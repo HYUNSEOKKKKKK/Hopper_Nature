@@ -31,7 +31,11 @@ class Reward {
   void initializeFromConfigurationFile(const Yaml::Node& cfg) {
     for(auto rw = cfg.Begin(); rw != cfg.End(); rw++) {
       rewards_[(*rw).first] = raisim::RewardElement();
-      rewards_[(*rw).first].coefficient = (*rw).second.template As<float>();
+      if (((*rw).second.template As<float>() - 0.0) < 1e-6){
+          rewards_[(*rw).first].coefficient = 1e-1;
+      }else{
+          rewards_[(*rw).first].coefficient = (*rw).second.template As<float>();
+      }
 //      RSFATAL_IF((*rw).second.IsNone() || (*rw).second["coeff"].IsNone(),
 //                 "Node " + (*rw).first + " or its coefficient doesn't exist");
 //      rewards_[(*rw).first].coefficient = (*rw).second["coeff"].template As<float>();

@@ -17,7 +17,7 @@ import argparse
 
 
 # task specification
-task_name = "anymal_locomotion"
+task_name = "hound"
 
 # configuration
 parser = argparse.ArgumentParser()
@@ -55,7 +55,7 @@ avg_rewards = []
 actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim, act_dim),
                          ppo_module.MultivariateGaussianDiagonalCovariance(act_dim,
                                                                            env.num_envs,
-                                                                           1.0,
+                                                                           2.0,
                                                                            NormalSampler(act_dim),
                                                                            cfg['seed']),
                          device)
@@ -84,7 +84,7 @@ reward_analyzer = RewardAnalyzer(env, ppo.writer)
 if mode == 'retrain':
     load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
 
-for update in range(1000000):
+for update in range(8000):
     start = time.time()
     env.reset()
     reward_sum = 0
@@ -143,6 +143,7 @@ for update in range(1000000):
 
     actor.update()
     actor.distribution.enforce_minimum_std((torch.ones(12)*0.2).to(device))
+    actor.distribution.enforce_maximum_std((torch.ones(12)*2).to(device))
 
     # curriculum update. Implement it in Environment.hpp
     env.curriculum_callback()
