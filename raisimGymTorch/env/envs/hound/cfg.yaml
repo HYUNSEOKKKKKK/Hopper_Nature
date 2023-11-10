@@ -16,9 +16,9 @@ environment:
 
     torque: 1e-1
     footSlip: 1e-1
-    bodyOri: 1e-1
-    smoothness1: 1e-1
-    smoothness2: 1e-1
+    bodyOri: 10
+    smoothness1: 10
+    smoothness2: 10
 
     barrierJointPos:
     barrierBodyHeight:

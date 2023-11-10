@@ -47,8 +47,8 @@ class RaisimGymEnv {
   double getControlTimeStep() { return control_dt_; }
   double getSimulationTimeStep() { return simulation_dt_; }
   raisim::World* getWorld() { return world_.get(); }
-  void turnOffVisualization() { server_->hibernate(); }
-  void turnOnVisualization() { server_->wakeup(); }
+  void turnOffVisualization() { server_->hibernate(); visualizationOn_ = false;}
+  void turnOnVisualization() { server_->wakeup(); visualizationOn_ = true;}
   void startRecordingVideo(const std::string& videoName ) { server_->startRecordingVideo(videoName); }
   void stopRecordingVideo() { server_->stopRecordingVideo(); }
   raisim::Reward& getRewards() { return rewards_; }
@@ -62,6 +62,7 @@ class RaisimGymEnv {
   int obDim_=0, actionDim_=0;
   std::unique_ptr<raisim::RaisimServer> server_;
   raisim::Reward rewards_;
+  bool visualizationOn_;
 };
 }
 

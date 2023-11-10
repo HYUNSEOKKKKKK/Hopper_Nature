@@ -28,13 +28,13 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_->addGround();
 
     /// initialize containers
-    gc_.setZero(19); gcInit_.setZero();
-    gv_.setZero(18); gvInit_.setZero();
+    gc_.setZero(19); gcInit_.setZero(); gcNoise_.setZero();
+    gv_.setZero(18); gvInit_.setZero(); gvNoise_.setZero();
     gcDes_.setZero(); gvDes_.setZero();
     pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero();
 
     /// this is nominal configuration of anymal
-    gcInit_ << 0, 0, 0.51875, 1.0, 0.0, 0.0, 0.0, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708;
+    gcInit_ << 0, 0, 0.505, 1.0, 0.0, 0.0, 0.0, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708;
     gcInit_.segment(3,4).normalize();
 
     /// set pd gains
@@ -74,7 +74,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       server_ = std::make_unique<raisim::RaisimServer>(world_.get());
       server_->launchServer();
       server_->focusOn(hound_);
+      arrows_.push_back(server_->addVisualArrow("command_xy",0.1,0.05,0,1,0,1));
+      arrows_.push_back(server_->addVisualArrow("command_yaw",0.1,0.05,1,0,0,1));
     }
+    visualizationOn_ = false;
 
     /// set limit for log barrier function
     for (int i=0;i<4;i++){
@@ -109,12 +112,50 @@ class ENVIRONMENT : public RaisimGymEnv {
   void init() final { }
 
   void reset() final {
-    hound_->setState(gcInit_, gvInit_);
+    command_ << 1.5 * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
+    standingMode_ = false;
+
+    /// initialize with noise
+    gcNoise_ = gcInit_;
+    /// rot noise
+    yawNoise_ = uniDist_(gen_) * 3.141592;
+    rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
+    quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
+    quat_.normalize();
+    rotTotalNoise_ = quat_;
+    rotTotalNoise_ = rotTotalNoise_.eval() * rotYawNoise_;
+    quat_ = rotTotalNoise_;
+    quat_.normalize();
+    gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
+    /// joint noise
+    for (int i = 7; i < 19; i++){
+        gcNoise_(i) += uniDist_(gen_) * 0.2;
+    }
+
+    /// Generalized Velocities randomization.
+    gvNoise_.setZero();
+    for (int i = 0; i < 18; i++) {
+      if (i < 3) {
+          gvNoise_(i) = uniDist_(gen_) * 0.5;
+      } else if (i < 6) {
+          gvNoise_(i) = uniDist_(gen_) * 0.5;
+      } else {
+          gvNoise_(i) = uniDist_(gen_) * 2.0;
+      }
+    }
+    /// preventing foot penetration
+    hound_->setState(gcNoise_,gvNoise_);
+    double heightShift = 0.0, temp = 0.0;
+    for (int i = 0; i < 4; i++){
+        hound_->getFramePosition(footFrames_[i], footPos_[i]);
+        temp = footPos_[i](2) - 0.025;
+        if (temp < heightShift){heightShift = temp;}
+    }
+    gcNoise_(2) -= heightShift;
+    /// reset
+    hound_->setState(gcNoise_, gvNoise_);
     updateObservation();
 
-    command_ << 1.5 * uniDist_(gen_), 0.0 * uniDist_(gen_), 0.0 * uniDist_(gen_); // [1.5, 0.6, 0.6]
-//    command_ << 1.5 * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
-    standingMode_ = false;
 
     pTarget_ = gc_.tail(12);
     gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_;
@@ -141,6 +182,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       if(server_) server_->unlockVisualizationServerMutex();
       updateObservation();
       avgReward += getReward();
+
+      if(visualizationOn_){
+          visualizeCommand();
+      }
     }
 
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
@@ -213,11 +258,11 @@ class ENVIRONMENT : public RaisimGymEnv {
 ////          rewards_.record("rewJointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
 //          limitBaseMotion_ << -0.1,0.1;
 //      }
-      rewards_.record("torque", std::exp(-1e-4 *hound_->getGeneralizedForce().squaredNorm()));
-      rewards_.record("footSlip", std::exp(-1e-2 *footTangentialForSlip));
-      rewards_.record("bodyOri", std::exp(-1e-1 *std::acos(rot_(8)) * std::acos(rot_(8))));
-      rewards_.record("smoothness1",std::exp(-1e-1 * (pTarget_ - prevTarget_).squaredNorm()));
-      rewards_.record("smoothness2", std::exp(-1e-1 *(pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()));
+      rewards_.record("torque", std::exp(-1e-3 *hound_->getGeneralizedForce().squaredNorm()));
+      rewards_.record("footSlip", std::exp(-1e-1 *footTangentialForSlip));
+      rewards_.record("bodyOri", std::exp(-1 *std::acos(rot_(8)) * std::acos(rot_(8))));
+      rewards_.record("smoothness1",std::exp(-1 * (pTarget_ - prevTarget_).squaredNorm()));
+      rewards_.record("smoothness2", std::exp(-1 *(pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()));
 
       /// relaxed log barrier
       getLogBarReward();
@@ -443,6 +488,37 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    }
   }
 
+  void visualizeCommand(){
+      Eigen::Matrix<double,3,3> rot_robot, rot_pitch_90, rot_command;
+      Eigen::Quaterniond quaternion;
+      Eigen::Vector3d command;
+      Eigen::VectorXd gc_head_7(7);
+      double theta_command;
+      Eigen::Matrix<double,3,1> arrow_pos_offset;
+
+      command = command_;
+      gc_head_7 = gc_.head(7);
+
+      quaternion.coeffs() << gc_head_7.tail(3),gc_head_7(3);
+      rot_robot = quaternion;
+
+      rot_pitch_90 << 0,0,1,0,1,0,-1,0,0;
+      theta_command = -atan2(command(1),command(0));
+      rot_command << 1,0,0,0,cos(theta_command),-sin(theta_command),0,sin(theta_command),cos(theta_command);
+
+      arrow_pos_offset << 0,0,0.15;
+      arrow_pos_offset = rot_robot * arrow_pos_offset.eval();
+      quaternion = rot_robot.eval() * rot_pitch_90 * rot_command;
+
+      arrows_[0]->setCylinderSize(0.2,command.head(2).norm()*0.3);
+      arrows_[0]->setPosition(gc_head_7.head(3) + arrow_pos_offset);
+      arrows_[0]->setOrientation(quaternion.w(),quaternion.x(),quaternion.y(),quaternion.z());
+
+      arrows_[1]->setCylinderSize(0.2,command(2)*0.3);
+      arrows_[1]->setPosition(gc_head_7.head(3) + arrow_pos_offset);
+      arrows_[1]->setOrientation(gc_head_7.segment(3,4));
+  }
+
   void observe(Eigen::Ref<EigenVec> ob) final {
       if (standingMode_){
           footContactPhase_.setZero();
@@ -489,12 +565,12 @@ class ENVIRONMENT : public RaisimGymEnv {
  private:
   int gcDim_, gvDim_;
   bool visualizable_ = false;
-  double terminalRewardCoeff_ = -100.;
+  double terminalRewardCoeff_ = -10.;
   raisim::ArticulatedSystem* hound_;
 
   Eigen::VectorXd gc_, gv_;
-  Eigen::Vector<double,19> gcInit_, gcDes_;
-  Eigen::Vector<double,18> gvInit_, gvDes_;
+  Eigen::Vector<double,19> gcInit_, gcNoise_, gcDes_;
+  Eigen::Vector<double,18> gvInit_, gvNoise_, gvDes_;
   Eigen::Vector<double,12> pTarget_, prevTarget_, prevPrevTarget_;
   raisim::Mat<3,3> rot_;
   Eigen::VectorXd actionMean_, actionStd_, obDouble_;
@@ -522,8 +598,12 @@ class ENVIRONMENT : public RaisimGymEnv {
 //  Eigen::Matrix<double,1,2> limitOtherContact_;
   ///
   std::vector<Eigen::Vector<double,12>> jointPosErrorHist_, jointVelHist_;
-
-
+  /// initialize
+  Eigen::Matrix<double,3,3> rotYawNoise_,rotTotalNoise_;
+  Eigen::Quaterniond quat_;
+  double yawNoise_;
+  ///
+  std::vector<raisim::Visuals*> arrows_;
 
 
   thread_local static std::mt19937 gen_;
