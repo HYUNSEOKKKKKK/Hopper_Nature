@@ -11,14 +11,14 @@ environment:
   control_dt: 0.01
   max_time: 4.0
   reward:
-    comAngularVel: 10
-    comLinearVel: 10
-
-    torque: 1e-1
-    footSlip: 1e-1
-    bodyOri: 10
-    smoothness1: 10
-    smoothness2: 10
+    comAngularVel: 8
+    comLinearVel: 8
+    jointPos : 2
+    bodyOri: 2
+    torque: 5e-1
+    footSlip: 2
+    smoothness1: 2
+    smoothness2: 2
 
     barrierJointPos:
     barrierBodyHeight:
@@ -27,8 +27,10 @@ environment:
     barrierTargetVel:
     barrierFootContact:
     barrierFootClearance:
-
-
+    barrierFootSlip:
+    barrierBodyOri:
+    barrierSmoothness1:
+    barrierSmoothness2:
 
 architecture:
   policy_net: [256, 128, 64]

@@ -112,7 +112,6 @@ for update in range(8000):
                 obs = env.observe(False)
                 action = loaded_graph.architecture(torch.from_numpy(obs).cpu())
                 reward, dones = env.step(action.cpu().detach().numpy())
-                reward_analyzer.add_reward_info(env.get_reward_info())
                 frame_end = time.time()
                 wait_time = cfg['environment']['control_dt'] - (frame_end-frame_start)
                 if wait_time > 0.:
@@ -121,7 +120,6 @@ for update in range(8000):
         env.stop_video_recording()
         env.turn_off_visualization()
 
-        reward_analyzer.analyze_and_plot(update)
         env.reset()
         env.save_scaling(saver.data_dir, str(update))
 
@@ -133,6 +131,8 @@ for update in range(8000):
         ppo.step(value_obs=obs, rews=reward, dones=dones)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
+        if update % 20 == 0:
+            reward_analyzer.add_reward_info(env.get_reward_info())
 
     # take st step to get value obs
     obs = env.observe()
@@ -149,6 +149,9 @@ for update in range(8000):
     env.curriculum_callback()
 
     end = time.time()
+
+    if update % 20 == 0:
+        reward_analyzer.analyze_and_plot(update)
 
     print('----------------------------------------------------')
     print('{:>6}th iteration'.format(update))
