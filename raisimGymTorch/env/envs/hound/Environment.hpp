@@ -39,6 +39,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     double hip = 0.62;
     gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
     gcInit_.segment(3,4).normalize();
+    gc_ = gcInit_;
 
     /// set pd gains
     Eigen::Vector<double,18> jointPgain, jointDgain;
@@ -101,7 +102,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.3,2;
-    limitThighContact_ << -0.1,0.1;
     limitFootClearance_ << -0.10,0.10; // 어차피 desired_foot_clearance 를
 //    limitFootClearance_ << -0.12,0.12; // 어차피 desired_foot_clearance 를
     limitFootSlip_    << -1.0, 1.0;
@@ -302,14 +302,14 @@ class ENVIRONMENT : public RaisimGymEnv {
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 //      rewards_.record("footSlip", std::exp(-1e1 * footSlip_.squaredNorm())); -> should be changed
-      rewards_.record("footSlip", std::exp(-1e1 * footSlip_.sum()));
-
-      rewards_.record("bodyOri", std::exp(-1e3 * pow(rot_(8)-1.0,2.0)));
-      rewards_.record("smoothness1",std::exp(-2e-1 * (pTarget_ - prevTarget_).squaredNorm()));
-      rewards_.record("smoothness2", std::exp(-1e-1 *(pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()));
-
-      rewards_.record("jointPos", std::exp(-1. * jointPosTemp.squaredNorm()));
-      rewards_.record("torque", std::exp(-1e-4 *hound_->getGeneralizedForce().squaredNorm()));
+//      rewards_.record("footSlip", std::exp(-1e1 * footSlip_.sum()));
+//
+//      rewards_.record("bodyOri", std::exp(-1e3 * pow(rot_(8)-1.0,2.0)));
+//      rewards_.record("smoothness1",std::exp(-2e-1 * (pTarget_ - prevTarget_).squaredNorm()));
+//      rewards_.record("smoothness2", std::exp(-1e-1 *(pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()));
+//
+//      rewards_.record("jointPos", std::exp(-1. * jointPosTemp.squaredNorm()));
+//      rewards_.record("torque", std::exp(-1e-4 *hound_->getGeneralizedForce().squaredNorm()));
 
 //      rewards_.record("comAngularVel", std::exp(-1.5 * pow((command_(2) - bodyAngularVel_(2)), 2)));
 //      rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
@@ -318,14 +318,14 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
 //      jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 //
-////      rewards_.record("footSlip", footSlip_.squaredNorm());
-//      rewards_.record("footSlip", footSlip_.sum());
-////      rewards_.record("bodyOri", pow(rot_(8)-1.0,2.0));
-//      rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
-//      rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
-//      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
-//      rewards_.record("jointPos", jointPosTemp.squaredNorm());
-//      rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
+//      rewards_.record("footSlip", footSlip_.squaredNorm());
+      rewards_.record("footSlip", footSlip_.sum());
+//      rewards_.record("bodyOri", pow(rot_(8)-1.0,2.0));
+      rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
+      rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
+      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
+      rewards_.record("jointPos", jointPosTemp.squaredNorm());
+      rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
 
 //      rewards_.record("jointPos", -5e-1 * jointPosTemp.squaredNorm());
@@ -349,21 +349,27 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      }
         float posReward, negReward, posCoeffSum, negCoeffSum;
         posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-        negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
+//        negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
 
         posCoeffSum = rewards_.getCoeff("comAngularVel") + rewards_.getCoeff("comLinearVel");
-        negCoeffSum = rewards_.getCoeff("jointPos") + rewards_.getCoeff("torque") + rewards_.getCoeff("footSlip") + rewards_.getCoeff("bodyOri") + rewards_.getCoeff("smoothness1") + rewards_.getCoeff("smoothness2");
-        posReward *= 10.0/posCoeffSum; /// posReward in [0.0, 6.0]
-        negReward /= negCoeffSum;      /// negReward in [0.0, 1.0]
+//        negCoeffSum = rewards_.getCoeff("jointPos") + rewards_.getCoeff("torque") + rewards_.getCoeff("footSlip") + rewards_.getCoeff("bodyOri") + rewards_.getCoeff("smoothness1") + rewards_.getCoeff("smoothness2");
+//        posReward *= 8.0/posCoeffSum; /// posReward in [0.0, 6.0]
+//        negReward *= 8.0/negCoeffSum;      /// negReward in [0.0, 5.0]
 //        posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-//        negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
+        negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
+        std::cout << "jointPos : " << rewards_.getReward("jointPos") << std::endl;
+        std::cout << "torque : " << rewards_.getReward("torque") << std::endl;
+        std::cout << "bodyOri : " << rewards_.getReward("bodyOri") << std::endl;
+        std::cout << "smoothness1 : " << rewards_.getReward("smoothness1") << std::endl;
+        std::cout << "smoothness2 : " << rewards_.getReward("smoothness2") << std::endl;
 //      return (float)std::exp(0.2 * negReward) * posReward;
-      return (float)((negReward*0.5 + 0.5) * posReward);
+      return (float)(std::exp(0.2 * negReward)*8.0 + posReward);
+//      return (float)(negReward + posReward);
   }
 
   float getLogBarReward(){
       double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0,
-              barrierFootSlip = 0.0, barrierSmoothness1 = 0.0, barrierSmoothness2 = 0.0, barrierBodyOri = 0.0, barrierThighContact = 0.0;
+              barrierFootSlip = 0.0, barrierSmoothness1 = 0.0, barrierSmoothness2 = 0.0, barrierBodyOri = 0.0;
       double tempReward = 0.0;
       // Log Barrier - limit_joint_pos
       for (int i=0;i<4;i++){
@@ -385,12 +391,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
       for (int i=0;i<2;i++){
-          relaxedLogBarrier(0.2,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
+          relaxedLogBarrier(0.3,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
           barrierBaseMotion += tempReward;
       }
       // Log Barrier - limit_joint_vel
       for (int i=0;i<12;i++){
-          relaxedLogBarrier(2.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
+          relaxedLogBarrier(3.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
           barrierJointVel += tempReward;
       }
       // Log Barrier - limit_target_vel
@@ -402,19 +408,15 @@ class ENVIRONMENT : public RaisimGymEnv {
       barrierTargetVel += tempReward;
       // Log Barrier - limit_foot_contact
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.1,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
+//          relaxedLogBarrier(0.1,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
+          relaxedLogBarrier(0.08,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
           barrierFootContact += tempReward;
       }
       // Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.03,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
-      // Log Barrier - limit_thigh_contact
-//      for (int i=0;i<4;i++){
-//          relaxedLogBarrier(0.01,limitThighContact_(0),limitThighContact_(1),double(-thighContact_(i)),tempReward);
-//          barrierThighContact += tempReward;
-//      }
 
       // Log Barrier - limit_foot_slip
 //      for(int i = 0; i < 4; i++) {
@@ -447,10 +449,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierTargetVel", barrierTargetVel);
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
-      rewards_.record("barrierThighContact", barrierThighContact);
 //      rewards_.record("barrierBodyOri", barrierBodyOri);
-//      return (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance + barrierThighContact));
-      return (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance + barrierThighContact));
+//      return (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
+      return (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
 //      double temp;
 //      temp = std::exp(1e-1 * barrierJointPos) + std::exp(1e-1 * barrierBodyHeight) + std::exp(1e-1 * barrierBaseMotion) + std::exp(1e-1 * barrierJointVel) +
 //              std::exp(1e-1 * barrierTargetVel) + std::exp(1e-1 * barrierFootContact) + std::exp(1e-1 * barrierFootClearance);
@@ -607,12 +608,14 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for each iteration
       iter_ ++;
 //      curriculum_ = (double)iter_ * (1.0/1600.0); /// 1600 iter -> 1.0
-      curriculum_ = (double)iter_ * (1.0/800.0); /// 1600 iter -> 1.0
+//      curriculum_ = (double)iter_ * (1.0/800.0); /// 1600 iter -> 1.0
+      curriculum_ = 0.0; /// 1600 iter -> 1.0
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
+      heightMap_ = HeightMapSample(world_.get(),0,curriculum_,gen_,uniDist_);
 //      heightMap_ = HeightMapSample(world_.get(),iter_%5,curriculum_,gen_,uniDist_);
-      heightMap_ = HeightMapSample(world_.get(),2,curriculum_,gen_,uniDist_);
+//      heightMap_ = HeightMapSample(world_.get(),2,curriculum_,gen_,uniDist_);
 
       mu_ = 0.7 + 0.3 * uniDist_(gen_);  // [0.4, 1.0]
 //      mu_ = 0.7;  // [0.4, 1.0]
@@ -687,7 +690,6 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,1,2> limitTargetVel_;
   Eigen::Matrix<double,1,2> limitFootClearance_;
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
-  Eigen::Matrix<double,1,2> limitThighContact_;
   Eigen::Matrix<double,1,2> limitFootSlip_;
   Eigen::Matrix<double,1,2> limitBodyOri_;
   Eigen::Matrix<double,1,2> limitSmoothness1_;
