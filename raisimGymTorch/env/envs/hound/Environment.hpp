@@ -48,7 +48,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     hound_->setGeneralizedForce(Eigen::VectorXd::Zero(18));
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
-    obDim_ = 171;
+    obDim_ = 175;
     actionDim_ = 12;
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
     obDouble_.setZero(obDim_);
@@ -67,6 +67,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     footIndices_.push_back(hound_->getBodyIdx("RL_calf"));
     footIndices_.push_back(hound_->getBodyIdx("FR_calf"));
     footIndices_.push_back(hound_->getBodyIdx("FL_calf"));
+    thighIndices_.push_back(hound_->getBodyIdx("RR_thigh"));
+    thighIndices_.push_back(hound_->getBodyIdx("RL_thigh"));
+    thighIndices_.push_back(hound_->getBodyIdx("FR_thigh"));
+    thighIndices_.push_back(hound_->getBodyIdx("FL_thigh"));
     footFrames_.push_back("RR_foot_fixed");
     footFrames_.push_back("RL_foot_fixed");
     footFrames_.push_back("FR_foot_fixed");
@@ -94,19 +98,21 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitBodyHeight_ << 0.52, 0.64;
     limitBaseMotion_.row(0) << -0.3,0.3;
     limitBaseMotion_.row(1) << -0.5,0.5;
-    limitJointVel_ << -6,6;
+    limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.3,2;
+    limitThighContact_ << -0.1,0.1;
+    limitFootClearance_ << -0.10,0.10; // 어차피 desired_foot_clearance 를
 //    limitFootClearance_ << -0.12,0.12; // 어차피 desired_foot_clearance 를
-    limitFootClearance_ << -0.09,0.09; // 어차피 desired_foot_clearance 를
     limitFootSlip_    << -1.0, 1.0;
-    limitBodyOri_     << -0.2, 0.2;
+    limitBodyOri_     << -0.3, 0.3;
     limitSmoothness1_ << -0.2, 0.2;
     limitSmoothness2_ << -1.0, 1.0;
 
     /// initialize
     command_.setZero();
     footContact_.setZero();
+    thighContact_.setZero();
     footVel_.resize(4); footPos_.resize(4);
     footContactPhase_.setZero();
     footClearance_.setZero();
@@ -135,37 +141,49 @@ class ENVIRONMENT : public RaisimGymEnv {
   void reset() final {
     if (iter_<6000){
       command_ << 1.5 * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
+      if (command_(0) < -1.0){
+          command_(0) = abs(command_(0));
+      }
     }
     standingMode_ = false;
 
-    /// initialize with noise
-    gcNoise_ = gcInit_;
-    /// rot noise
-    yawNoise_ = uniDist_(gen_) * 3.141592;
-    rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
-    quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
-    quat_.normalize();
-    rotTotalNoise_ = quat_;
-    rotTotalNoise_ = rotTotalNoise_.eval() * rotYawNoise_;
-    quat_ = rotTotalNoise_;
-    quat_.normalize();
-    gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
-    /// joint noise
-    for (int i = 7; i < 19; i++){
-        gcNoise_(i) += uniDist_(gen_) * 0.2;
+    double keepState = uniDist_(gen_);
+
+    if (keepState >= 0.0){
+        /// keep current state
+        gcNoise_.head(2) = gcInit_.head(2);
+        gcNoise_.tail(17) = gc_.tail(17);
+        gvNoise_ = gv_;
+    }else{
+        /// initialize with noise
+        gcNoise_ = gcInit_;
+        /// rot noise
+        yawNoise_ = uniDist_(gen_) * 3.141592;
+        rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
+        quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
+        quat_.normalize();
+        rotTotalNoise_ = quat_;
+        rotTotalNoise_ = rotTotalNoise_.eval() * rotYawNoise_;
+        quat_ = rotTotalNoise_;
+        quat_.normalize();
+        gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
+        /// joint noise
+        for (int i = 7; i < 19; i++){
+            gcNoise_(i) += uniDist_(gen_) * 0.2;
+        }
+        /// Generalized Velocities randomization.
+        gvNoise_.setZero();
+        for (int i = 0; i < 18; i++) {
+            if (i < 3) {
+                gvNoise_(i) = uniDist_(gen_) * 0.5;
+            } else if (i < 6) {
+                gvNoise_(i) = uniDist_(gen_) * 0.5;
+            } else {
+                gvNoise_(i) = uniDist_(gen_) * 2.0;
+            }
+        }
     }
 
-    /// Generalized Velocities randomization.
-    gvNoise_.setZero();
-    for (int i = 0; i < 18; i++) {
-      if (i < 3) {
-          gvNoise_(i) = uniDist_(gen_) * 0.5;
-      } else if (i < 6) {
-          gvNoise_(i) = uniDist_(gen_) * 0.5;
-      } else {
-          gvNoise_(i) = uniDist_(gen_) * 2.0;
-      }
-    }
     /// preventing foot penetration
     hound_->setState(gcNoise_,gvNoise_);
     double heightShift = 0.0, temp = 0.0;
@@ -175,18 +193,18 @@ class ENVIRONMENT : public RaisimGymEnv {
         if (temp < heightShift){heightShift = temp;}
     }
     gcNoise_(2) -= heightShift;
-    /// reset
     hound_->setState(gcNoise_, gvNoise_);
     updateObservation();
 
+    if (keepState < 0.0){
+        pTarget_ = gc_.tail(12);
+        gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_;
+        for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
+        for (auto& vec : jointVelHist_) { vec.setZero(); }
 
-    pTarget_ = gc_.tail(12);
-    gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_;
-    for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
-    for (auto& vec : jointVelHist_) { vec.setZero(); }
-
-    phase_ = 0.0;
-    footContactPhase_.setZero();
+        phase_ = 0.0;
+        footContactPhase_.setZero();
+    }
   }
 
   float step(const Eigen::Ref<EigenVec>& action) final {
@@ -238,13 +256,12 @@ class ENVIRONMENT : public RaisimGymEnv {
 //
       if (!standingMode_){ /// walking
           /// footContactDouble_ -> limit_foot_contact 에 있도록 (-0.3,3) -> Gait Enforcing (요 -0.3 이 벗어나도 되는 범위)
-          for(int i=0; i<4; i++){
-              if (footContact_(i)) {footContactDouble_(i) = 1.0 * footContactPhase_(i);}
-              else {footContactDouble_(i) = -1.0 * footContactPhase_(i);}
+          for(int i=0; i<4; i++) {
+              if (footContact_(i)) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
+              else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-//          double desiredFootZPosition = 0.15;
-          double desiredFootZPosition = 0.12;
+          double desiredFootZPosition = 0.15;
           for (int i=0; i<4; i++){
               if (footContactPhase_(i) < -0.5) { /// during swing
                   footClearance_(i) =
@@ -252,7 +269,8 @@ class ENVIRONMENT : public RaisimGymEnv {
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
 
               if (footContactPhase_(i) > 0.3) { /// during contact
-                  footSlip_(i) = footVel_[i].e().head(2).norm();
+//                  footSlip_(i) = footVel_[i].e().head(2).norm();
+                  footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
               }else{ footSlip_(i) = 0.0; } // max reward
           }
       } else { /// under standingMode_
@@ -263,23 +281,59 @@ class ENVIRONMENT : public RaisimGymEnv {
           }
       }
 
+      /// (exp(neg1)+exp(neg2))/2.0 * (exp(pos1) + exp(pos2)) + relaxedLogBarrier
+      rewards_.record("negSumPos",getNegPosReward());
+      rewards_.record("relaxedLog", getLogBarReward()); /// relaxed log barrier
+//      return rewards_.sum();
+      return rewards_.sumModified();
+  }
+
+  float getNegPosReward(){
       Eigen::Vector3d tempCommand;
       tempCommand.setZero(); tempCommand(2) = command_(2);
-      rewards_.record("comAngularVel", std::exp(-1.0 * (tempCommand - bodyAngularVel_).squaredNorm())); // 너무 빡센듯
-      tempCommand.setZero(); tempCommand.head(2) = command_.head(2);
-      rewards_.record("comLinearVel", std::exp(-1.0 * (tempCommand - bodyLinearVel_).squaredNorm()));   // 너무 빡센듯
-//      rewards_.record("comAngularVel", std::exp(-2.0 * pow((command_(2) - bodyAngularVel_(2)), 2)));
-//      rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
+      rewards_.record("comAngularVel", std::exp(-1.0 * (tempCommand - bodyAngularVel_).squaredNorm())); // regulation 같이
+//      tempCommand.setZero(); tempCommand.head(2) = command_.head(2);
+//      rewards_.record("comLinearVel", std::exp(-1.0 * (tempCommand - bodyLinearVel_).squaredNorm()));   // 너무 빡센듯
+//
+//      rewards_.record("comAngularVel", std::exp(-2.5 * pow((command_(2) - bodyAngularVel_(2)), 2)));
+      rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
       jointPosWeight << 2.0, 1.,1.,2.,1.,1.,2.,1.,1.,2.,1.,1.;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
-      rewards_.record("jointPos", std::exp(-2. * jointPosTemp.squaredNorm()));
-      rewards_.record("torque", std::exp(-2e-4 *hound_->getGeneralizedForce().squaredNorm()));
-      rewards_.record("footSlip", std::exp(-1e1 * footSlip_.squaredNorm()));
+//      rewards_.record("footSlip", std::exp(-1e1 * footSlip_.squaredNorm())); -> should be changed
+      rewards_.record("footSlip", std::exp(-1e1 * footSlip_.sum()));
+
       rewards_.record("bodyOri", std::exp(-1e3 * pow(rot_(8)-1.0,2.0)));
-      rewards_.record("smoothness1",std::exp(-5e-1 * (pTarget_ - prevTarget_).squaredNorm()));
+      rewards_.record("smoothness1",std::exp(-2e-1 * (pTarget_ - prevTarget_).squaredNorm()));
       rewards_.record("smoothness2", std::exp(-1e-1 *(pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()));
+
+      rewards_.record("jointPos", std::exp(-1. * jointPosTemp.squaredNorm()));
+      rewards_.record("torque", std::exp(-1e-4 *hound_->getGeneralizedForce().squaredNorm()));
+
+//      rewards_.record("comAngularVel", std::exp(-1.5 * pow((command_(2) - bodyAngularVel_(2)), 2)));
+//      rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
+//      Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
+//      jointPosWeight << 2.0, 1.,1.,2.,1.,1.,2.,1.,1.,2.,1.,1.;
+//      jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
+//      jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
+//
+////      rewards_.record("footSlip", footSlip_.squaredNorm());
+//      rewards_.record("footSlip", footSlip_.sum());
+////      rewards_.record("bodyOri", pow(rot_(8)-1.0,2.0));
+//      rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
+//      rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
+//      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
+//      rewards_.record("jointPos", jointPosTemp.squaredNorm());
+//      rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
+
+
+//      rewards_.record("jointPos", -5e-1 * jointPosTemp.squaredNorm());
+//      rewards_.record("torque", -1e-4 *hound_->getGeneralizedForce().squaredNorm());
+//      rewards_.record("footSlip", -1 * footSlip_.squaredNorm());
+//      rewards_.record("bodyOri", -5e2 * pow(rot_(8)-1.0,2.0));
+//      rewards_.record("smoothness1",-1 * (pTarget_ - prevTarget_).squaredNorm());
+//      rewards_.record("smoothness2", -5e-1 *(pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
 
       double rewJointVelStanding,rewJointPosStanding,rewJointAcc;
 //      if (!standingMode_){
@@ -293,16 +347,23 @@ class ENVIRONMENT : public RaisimGymEnv {
 ////          rewards_.record("rewJointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
 //          limitBaseMotion_ << -0.1,0.1;
 //      }
+        float posReward, negReward, posCoeffSum, negCoeffSum;
+        posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
+        negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
 
-      /// relaxed log barrier
-      getLogBarReward();
-//      getBarReward();
-      return rewards_.sum();
+        posCoeffSum = rewards_.getCoeff("comAngularVel") + rewards_.getCoeff("comLinearVel");
+        negCoeffSum = rewards_.getCoeff("jointPos") + rewards_.getCoeff("torque") + rewards_.getCoeff("footSlip") + rewards_.getCoeff("bodyOri") + rewards_.getCoeff("smoothness1") + rewards_.getCoeff("smoothness2");
+        posReward *= 10.0/posCoeffSum; /// posReward in [0.0, 6.0]
+        negReward /= negCoeffSum;      /// negReward in [0.0, 1.0]
+//        posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
+//        negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
+//      return (float)std::exp(0.2 * negReward) * posReward;
+      return (float)((negReward*0.5 + 0.5) * posReward);
   }
 
-  void getLogBarReward(){
+  float getLogBarReward(){
       double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0,
-              barrierFootSlip = 0.0, barrierSmoothness1 = 0.0, barrierSmoothness2 = 0.0, barrierBodyOri = 0.0;
+              barrierFootSlip = 0.0, barrierSmoothness1 = 0.0, barrierSmoothness2 = 0.0, barrierBodyOri = 0.0, barrierThighContact = 0.0;
       double tempReward = 0.0;
       // Log Barrier - limit_joint_pos
       for (int i=0;i<4;i++){
@@ -324,12 +385,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
       for (int i=0;i<2;i++){
-          relaxedLogBarrier(0.3,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
+          relaxedLogBarrier(0.2,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
           barrierBaseMotion += tempReward;
       }
       // Log Barrier - limit_joint_vel
       for (int i=0;i<12;i++){
-          relaxedLogBarrier(3.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
+          relaxedLogBarrier(2.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
           barrierJointVel += tempReward;
       }
       // Log Barrier - limit_target_vel
@@ -341,8 +402,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       barrierTargetVel += tempReward;
       // Log Barrier - limit_foot_contact
       for (int i=0;i<4;i++){
-//          relaxedLogBarrier(0.1,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
-          relaxedLogBarrier(0.08,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
+          relaxedLogBarrier(0.1,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
           barrierFootContact += tempReward;
       }
       // Log Barrier - limit_foot_clearance
@@ -350,6 +410,12 @@ class ENVIRONMENT : public RaisimGymEnv {
           relaxedLogBarrier(0.03,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
+      // Log Barrier - limit_thigh_contact
+//      for (int i=0;i<4;i++){
+//          relaxedLogBarrier(0.01,limitThighContact_(0),limitThighContact_(1),double(-thighContact_(i)),tempReward);
+//          barrierThighContact += tempReward;
+//      }
+
       // Log Barrier - limit_foot_slip
 //      for(int i = 0; i < 4; i++) {
 ////          if (footContact_(i)) { // contact 이면
@@ -360,8 +426,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          barrierFootSlip += tempReward;
 //      }
       // Log Barrier - limit_body_ori
-      relaxedLogBarrier(0.1,limitBodyOri_(0),limitBodyOri_(1),1-rot_(8),tempReward);
-      barrierBodyOri += tempReward;
+//      relaxedLogBarrier(0.1,limitBodyOri_(0),limitBodyOri_(1),1-rot_(8),tempReward);
+//      barrierBodyOri += tempReward;
 //      // Log Barrier - limit_smoothness1
 //      for (int i=0; i<12; i++){
 //          relaxedLogBarrier(0.1,limitSmoothness1_(0),limitSmoothness1_(1),pTarget_(i) - prevTarget_(i),tempReward);
@@ -381,8 +447,15 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierTargetVel", barrierTargetVel);
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
-      rewards_.record("barrierBodyOri", barrierBodyOri);
-  }
+      rewards_.record("barrierThighContact", barrierThighContact);
+//      rewards_.record("barrierBodyOri", barrierBodyOri);
+//      return (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance + barrierThighContact));
+      return (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance + barrierThighContact));
+//      double temp;
+//      temp = std::exp(1e-1 * barrierJointPos) + std::exp(1e-1 * barrierBodyHeight) + std::exp(1e-1 * barrierBaseMotion) + std::exp(1e-1 * barrierJointVel) +
+//              std::exp(1e-1 * barrierTargetVel) + std::exp(1e-1 * barrierFootContact) + std::exp(1e-1 * barrierFootClearance);
+//      return temp;
+}
 
   void relaxedLogBarrier(const double& delta,const double& alpha_lower,const double& alpha_upper,const double& x, double& y){
       /// positive reward, boundary 밖에서 gradient 가 큼
@@ -417,13 +490,18 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// foot contact update
     footContact_.setZero();
+    thighContact_.setZero();
     for(auto& contact: hound_->getContacts()){
         for (size_t i=0; i<4; i++){
             if(contact.getlocalBodyIndex() == footIndices_[i]){
                 footContact_(i) = 1;
             }
+            if(contact.getlocalBodyIndex() == thighIndices_[i]){
+                thighContact_(i) = 1;
+            }
         }
     }
+
 
     /// update foot terrain
     updateFootToTerrain();
@@ -505,7 +583,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
           bodyLinearVel_,                                                       /// body linear velocity. 3
           footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
-          footContact_.cast<double>();                                          /// foot contact state/probability 4
+          footContact_.cast<double>(),
+          thighContact_.cast<double>();                                          /// foot contact state/probability 4
 
     /// convert it to float
     ob = obDouble_.cast<float>();
@@ -527,13 +606,16 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = (double)iter_ * (1.0/1600.0); /// 1600 iter -> 1.0
+//      curriculum_ = (double)iter_ * (1.0/1600.0); /// 1600 iter -> 1.0
+      curriculum_ = (double)iter_ * (1.0/800.0); /// 1600 iter -> 1.0
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
-      heightMap_ = HeightMapSample(world_.get(),iter_%5,curriculum_,gen_,uniDist_);
+//      heightMap_ = HeightMapSample(world_.get(),iter_%5,curriculum_,gen_,uniDist_);
+      heightMap_ = HeightMapSample(world_.get(),2,curriculum_,gen_,uniDist_);
 
       mu_ = 0.7 + 0.3 * uniDist_(gen_);  // [0.4, 1.0]
+//      mu_ = 0.7;  // [0.4, 1.0]
       world_->setDefaultMaterial(mu_, 0, 0);
 
       if (iter_>=6000){
@@ -541,7 +623,34 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
   }
 
-  virtual void setSeed(int seed) {gen_.seed(seed);}
+  void setSeed(int seed) {gen_.seed(seed);}
+
+
+  /// for tester.py
+  void setCommand(Eigen::Vector3d command){
+    command_ = command;
+  }
+  void setTerrain(int type, double curriculum, double mu){
+      world_->removeObject(heightMap_);
+      heightMap_ = HeightMapSample(world_.get(),type,curriculum,gen_,uniDist_);
+      world_->setDefaultMaterial(mu, 0, 0);
+  }
+  void setInitial(int type){
+      if (type == 0){
+          hound_->setState(gcInit_,gvInit_);
+          double heightShift = 0.0, temp = 0.0;
+          for (int i = 0; i < 4; i++){
+              hound_->getFramePosition(footFrames_[i], footPos_[i]);
+//              temp = footPos_[i](2) - 0.025 - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
+              temp = footPos_[i](2) - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
+              if (temp < heightShift){heightShift = temp;}
+          }
+          gcNoise_(2) -= heightShift;
+          /// reset
+          hound_->setState(gcInit_, gvInit_);
+          updateObservation();
+      }
+  }
 
  private:
   int gcDim_, gvDim_;
@@ -556,11 +665,11 @@ class ENVIRONMENT : public RaisimGymEnv {
   raisim::Mat<3,3> rot_;
   Eigen::VectorXd actionMean_, actionStd_, obDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
-  std::vector<size_t> footIndices_;
+  std::vector<size_t> footIndices_,thighIndices_;
   /// additional
   Eigen::Vector3d command_;                     // vx, vy, w
   std::vector<std::string> footFrames_;
-  Eigen::Vector4i footContact_;
+  Eigen::Vector4i footContact_,thighContact_;
   std::vector<raisim::Vec<3>> footPos_,footVel_;
   double phase_;
   double gait_hz_;
@@ -578,6 +687,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,1,2> limitTargetVel_;
   Eigen::Matrix<double,1,2> limitFootClearance_;
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
+  Eigen::Matrix<double,1,2> limitThighContact_;
   Eigen::Matrix<double,1,2> limitFootSlip_;
   Eigen::Matrix<double,1,2> limitBodyOri_;
   Eigen::Matrix<double,1,2> limitSmoothness1_;

@@ -1,5 +1,5 @@
 from ruamel.yaml import YAML, dump, RoundTripDumper
-from raisimGymTorch.env.bin import rsg_anymal
+from raisimGymTorch.env.bin import hound
 from raisimGymTorch.env.RaisimGymVecEnv import RaisimGymVecEnv as VecEnv
 import raisimGymTorch.algo.ppo.module as ppo_module
 import os
@@ -24,13 +24,15 @@ cfg = YAML().load(open(task_path + "/cfg.yaml", 'r'))
 # create environment from the configuration file
 cfg['environment']['num_envs'] = 1
 
-env = VecEnv(rsg_anymal.RaisimGymEnv(home_path + "/rsc", dump(cfg['environment'], Dumper=RoundTripDumper)), cfg['environment'])
+env = VecEnv(hound.RaisimGymEnv(home_path + "/rsc", dump(cfg['environment'], Dumper=RoundTripDumper)), cfg['environment'])
 
 # shortcuts
 ob_dim = env.num_obs
 act_dim = env.num_acts
 
-weight_path = args.weight
+weight_path = "/home/gijeong/workspace/raisimLib/raisimGymTorch/data/hound/2023-11-15-14-49-34/full_1206.pt"
+# weight_path = "/home/gijeong/workspace/raisimLib/raisimGymTorch/data/hound/2023-11-14-23-14-18/full_7839.pt"
+# weight_path = args.weight
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -39,7 +41,13 @@ if weight_path == "":
 else:
     print("Loaded weight from {}\n".format(weight_path))
     start = time.time()
+
+    env.set_terrain(2,3.0,1.0)
+    env.set_command(0.5,0.0,-0.0)
+    env.set_initial(0)
+
     env.reset()
+
     reward_ll_sum = 0
     done_sum = 0
     average_dones = 0.

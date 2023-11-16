@@ -31,7 +31,7 @@ class Reward {
   void initializeFromConfigurationFile(const Yaml::Node& cfg) {
     for(auto rw = cfg.Begin(); rw != cfg.End(); rw++) {
       rewards_[(*rw).first] = raisim::RewardElement();
-      if (((*rw).second.template As<float>() - 0.0) < 1e-6){
+      if (abs((*rw).second.template As<float>() - 0.0) < 1e-6){
           rewards_[(*rw).first].coefficient = 1e-1;
       }else{
           rewards_[(*rw).first].coefficient = (*rw).second.template As<float>();
@@ -56,12 +56,29 @@ class Reward {
     rewards_[name].integral += rewards_[name].reward;
   }
 
+  float getReward (const std::string& name){
+      return rewards_[name].reward;
+  }
+
+  float getCoeff (const std::string& name){
+      return rewards_[name].coefficient;
+  }
+
   float sum() {
     float sum = 0.f;
     for(auto& rw: rewards_)
-      sum += rw.second.reward;
-
+        sum += rw.second.reward;
     return sum;
+  }
+
+  float sumModified() {
+      float sum = 0.f;
+      std::string sum1 = "negSumPos";
+      std::string sum2 = "relaxedLog";
+      RSFATAL_IF(rewards_.find(sum1) == rewards_.end(), sum1<<" was not found in the configuration file")
+      RSFATAL_IF(rewards_.find(sum2) == rewards_.end(), sum2<<" was not found in the configuration file")
+      sum = rewards_[sum1].reward + rewards_[sum2].reward;
+      return sum;
   }
 
   void setZero() {

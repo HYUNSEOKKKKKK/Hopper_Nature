@@ -73,7 +73,8 @@ ppo = PPO.PPO(actor=actor,
               num_learning_epochs=4,
               gamma=0.996,
               lam=0.95,
-              num_mini_batches=4,
+              num_mini_batches=8,
+              entropy_coef=0.01,
               device=device,
               log_dir=saver.data_dir,
               shuffle_batch=False,
@@ -131,7 +132,7 @@ for update in range(8000):
         ppo.step(value_obs=obs, rews=reward, dones=dones)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
-        if update % 200 == 0:
+        if update % 100 == 0:
             reward_analyzer.add_reward_info(env.get_reward_info())
 
     # take st step to get value obs
@@ -150,7 +151,7 @@ for update in range(8000):
 
     end = time.time()
 
-    if update % 200 == 0:
+    if update % 100 == 0:
         reward_analyzer.analyze_and_plot(update)
 
     print('----------------------------------------------------')

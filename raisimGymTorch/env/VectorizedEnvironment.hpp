@@ -113,6 +113,18 @@ class VectorizedEnvironment {
       environments_[i]->setSeed(seed_inc++);
   }
 
+  void setCommand(double commandX,double commandY,double commandYaw) {
+      Eigen::Vector3d command;
+      command << commandX, commandY, commandYaw;
+      environments_[0] -> setCommand(command);
+  };
+  void setTerrain(int type, double curriculum, double mu) {
+      environments_[0] -> setTerrain(type, curriculum, mu);
+  };
+  void setInitial(int type){
+      environments_[0] -> setInitial(type);
+  }
+
   void close() {
     for (auto *env: environments_)
       env->close();

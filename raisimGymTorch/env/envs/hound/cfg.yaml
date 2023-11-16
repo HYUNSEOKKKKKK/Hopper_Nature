@@ -4,22 +4,32 @@ record_video: yes
 environment:
   render: True
 # just testing commenting
-  num_envs: 200
+  num_envs: 100
   eval_every_n: 201
   num_threads: 30
   simulation_dt: 0.001
   control_dt: 0.01
   max_time: 4.0
   reward:
-    comAngularVel: 8
-    comLinearVel: 8
-    jointPos : 2
-    bodyOri: 2
-    torque: 5e-1
-    footSlip: 2
-    smoothness1: 2
-    smoothness2: 2
+    # pos reward
+    comAngularVel: 1
+    comLinearVel: 1
 
+    # neg reward (not reward coefficient, about range)
+#    footSlip: -5e-1
+#    smoothness1: -2.5
+#    smoothness2: -1.2
+#    bodyOri: -2.5
+#    torque: -1e-4
+#    jointPos : -1e-1
+    footSlip: 2
+    smoothness1: 1.2
+    smoothness2: 1.2
+    bodyOri: 0.8
+    torque: 0.2
+    jointPos: 0.2
+
+    # relaxed
     barrierJointPos:
     barrierBodyHeight:
     barrierBaseMotion:
@@ -27,7 +37,12 @@ environment:
     barrierTargetVel:
     barrierFootContact:
     barrierFootClearance:
-    barrierBodyOri:
+    barrierThighContact:
+#    barrierBodyOri:
+
+    # total sum
+    negSumPos: 1.0
+    relaxedLog: 1.0
 
 architecture:
   policy_net: [256, 128, 64]

@@ -80,6 +80,15 @@ class RaisimGymVecEnv:
     def curriculum_callback(self):
         self.wrapper.curriculumUpdate()
 
+    def set_command(self, command_x, command_y, command_yaw):
+        self.wrapper.setCommand(command_x,command_y,command_yaw)
+
+    def set_terrain(self, type, curriculum, mu):
+        self.wrapper.setTerrain(type,curriculum, mu)
+
+    def set_initial(self, type):
+        self.wrapper.setInitial(type)
+
     @property
     def num_envs(self):
         return self.wrapper.getNumOfEnvs()
