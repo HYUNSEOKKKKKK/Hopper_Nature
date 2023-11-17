@@ -28,6 +28,7 @@ mode = args.mode
 weight_path = args.weight
 
 # check if gpu is available
+torch.cuda.empty_cache()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # directories
@@ -71,7 +72,7 @@ ppo = PPO.PPO(actor=actor,
               num_envs=cfg['environment']['num_envs'],
               num_transitions_per_env=n_steps,
               num_learning_epochs=4,
-              gamma=0.996,
+              gamma=0.99,
               lam=0.95,
               num_mini_batches=8,
               entropy_coef=0.01,
@@ -132,7 +133,7 @@ for update in range(8000):
         ppo.step(value_obs=obs, rews=reward, dones=dones)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
-        if update % 100 == 0:
+        if (update % 200 == 0) or (update % 202 == 0):
             reward_analyzer.add_reward_info(env.get_reward_info())
 
     # take st step to get value obs
@@ -151,7 +152,7 @@ for update in range(8000):
 
     end = time.time()
 
-    if update % 100 == 0:
+    if (update % 200 == 0) or (update % 202 == 0):
         reward_analyzer.analyze_and_plot(update)
 
     print('----------------------------------------------------')

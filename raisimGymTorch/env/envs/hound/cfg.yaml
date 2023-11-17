@@ -4,7 +4,7 @@ record_video: yes
 environment:
   render: True
 # just testing commenting
-  num_envs: 100
+  num_envs: 400
   eval_every_n: 201
   num_threads: 30
   simulation_dt: 0.001
@@ -17,11 +17,11 @@ environment:
 
     # neg reward (not reward coefficient, about range)
     footSlip: -5e-1
-    smoothness1: -2.5
-    smoothness2: -1.2
+    smoothness1: -2.5 #-1.0 # -2.5
+    smoothness2: -1.2 #-0.5 # -1.2
     bodyOri: -2.5
     torque: -1e-4
-    jointPos : -1e-1
+    jointPos : -5e-2
 #    footSlip: 2
 #    smoothness1: 2.0
 #    smoothness2: 2.0
@@ -41,6 +41,7 @@ environment:
 #    barrierBodyOri:
 
     # total sum
+    negReward: 1.0 # only for record
     negSumPos: 1.0
     relaxedLog: 1.0
 

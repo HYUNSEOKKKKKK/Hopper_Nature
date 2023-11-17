@@ -102,8 +102,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.3,2;
-    limitFootClearance_ << -0.10,0.10; // 어차피 desired_foot_clearance 를
-//    limitFootClearance_ << -0.12,0.12; // 어차피 desired_foot_clearance 를
+//    limitFootClearance_ << -0.10,0.10; // 어차피 desired_foot_clearance 를
+    limitFootClearance_ << -0.12,0.12; // 어차피 desired_foot_clearance 를
     limitFootSlip_    << -1.0, 1.0;
     limitBodyOri_     << -0.3, 0.3;
     limitSmoothness1_ << -0.2, 0.2;
@@ -146,13 +146,15 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
     }
     standingMode_ = false;
+    mu_ = 0.7 + 0.3 * uniDist_(gen_);
+    world_->setDefaultMaterial(mu_, 0, 0);
 
     double keepState = uniDist_(gen_);
 
     if (keepState >= 0.0){
         /// keep current state
-        gcNoise_.head(2) = gcInit_.head(2);
-        gcNoise_.tail(17) = gc_.tail(17);
+        gcNoise_.head(3) = gcInit_.head(3); /// prevent falling case due to sudden low height map
+        gcNoise_.tail(16) = gc_.tail(16);
         gvNoise_ = gv_;
     }else{
         /// initialize with noise
@@ -178,8 +180,10 @@ class ENVIRONMENT : public RaisimGymEnv {
                 gvNoise_(i) = uniDist_(gen_) * 0.5;
             } else if (i < 6) {
                 gvNoise_(i) = uniDist_(gen_) * 0.5;
+//                gvNoise_(i) = uniDist_(gen_) * 0.8;
             } else {
                 gvNoise_(i) = uniDist_(gen_) * 2.0;
+//                gvNoise_(i) = uniDist_(gen_) * 2.5;
             }
         }
     }
@@ -194,6 +198,16 @@ class ENVIRONMENT : public RaisimGymEnv {
     }
     gcNoise_(2) -= heightShift;
     hound_->setState(gcNoise_, gvNoise_);
+    double gcBef = gcNoise_(2);
+    while (checkCalfContact()){
+        gcNoise_(2) += 0.05;
+        hound_->setState(gcNoise_, gvNoise_);
+        if (gcNoise_(2)-gcBef > 0.20){ /// self collision
+            gcNoise_(2) = gcBef;
+            hound_->setState(gcNoise_, gvNoise_);
+            break;
+        }
+    }
     updateObservation();
 
     if (keepState < 0.0){
@@ -267,17 +281,18 @@ class ENVIRONMENT : public RaisimGymEnv {
                   footClearance_(i) =
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
-
-              if (footContactPhase_(i) > 0.3) { /// during contact
-//                  footSlip_(i) = footVel_[i].e().head(2).norm();
-                  footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
-              }else{ footSlip_(i) = 0.0; } // max reward
           }
       } else { /// under standingMode_
           /// standingMode_ 는 zero command 로 부터 유추 가능, command 는 obs 이기 때문에, robot 은 standingMode_인지 아닌지 충분히 알 수 있음
           for (int i=0; i<4; i++){
               footContactDouble_(i) = 1.0; // around max reward, where this value should go under (-0.3,3)
               footClearance_(i) = 0.0; // max reward (not enforcing clearance)
+          }
+      }
+      footSlip_.setZero();
+      for (int i=0; i<4; i++){
+          if (footContact_(i)){
+                  footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
           }
       }
 
@@ -324,6 +339,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
+//      if ((pTarget_ - prevTarget_).squaredNorm()>1e3){
+//          std::cout << "ptarget : " << pTarget_.transpose() << std::endl;
+//          std::cout << "prevTarget_ : " << prevTarget_.transpose() << std::endl;
+//          std::cout << "prevPrevTarget_ : " << prevPrevTarget_.transpose() << std::endl;
+//      }
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
@@ -357,13 +377,17 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        negReward *= 8.0/negCoeffSum;      /// negReward in [0.0, 5.0]
 //        posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
         negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
-        std::cout << "jointPos : " << rewards_.getReward("jointPos") << std::endl;
-        std::cout << "torque : " << rewards_.getReward("torque") << std::endl;
-        std::cout << "bodyOri : " << rewards_.getReward("bodyOri") << std::endl;
-        std::cout << "smoothness1 : " << rewards_.getReward("smoothness1") << std::endl;
-        std::cout << "smoothness2 : " << rewards_.getReward("smoothness2") << std::endl;
+//        std::cout << "jointPos : " << rewards_.getReward("jointPos") << std::endl;
+//        std::cout << "torque : " << rewards_.getReward("torque") << std::endl;
+//        std::cout << "bodyOri : " << rewards_.getReward("bodyOri") << std::endl;
+//        std::cout << "footSlip : " << rewards_.getReward("footSlip") << std::endl;
+//        std::cout << "smoothness1 : " << rewards_.getReward("smoothness1") << std::endl;
+//        std::cout << "smoothness2 : " << rewards_.getReward("smoothness2") << std::endl;
 //      return (float)std::exp(0.2 * negReward) * posReward;
-      return (float)(std::exp(0.2 * negReward)*8.0 + posReward);
+      rewards_.record("negReward", std::exp(0.1 * negReward)*4.0);
+//      return (float)(std::exp(0.1 * negReward)*4.0 + posReward);
+//      return (float)((std::exp(0.2 * negReward) + 1.0)/2.0 * posReward); // -> 여전히 negative 안 줄어들어용
+      return (float)(std::exp(0.02 * negReward) * posReward);
 //      return (float)(negReward + posReward);
   }
 
@@ -408,13 +432,14 @@ class ENVIRONMENT : public RaisimGymEnv {
       barrierTargetVel += tempReward;
       // Log Barrier - limit_foot_contact
       for (int i=0;i<4;i++){
-//          relaxedLogBarrier(0.1,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
-          relaxedLogBarrier(0.08,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
+          relaxedLogBarrier(0.1,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
+//          relaxedLogBarrier(0.08,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
           barrierFootContact += tempReward;
       }
       // Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.03,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+//          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
@@ -503,7 +528,6 @@ class ENVIRONMENT : public RaisimGymEnv {
         }
     }
 
-
     /// update foot terrain
     updateFootToTerrain();
   }
@@ -526,6 +550,11 @@ class ENVIRONMENT : public RaisimGymEnv {
             temp3 = footPos_[k].e() + sample_point.col(i);
             footToTerrain_(5 * k + i) = footPos_[k].e()(2) - heightMap_->getHeight(temp3(0), temp3(1));
         }
+    }
+    if (abs(footToTerrain_.minCoeff()) >  3.0){ /// print error !!!
+        std::cout << "gc_[2] : " << gc_[2] << std::endl;
+        std::cout << "height map : " << heightMap_->getHeight(temp3(0), temp3(1)) <<  std::endl;
+        std::cout << "Error too big here : " << footToTerrain_.transpose() << std::endl;
     }
   }
 
@@ -607,23 +636,32 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-//      curriculum_ = (double)iter_ * (1.0/1600.0); /// 1600 iter -> 1.0
+      curriculum_ = (double)iter_ * (1.0/1800.0); /// 1600 iter -> 1.0
 //      curriculum_ = (double)iter_ * (1.0/800.0); /// 1600 iter -> 1.0
-      curriculum_ = 0.0; /// 1600 iter -> 1.0
+//      curriculum_ = 0.0; /// 1600 iter -> 1.0
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
-      heightMap_ = HeightMapSample(world_.get(),0,curriculum_,gen_,uniDist_);
-//      heightMap_ = HeightMapSample(world_.get(),iter_%5,curriculum_,gen_,uniDist_);
+//      heightMap_ = HeightMapSample(world_.get(),0,curriculum_,gen_,uniDist_);
+      heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
 //      heightMap_ = HeightMapSample(world_.get(),2,curriculum_,gen_,uniDist_);
 
-      mu_ = 0.7 + 0.3 * uniDist_(gen_);  // [0.4, 1.0]
-//      mu_ = 0.7;  // [0.4, 1.0]
-      world_->setDefaultMaterial(mu_, 0, 0);
+//      if (iter_>=6000){
+//          command_ << 1.5 * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
+//      }
+  }
 
-      if (iter_>=6000){
-          command_ << 1.5 * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
+  bool checkCalfContact(){
+      world_->integrate1();
+      footContact_.setZero();
+      for(auto& contact: hound_->getContacts()){
+          for (size_t i=0; i<4; i++){
+              if(contact.getlocalBodyIndex() == footIndices_[i]){
+                  footContact_(i) = 1;
+              }
+          }
       }
+      return footContact_.sum()>0;
   }
 
   void setSeed(int seed) {gen_.seed(seed);}
@@ -649,8 +687,9 @@ class ENVIRONMENT : public RaisimGymEnv {
               if (temp < heightShift){heightShift = temp;}
           }
           gcNoise_(2) -= heightShift;
+
           /// reset
-          hound_->setState(gcInit_, gvInit_);
+          hound_->setState(gcNoise_, gvInit_);
           updateObservation();
       }
   }
