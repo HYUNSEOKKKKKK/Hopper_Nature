@@ -149,7 +149,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
     world_->setDefaultMaterial(mu_, 0, 0);
 
-    double keepState = uniDist_(gen_);
+//    double keepState = uniDist_(gen_);
+    double keepState = -1.0;
 
     if (keepState >= 0.0){
         /// keep current state
@@ -387,7 +388,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("negReward", std::exp(0.1 * negReward)*4.0);
 //      return (float)(std::exp(0.1 * negReward)*4.0 + posReward);
 //      return (float)((std::exp(0.2 * negReward) + 1.0)/2.0 * posReward); // -> 여전히 negative 안 줄어들어용
-      return (float)(std::exp(0.02 * negReward) * posReward);
+      return (float)(std::exp(0.1 * negReward) * posReward);
 //      return (float)(negReward + posReward);
   }
 
@@ -466,7 +467,13 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          barrierSmoothness2 += tempReward;
 //      }
 
-
+      barrierJointPos = fmax(fmin(barrierJointPos,300.0),-300.0);           /// 여기 밖 부분은 gradient 안 받겠다
+      barrierBodyHeight = fmax(fmin(barrierBodyHeight,300.0),-300.0);
+      barrierBaseMotion = fmax(fmin(barrierBaseMotion,300.0),-300.0);
+      barrierJointVel = fmax(fmin(barrierJointVel,300.0),-300.0);
+      barrierTargetVel = fmax(fmin(barrierTargetVel,300.0),-300.0);
+      barrierFootContact = fmax(fmin(barrierFootContact,300.0),-300.0);
+      barrierFootClearance = fmax(fmin(barrierFootClearance,300.0),-300.0);
       rewards_.record("barrierJointPos", barrierJointPos);
       rewards_.record("barrierBodyHeight", barrierBodyHeight);
       rewards_.record("barrierBaseMotion", barrierBaseMotion);
@@ -474,14 +481,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierTargetVel", barrierTargetVel);
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
-//      rewards_.record("barrierBodyOri", barrierBodyOri);
-//      return (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
       return (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
-//      double temp;
-//      temp = std::exp(1e-1 * barrierJointPos) + std::exp(1e-1 * barrierBodyHeight) + std::exp(1e-1 * barrierBaseMotion) + std::exp(1e-1 * barrierJointVel) +
-//              std::exp(1e-1 * barrierTargetVel) + std::exp(1e-1 * barrierFootContact) + std::exp(1e-1 * barrierFootClearance);
-//      return temp;
-}
+  }
 
   void relaxedLogBarrier(const double& delta,const double& alpha_lower,const double& alpha_upper,const double& x, double& y){
       /// positive reward, boundary 밖에서 gradient 가 큼
@@ -628,6 +629,11 @@ class ENVIRONMENT : public RaisimGymEnv {
         if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
             return true;
         }
+    for (int i=0; i<4; i++){
+        if (gc_(8+i*3)>3.0 or gc_(8+i*3)<-3.0){
+            return true;
+        }
+    }
 
     terminalReward = -0.f;
     return false;
