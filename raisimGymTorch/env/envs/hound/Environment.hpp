@@ -93,7 +93,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
 //      limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
       limitJointPos_.row(i*3+1) << 0,2*hip; // hip : hip nominal (-hip,+hip)
-      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+1.047197; // knee : knee nominal (-pi/3,+pi/3)
+//      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+1.047197; // knee : knee nominal (-pi/3,+pi/3)
+      limitJointPos_.row(i*3+2) << -2*hip-0.7164013,-2*hip+0.7164013; // knee : knee nominal (-pi/3,+pi/3)
     }
 //    limitBodyHeight_ << 0.48, 0.62;
     limitBodyHeight_ << 0.52, 0.64;
@@ -322,16 +323,16 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("footSlip", footSlip_.sum());
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
-      if (rewards_.getReward("smoothness1") < -1e3){
-          std::cout << "smoothness error!" << std::endl;
-          std::cout << "pTarget_ : " << pTarget_.transpose() << std::endl;
-          std::cout << "prevTarget_ : " << prevTarget_.transpose() << std::endl;
-          std::cout << "gc : " << gc_.transpose() << std::endl;
-          std::cout << "gv : " << gv_.transpose() << std::endl;
-          std::cout << "robot height map : " << heightMap_->getHeight(gc_(0), gc_(1)) << std::endl;
-          std::cout << "iter_ : " << iter_ << std::endl;
-      }
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
+//      if (rewards_.getReward("smoothness1") < -1e3){
+//          std::cout << "smoothness error!" << std::endl;
+//          std::cout << "pTarget_ : " << pTarget_.transpose() << std::endl;
+//          std::cout << "prevTarget_ : " << prevTarget_.transpose() << std::endl;
+//          std::cout << "gc : " << gc_.transpose() << std::endl;
+//          std::cout << "gv : " << gv_.transpose() << std::endl;
+//          std::cout << "robot height map : " << heightMap_->getHeight(gc_(0), gc_(1)) << std::endl;
+//          std::cout << "iter_ : " << iter_ << std::endl;
+//      }
 //      if ((pTarget_ - prevTarget_).squaredNorm()>1e3){
 //          std::cout << "ptarget : " << pTarget_.transpose() << std::endl;
 //          std::cout << "prevTarget_ : " << prevTarget_.transpose() << std::endl;
@@ -461,13 +462,13 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          barrierSmoothness2 += tempReward;
 //      }
 
-      barrierJointPos = fmax(fmin(barrierJointPos,300.0),-300.0);           /// 여기 밖 부분은 gradient 안 받겠다
-      barrierBodyHeight = fmax(fmin(barrierBodyHeight,300.0),-300.0);
-      barrierBaseMotion = fmax(fmin(barrierBaseMotion,300.0),-300.0);
-      barrierJointVel = fmax(fmin(barrierJointVel,300.0),-300.0);
-      barrierTargetVel = fmax(fmin(barrierTargetVel,300.0),-300.0);
-      barrierFootContact = fmax(fmin(barrierFootContact,300.0),-300.0);
-      barrierFootClearance = fmax(fmin(barrierFootClearance,300.0),-300.0);
+      barrierJointPos = fmax(barrierJointPos,-300.0);           /// 여기 밖 부분은 gradient 안 받겠다
+      barrierBodyHeight = fmax(barrierBodyHeight,-300.0);
+      barrierBaseMotion = fmax(barrierBaseMotion,-300.0);
+      barrierJointVel = fmax(barrierJointVel,-300.0);
+      barrierTargetVel = fmax(barrierTargetVel,-300.0);
+      barrierFootContact = fmax(barrierFootContact,-300.0);
+      barrierFootClearance = fmax(barrierFootClearance,-300.0);
       rewards_.record("barrierJointPos", barrierJointPos);
       rewards_.record("barrierBodyHeight", barrierBodyHeight);
       rewards_.record("barrierBaseMotion", barrierBaseMotion);
@@ -697,7 +698,7 @@ class ENVIRONMENT : public RaisimGymEnv {
  private:
   int gcDim_, gvDim_;
   bool visualizable_ = false;
-  double terminalRewardCoeff_ = -10.0;
+  double terminalRewardCoeff_ = -210.0;
   raisim::ArticulatedSystem* hound_;
 
   Eigen::VectorXd gc_, gv_;

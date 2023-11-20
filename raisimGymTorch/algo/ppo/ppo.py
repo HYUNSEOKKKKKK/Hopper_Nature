@@ -102,7 +102,7 @@ class PPO:
         self.writer.add_scalar('PPO/value_function', variables['mean_value_loss'], variables['it'])
         self.writer.add_scalar('PPO/surrogate', variables['mean_surrogate_loss'], variables['it'])
         self.writer.add_scalar('PPO/mean_noise_std', mean_std.item(), variables['it'])
-        # self.writer.add_scalar('PPO/learning_rate', self.optimizer. learning_rate, variables['it'])
+        # self.writer.add_scalar('PPO/learning_rate', self.learning_rate, variables['it'])
 
     def _train_step(self, log_this_iteration):
         mean_value_loss = 0
@@ -114,6 +114,25 @@ class PPO:
                 actions_log_prob_batch, entropy_batch = self.actor.evaluate(actor_obs_batch, actions_batch)
                 value_batch = self.critic.evaluate(critic_obs_batch)
 
+                # Adjusting the learning rate using KL divergence
+                # mu_batch = self.actor.action_mean
+                # sigma_batch = self.actor.distribution.std
+
+                # KL
+                # if self.desired_kl != None and self.schedule == 'adaptive':
+                #     with torch.no_grad():
+                #         kl = torch.sum(
+                #             torch.log(sigma_batch / old_sigma_batch + 1.e-5) + (torch.square(old_sigma_batch) + torch.square(old_mu_batch - mu_batch)) / (2.0 * torch.square(sigma_batch)) - 0.5, axis=-1)
+                #         kl_mean = torch.mean(kl)
+                #
+                #         if kl_mean > self.desired_kl * 2.0:
+                #             self.learning_rate = max(1e-5, self.learning_rate / 1.2)
+                #         elif kl_mean < self.desired_kl / 2.0 and kl_mean > 0.0:
+                #             # self.learning_rate = min(1e-2, self.learning_rate * 1.2)
+                #             self.learning_rate = min(1e-3, self.learning_rate * 1.2)
+                #
+                #         for param_group in self.optimizer.param_groups:
+                #             param_group['lr'] = self.learning_rate
 
                 # Surrogate loss
                 ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob_batch))
