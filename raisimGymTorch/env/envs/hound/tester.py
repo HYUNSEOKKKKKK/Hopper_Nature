@@ -7,6 +7,7 @@ import math
 import time
 import torch
 import argparse
+import numpy as np
 
 
 # configuration
@@ -30,8 +31,8 @@ env = VecEnv(hound.RaisimGymEnv(home_path + "/rsc", dump(cfg['environment'], Dum
 ob_dim = env.num_obs
 act_dim = env.num_acts
 
-weight_path = "/home/gijeong/workspace/raisimLib/raisimGymTorch/data/hound/2023-11-17-14-37-33/full_7638.pt"
-# weight_path = "/home/gijeong/workspace/raisimLib/raisimGymTorch/data/hound/2023-11-14-23-14-18/full_7839.pt"
+weight_path = task_path+"/../../../data/hound/2023-11-20-17-13-04/full_7236.pt"
+# weight_path = "/home/gijeong/workspace/raisimLib/raisimGymTorch/data/hound/2023-11-17-14-37-33/full_7839.pt"
 # weight_path = args.weight
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
@@ -42,7 +43,7 @@ else:
     print("Loaded weight from {}\n".format(weight_path))
     start = time.time()
 
-    env.set_terrain(2,3.0,0.7)
+    env.set_terrain(3,3.0,0.7)
     env.set_initial(0)
 
     env.reset()
@@ -66,6 +67,11 @@ else:
     max_steps = 10000 ## 10 secs
 
     for step in range(max_steps):
+        if step % 400 == 0:
+            env.set_command(np.random.uniform(0.6, 1.2, 1),
+                            np.random.uniform(0.0, 0.0, 1),
+                            np.random.uniform(-0.2, 0.2, 1))
+
         time.sleep(0.01)
         obs = env.observe(False)
         action_ll = loaded_graph.architecture(torch.from_numpy(obs).cpu())

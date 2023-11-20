@@ -28,7 +28,6 @@ mode = args.mode
 weight_path = args.weight
 
 # check if gpu is available
-torch.cuda.empty_cache()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # directories
@@ -63,7 +62,7 @@ actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.Le
 critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['value_net'], nn.LeakyReLU, ob_dim, 1),
                            device)
 
-saver = ConfigurationSaver(log_dir=home_path + "/raisimGymTorch/data/"+task_name,
+saver = ConfigurationSaver(log_dir=home_path + "/hound/raisimGymTorch/data/"+task_name,
                            save_items=[task_path + "/cfg.yaml", task_path + "/Environment.hpp"])
 tensorboard_launcher(saver.data_dir+"/..")  # press refresh (F5) after the first ppo update
 
@@ -82,6 +81,7 @@ ppo = PPO.PPO(actor=actor,
               )
 
 reward_analyzer = RewardAnalyzer(env, ppo.writer)
+scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000], gamma=0.333333)
 
 if mode == 'retrain':
     load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
@@ -151,6 +151,7 @@ for update in range(8000):
     env.curriculum_callback()
 
     end = time.time()
+    scheduler.step()
 
     if (update % 200 == 0) or (update % 202 == 0):
         reward_analyzer.analyze_and_plot(update)
