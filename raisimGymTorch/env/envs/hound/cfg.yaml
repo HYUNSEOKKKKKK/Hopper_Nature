@@ -31,7 +31,6 @@ environment:
     barrierTargetVel:     1e-1
     barrierFootContact:   1e-1
     barrierFootClearance: 1e-1
-    barrierThighContact:  1e-1
 
     # total sum
     negReward2: 1.0 # only for record

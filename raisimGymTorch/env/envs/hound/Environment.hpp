@@ -94,7 +94,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
       limitJointPos_.row(i*3+1) << 0,2*hip; // hip : hip nominal (-hip,+hip)
 //      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+1.047197; // knee : knee nominal (-pi/3,+pi/3)
-      limitJointPos_.row(i*3+2) << -2*hip-0.7164013,-2*hip+0.7164013; // knee : knee nominal (-pi/3,+pi/3)
+//      limitJointPos_.row(i*3+2) << -2*hip-0.7164013,-2*hip+0.7164013; // knee : knee nominal (-pi/3,+pi/3)
+      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+0.7164013; // knee : knee nominal (-pi/3,+pi/3)
     }
 //    limitBodyHeight_ << 0.48, 0.62;
     limitBodyHeight_ << 0.52, 0.64;
@@ -698,7 +699,7 @@ class ENVIRONMENT : public RaisimGymEnv {
  private:
   int gcDim_, gvDim_;
   bool visualizable_ = false;
-  double terminalRewardCoeff_ = -210.0;
+  double terminalRewardCoeff_ = -10.0;
   raisim::ArticulatedSystem* hound_;
 
   Eigen::VectorXd gc_, gv_;
