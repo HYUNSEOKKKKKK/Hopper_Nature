@@ -31,8 +31,8 @@ env = VecEnv(hound.RaisimGymEnv(home_path + "/rsc", dump(cfg['environment'], Dum
 ob_dim = env.num_obs
 act_dim = env.num_acts
 
-# weight_path = task_path+"/../../../data/hound/2023-11-20-17-13-04/full_7236.pt"
-weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-11-21-01-03-21/full_7638.pt"
+# weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-11-21-01-03-21/full_7638.pt"
+weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-11-21-16-18-26/full_2814.pt"
 # weight_path = args.weight
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
