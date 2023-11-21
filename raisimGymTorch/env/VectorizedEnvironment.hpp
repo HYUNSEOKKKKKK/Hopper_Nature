@@ -57,6 +57,7 @@ class VectorizedEnvironment {
     }
 
     obDim_ = environments_[0]->getObDim();
+    valueObDim_ = environments_[0]->getValueObDimTest();
     actionDim_ = environments_[0]->getActionDim();
     RSFATAL_IF(obDim_ == 0 || actionDim_ == 0, "Observation/Action dimension must be defined in the constructor of each environment!")
 
@@ -85,6 +86,12 @@ class VectorizedEnvironment {
 
     if (normalizeObservation_)
       updateObservationStatisticsAndNormalize(ob, updateStatistics);
+  }
+
+  void valueObserve(Eigen::Ref<EigenRowMajorMat> &ob, bool updateStatistics) {
+#pragma omp parallel for schedule(auto)
+      for (int i = 0; i < num_envs_; i++)
+          environments_[i]->valueObserve(ob.row(i));
   }
 
 
@@ -148,6 +155,7 @@ class VectorizedEnvironment {
   }
 
   int getObDim() { return obDim_; }
+  int getValueObDim() { return valueObDim_; }
   int getActionDim() { return actionDim_; }
   int getNumOfEnvs() { return num_envs_; }
 
@@ -201,7 +209,7 @@ class VectorizedEnvironment {
   std::vector<std::map<std::string, float>> rewardInformation_;
 
   int num_envs_ = 1;
-  int obDim_ = 0, actionDim_ = 0;
+  int obDim_ = 0, valueObDim_ = 0, actionDim_ = 0;
   bool recordVideo_=false, render_=false;
   std::string resourceDir_;
   Yaml::Node cfg_;
