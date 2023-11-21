@@ -24,7 +24,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// add objects
     hound_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hound/Hound_foot_cylinder_20230328.urdf");
-//    hound_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hound/Hound.urdf");
     hound_->setName("hound");
     hound_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -70,10 +69,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     footIndices_.push_back(hound_->getBodyIdx("RL_calf"));
     footIndices_.push_back(hound_->getBodyIdx("FR_calf"));
     footIndices_.push_back(hound_->getBodyIdx("FL_calf"));
-    thighIndices_.push_back(hound_->getBodyIdx("RR_thigh"));
-    thighIndices_.push_back(hound_->getBodyIdx("RL_thigh"));
-    thighIndices_.push_back(hound_->getBodyIdx("FR_thigh"));
-    thighIndices_.push_back(hound_->getBodyIdx("FL_thigh"));
     footFrames_.push_back("RR_foot_fixed");
     footFrames_.push_back("RL_foot_fixed");
     footFrames_.push_back("FR_foot_fixed");
@@ -119,7 +114,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize
     command_.setZero();
     footContact_.setZero();
-//    thighContact_.setZero();
     footVel_.resize(4); footPos_.resize(4);
     footContactPhase_.setZero();
     footClearance_.setZero();
@@ -203,7 +197,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// preventing foot penetration
     hound_->setState(gcNoise_,gvNoise_);
-    double heightShift = 1e10;  /// -> 공중에 있는 것도 데리고 옴
+    double heightShift = 1e3;  /// -> 공중에 있는 것도 데리고 옴
 //    double heightShift = 0.0; /// -> penetration 만 compensation (중간에 발산함)
     double temp = 0.0;
     for (int i = 0; i < 4; i++){
@@ -523,15 +517,11 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// foot contact update
     footContact_.setZero();
-//    thighContact_.setZero();
     for(auto& contact: hound_->getContacts()){
         for (size_t i=0; i<4; i++){
             if(contact.getlocalBodyIndex() == footIndices_[i]){
                 footContact_(i) = 1;
             }
-//            if(contact.getlocalBodyIndex() == thighIndices_[i]){
-//                thighContact_(i) = 1;
-//            }
         }
     }
 
@@ -692,7 +682,6 @@ class ENVIRONMENT : public RaisimGymEnv {
           double heightShift = 1e2, temp = 0.0;
           for (int i = 0; i < 4; i++){
               hound_->getFramePosition(footFrames_[i], footPos_[i]);
-//              temp = footPos_[i](2) - 0.025 - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
               temp = footPos_[i](2) - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
               if (temp < heightShift){heightShift = temp;}
           }
@@ -717,11 +706,11 @@ class ENVIRONMENT : public RaisimGymEnv {
   raisim::Mat<3,3> rot_;
   Eigen::VectorXd actionMean_, actionStd_, obDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
-  std::vector<size_t> footIndices_,thighIndices_;
+  std::vector<size_t> footIndices_;
   /// additional
   Eigen::Vector3d command_;                     // vx, vy, w
   std::vector<std::string> footFrames_;
-  Eigen::Vector4i footContact_,thighContact_;
+  Eigen::Vector4i footContact_;
   std::vector<raisim::Vec<3>> footPos_,footVel_;
   double phase_;
   double gait_hz_;
