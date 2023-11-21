@@ -4,7 +4,7 @@ record_video: yes
 environment:
   render: True
 # just testing commenting
-  num_envs: 100
+  num_envs: 200
   eval_every_n: 201
   num_threads: 30
   simulation_dt: 0.001
@@ -19,7 +19,7 @@ environment:
     footSlip: -5e-1
     smoothness1: -2.5
     smoothness2: -1.2
-    bodyOri: -1.0 #-2.5
+    bodyOri: -0.5 #-1.0
     torque: -1e-4
     jointPos : -1e-1
 

@@ -33,8 +33,8 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
                     heightVec[j*xSampleNum + i] = (0.10 * roughness) * uniDist(gen) + 0.2;
                 }
             }
-            double y_size = 20;
-            return world->addHeightMap(xSampleNum, ySampleNum, 20.0, y_size, 0., 0., heightVec);
+            double ySize = 20;
+            return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
         }else{
             /// sqaure
             int xSampleNum = 480;
@@ -53,8 +53,8 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
                     heightVec[j*xSampleNum + i] = squareHeight((i/12)%10,(j/12)%10);
                 }
             }
-            double y_size = 20;
-            return world->addHeightMap(xSampleNum, ySampleNum, 20.0, y_size, 0., 0., heightVec);
+            double ySize = 20;
+            return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
         }
     }
 
@@ -76,8 +76,8 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
             }
         }
 
-        double y_size = 20;
-        return world->addHeightMap(xSampleNum, ySampleNum, 20.0, y_size, 0., 0., heightVec);
+        double ySize = 20;
+        return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
     }
 
 
@@ -86,21 +86,23 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
         double hardness = (uniDist(gen) < 0.0) ? curriculum : curriculum * abs(uniDist(gen)); // 50% : curriculum, 50% : 0~curriculum
 //        double hardness = curriculum; // 50% : curriculum, 50% : 0~curriculum
         double stepHeight = 0.065 * hardness;
-        int xSampleNum = 2;
-        int ySampleNum = 3600;
+        int xSampleNum = 6;
+        int ySampleNum = 3600; //3600;
         int stairNum = 60;
         std::vector<double> heightVec;
         heightVec.resize(xSampleNum*ySampleNum);
 
         int step = 0;
         for (int j=0; j<ySampleNum; j++){
-            heightVec[j*2] = ceil((double)step/(double)(ySampleNum/stairNum)) * stepHeight + 0.2; // 50 계단
-            heightVec[j*2+1] = heightVec[j*2];
+            heightVec[j*xSampleNum] = ceil((double)step/(double)(ySampleNum/stairNum)) * stepHeight + 0.2; // 50 계단
+            for (int i=1; i<xSampleNum; i++){
+                heightVec[j*xSampleNum+i] = heightVec[j*xSampleNum];
+            }
             step++;
         }
 
-        double y_size = (0.30 + 0.10 * uniDist(gen)) * (double)stairNum; // 폭 [20,40]
-        return world->addHeightMap(xSampleNum, ySampleNum, 20.0, y_size, 0., 0., heightVec);
+        double ySize = (0.30 + 0.10 * uniDist(gen)) * (double)stairNum; // 폭 [20,40]
+        return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
     }
 
 
@@ -109,7 +111,7 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
         double hardness = (uniDist(gen) < 0.0) ? curriculum : curriculum * abs(uniDist(gen)); // 50% : curriculum, 50% : 0~curriculum
 //        double hardness = curriculum; // 50% : curriculum, 50% : 0~curriculum
         double stepHeight = 0.115 * hardness;
-        int xSampleNum = 2;
+        int xSampleNum = 6;
         int ySampleNum = 3600;
         int stairNum = 12;
         std::vector<double> heightVec;
@@ -117,13 +119,15 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
 
         int step = 0;
         for (int j=0; j<ySampleNum; j++){
-            heightVec[j*2] = ceil((double)step/(double)(ySampleNum/stairNum)) * stepHeight + 0.2; // 12 계단
-            heightVec[j*2+1] = heightVec[j*2];
+            heightVec[j*xSampleNum] = ceil((double)step/(double)(ySampleNum/stairNum)) * stepHeight + 0.2; // 12 계단
+            for (int i=1; i<xSampleNum; i++){
+                heightVec[j*xSampleNum+i] = heightVec[j*xSampleNum];
+            }
             step++;
         }
 
-        double y_size = (1.7 + 0.3 * uniDist(gen)) * (double)stairNum; // 폭 [140,200]
-        return world->addHeightMap(xSampleNum, ySampleNum, 20.0, y_size, 0., 0., heightVec);
+        double ySize = (1.7 + 0.3 * uniDist(gen)) * (double)stairNum; // 폭 [140,200]
+        return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
     }
 }
 

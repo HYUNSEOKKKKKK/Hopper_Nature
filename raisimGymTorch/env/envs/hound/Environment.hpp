@@ -24,6 +24,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// add objects
     hound_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hound/Hound_foot_cylinder_20230328.urdf");
+//    hound_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hound/Hound.urdf");
     hound_->setName("hound");
     hound_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -36,8 +37,9 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// this is nominal configuration of anymal
 //    gcInit_ << 0, 0, 0.505, 1.0, 0.0, 0.0, 0.0, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708;
-    double hip = 0.62;
-    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
+    double hip = 0.7854;
+//    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
+    gcInit_ << 0, 0, 0.51875, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
@@ -89,16 +91,19 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// set limit for log barrier function
     for (int i=0;i<4;i++){
-      limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
-//      limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
-//      limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
-      limitJointPos_.row(i*3+1) << 0,2*hip; // hip : hip nominal (-hip,+hip)
-//      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+1.047197; // knee : knee nominal (-pi/3,+pi/3)
+//      limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
+////      limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
+////      limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
+//      limitJointPos_.row(i*3+1) << 0,2*hip; // hip : hip nominal (-hip,+hip)
+////      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+1.047197; // knee : knee nominal (-pi/3,+pi/3)
 //      limitJointPos_.row(i*3+2) << -2*hip-0.7164013,-2*hip+0.7164013; // knee : knee nominal (-pi/3,+pi/3)
-      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+0.7164013; // knee : knee nominal (-pi/3,+pi/3)
+////      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+0.7164013; // knee : knee nominal (-pi/3,+pi/3)
+        limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
+        limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
+        limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
     }
-//    limitBodyHeight_ << 0.48, 0.62;
-    limitBodyHeight_ << 0.52, 0.64;
+    limitBodyHeight_ << 0.48, 0.62;
+//    limitBodyHeight_ << 0.52, 0.64;
     limitBaseMotion_.row(0) << -0.3,0.3;
     limitBaseMotion_.row(1) << -0.5,0.5;
     limitJointVel_ << -8,8;
@@ -141,13 +146,17 @@ class ENVIRONMENT : public RaisimGymEnv {
   void init() final { }
 
   void reset() final {
-    if (iter_<6000){
-//      command_ << 1.5 * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
-      command_ << 1.0 * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
+      double comCurriculum = (double)iter_ * 1.0/3600;
+      comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum;
+      if (iter_%4==0){
+          command_ << (1.0+comCurriculum) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [2.0, 0.6, 0.6]
+      }else{
+          command_ << (1.0+comCurriculum*0.5) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
+      }
       if (command_(0) < -1.0){
           command_(0) = abs(command_(0));
       }
-    }
+
     standingMode_ = false;
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
     world_->setDefaultMaterial(mu_, 0, 0);
@@ -385,7 +394,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      return (float)((std::exp(0.2 * negReward) + 1.0)/2.0 * posReward); // -> 여전히 negative 안 줄어들어용
 //      return (float)(std::exp(0.1 * negReward) * posReward);
       return (float)(std::exp(0.2 * negReward) * posReward);
-//      return (float)(negReward + posReward);
   }
 
   float getLogBarReward(){
@@ -647,10 +655,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      heightMap_ = HeightMapSample(world_.get(),0,curriculum_,gen_,uniDist_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
 //      heightMap_ = HeightMapSample(world_.get(),2,curriculum_,gen_,uniDist_);
-
-//      if (iter_>=6000){
-//          command_ << 1.5 * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
-//      }
   }
 
   bool checkCalfContact(){
