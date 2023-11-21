@@ -310,7 +310,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 2.0, 1.,1.,2.,1.,1.,2.,1.,1.,2.,1.,1.;
+      jointPosWeight << 2.0, 0.,0.,2.,0.,0.,2.,0.,0.,2.,0.,0.;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
@@ -570,7 +570,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// if the contact body is not feet
     for(auto& contact: hound_->getContacts())
         if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
-            return true;
+//            return true;
         }
 
 //    for (int i=0; i<4; i++){
