@@ -349,6 +349,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          std::cout << "prevPrevTarget_ : " << prevPrevTarget_.transpose() << std::endl;
 //      }
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
+      rewards_.record("pTarget", (pTarget_-actionMean_).squaredNorm());
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
 
@@ -380,7 +381,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        posReward *= 8.0/posCoeffSum; /// posReward in [0.0, 6.0]
 //        negReward *= 8.0/negCoeffSum;      /// negReward in [0.0, 5.0]
 //        posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-        negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
+        negReward = (float)(rewards_.getReward("pTarget") + rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
 //        std::cout << "jointPos : " << rewards_.getReward("jointPos") << std::endl;
 //        std::cout << "torque : " << rewards_.getReward("torque") << std::endl;
 //        std::cout << "bodyOri : " << rewards_.getReward("bodyOri") << std::endl;
@@ -471,13 +472,14 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          barrierSmoothness2 += tempReward;
 //      }
 
-      barrierJointPos = fmax(barrierJointPos,-300.0);           /// 여기 밖 부분은 gradient 안 받겠다
-      barrierBodyHeight = fmax(barrierBodyHeight,-300.0);
-      barrierBaseMotion = fmax(barrierBaseMotion,-300.0);
-      barrierJointVel = fmax(barrierJointVel,-300.0);
-      barrierTargetVel = fmax(barrierTargetVel,-300.0);
-      barrierFootContact = fmax(barrierFootContact,-300.0);
-      barrierFootClearance = fmax(barrierFootClearance,-300.0);
+      double logClip = -100.0; // -300.0
+      barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
+      barrierBodyHeight = fmax(barrierBodyHeight,logClip);
+      barrierBaseMotion = fmax(barrierBaseMotion,logClip);
+      barrierJointVel = fmax(barrierJointVel,logClip);
+      barrierTargetVel = fmax(barrierTargetVel,logClip);
+      barrierFootContact = fmax(barrierFootContact,logClip);
+      barrierFootClearance = fmax(barrierFootClearance,logClip);
       rewards_.record("barrierJointPos", barrierJointPos);
       rewards_.record("barrierBodyHeight", barrierBodyHeight);
       rewards_.record("barrierBaseMotion", barrierBaseMotion);
@@ -631,12 +633,14 @@ class ENVIRONMENT : public RaisimGymEnv {
         if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
             return true;
         }
+
 //    for (int i=0; i<4; i++){
 //        if (gc_(8+i*3)>3.0 or gc_(8+i*3)<-3.0){
 //            return true;
 //        }
 //    }
-    if ((pTarget_-actionMean_).squaredNorm() > 1e2) {return true;}
+
+//    if ((pTarget_-actionMean_).squaredNorm() > 1e2) {return true;}
 
     terminalReward = -0.f;
     return false;

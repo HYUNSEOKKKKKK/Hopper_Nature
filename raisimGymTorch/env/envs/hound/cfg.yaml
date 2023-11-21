@@ -22,6 +22,7 @@ environment:
     bodyOri: -0.5 #-1.0
     torque: -1e-4
     jointPos : -1e-1
+    pTarget : -1e-1
 
     # relaxed
     barrierJointPos:      1e-1

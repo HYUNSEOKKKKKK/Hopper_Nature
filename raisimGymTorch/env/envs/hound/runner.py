@@ -134,7 +134,7 @@ for update in range(8000):
         ppo.step(value_obs=obs, rews=reward, dones=dones)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
-        if (update % 200 == 0) or (update % 202 == 0):
+        if (update % 20 == 0) or (update % 200 == 0) or (update % 202 == 0):
             reward_analyzer.add_reward_info(env.get_reward_info())
 
     # take st step to get value obs
@@ -154,7 +154,7 @@ for update in range(8000):
     end = time.time()
     scheduler.step()
 
-    if (update % 200 == 0) or (update % 202 == 0):
+    if (update % 20 == 0) or (update % 200 == 0) or (update % 202 == 0):
         reward_analyzer.analyze_and_plot(update)
 
     print('----------------------------------------------------')
