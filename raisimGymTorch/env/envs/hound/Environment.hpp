@@ -99,7 +99,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
         limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
     }
-    limitBodyHeight_ << 0.48, 0.62;
+    limitBodyHeight_ << 0.48, 0.62; // -> 52,66
 //    limitBodyHeight_ << 0.52, 0.64;
     limitBaseMotion_.row(0) << -0.3,0.3;
     limitBaseMotion_.row(1) << -0.5,0.5;
@@ -312,7 +312,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 2.0, 1.,1.,2.,1.,1.,2.,1.,1.,2.,1.,1.;
+//      jointPosWeight << 2.0, 1.,1.,2.,1.,1.,2.,1.,1.,2.,1.,1.;
+      jointPosWeight << 2.0, 0.,0.,2.,0.,0.,2.,0.,0.,2.,0.,0.;
+
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
