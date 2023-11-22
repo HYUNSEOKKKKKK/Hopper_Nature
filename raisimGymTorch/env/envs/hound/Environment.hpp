@@ -32,7 +32,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     gc_.setZero(19); gcInit_.setZero(); gcNoise_.setZero();
     gv_.setZero(18); gvInit_.setZero(); gvNoise_.setZero();
     gcDes_.setZero(); gvDes_.setZero();
-    pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero();
+    pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero(); preJointVel_.setZero();
 
     /// this is nominal configuration of anymal
 //    gcInit_ << 0, 0, 0.505, 1.0, 0.0, 0.0, 0.0, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708;
@@ -140,18 +140,25 @@ class ENVIRONMENT : public RaisimGymEnv {
   void init() final { }
 
   void reset() final {
-      double comCurriculum = (double)iter_ * 1.0/3600;
-      comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum;
-      if (iter_%4==0){
-          command_ << (1.0+comCurriculum) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [2.0, 0.6, 0.6]
-      }else{
-          command_ << (1.0+comCurriculum*0.5) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
-      }
-      if (command_(0) < -1.0){
-          command_(0) = abs(command_(0));
-      }
+    double comCurriculum = (double)iter_ * 1.0/3600;
+    comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum;
+    if (iter_%4==0){
+      command_ << (1.0+comCurriculum) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [2.0, 0.6, 0.6]
+    }else{
+      command_ << (1.0+comCurriculum*0.5) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
+    }
+    if (command_(0) < -1.0){
+      command_(0) = abs(command_(0));
+    }
 
-    standingMode_ = false;
+    /// with standing mode
+    if (uniDist_(gen_) > 0.8) {
+        standingMode_ = true;      // 10 %
+        command_.setZero();
+    }else{
+        standingMode_ = false;
+    }
+
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
     world_->setDefaultMaterial(mu_, 0, 0);
 
@@ -212,7 +219,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     if (keepState < 0.5){
         pTarget_ = gc_.tail(12);
-        gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_;
+        gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
         for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
         for (auto& vec : jointVelHist_) { vec.setZero(); }
 
@@ -296,11 +303,37 @@ class ENVIRONMENT : public RaisimGymEnv {
           }
       }
 
-      /// (exp(neg1)+exp(neg2))/2.0 * (exp(pos1) + exp(pos2)) + relaxedLogBarrier
+      /// (exp(neg1)+exp(neg2))/2.0 * (exp(pos1) + exp(pos2)) + relaxedLogBarrier + standingNegReward
       rewards_.record("negSumPos",getNegPosReward());
+      rewards_.record("standingNegReward", getStandingReward());
       rewards_.record("relaxedLog", getLogBarReward()); /// relaxed log barrier
-//      return rewards_.sum();
       return rewards_.sumModified();
+  }
+
+  float getStandingReward(){  /// for standingMode_
+      Eigen::VectorXd jointPosTemp(12), jointPosWeight(12), jointVelTemp(12),jointAccTemp(12);
+      jointPosWeight << 2.0, 0.,0.,2.,0.,0.,2.,0.,0.,2.,0.,0.;
+      if (!standingMode_){
+          jointPosTemp.setZero();
+          jointVelTemp.setZero();
+          jointAccTemp.setZero();
+          limitBaseMotion_.row(0) << -0.3,0.3;
+          limitBaseMotion_.row(1) << -0.5,0.5;
+      } else {
+          jointPosTemp = gc_.tail(12)-gcInit_.tail(12);
+          jointVelTemp = gv_.tail(12);
+          jointAccTemp = gv_.tail(12) - preJointVel_;
+          limitBaseMotion_.row(0) << -0.1,0.1;
+          limitBaseMotion_.row(1) << -0.3,0.3;
+      }
+      rewards_.record("standingJointPos", jointPosTemp.squaredNorm());
+      rewards_.record("standingJointVel", jointVelTemp.squaredNorm());
+      rewards_.record("standingJointAcc", jointAccTemp.squaredNorm());
+
+      float tempReward;
+      tempReward = rewards_.getReward("standingJointPos") + rewards_.getReward("standingJointVel") + rewards_.getReward("standingJointAcc");
+
+      return (float)(std::exp(0.2 * tempReward)); /// same weight with positive reward
   }
 
   float getNegPosReward(){
@@ -322,22 +355,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("pTarget", (pTarget_-actionMean_).squaredNorm());
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
-      double rewJointVelStanding,rewJointPosStanding,rewJointAcc;
-//      if (!standingMode_){
-//          rewJointVelStanding = 0.0;
-//          rewJointPosStanding = 0.0;
-//          rewJointAcc = 0.0;
-//          limitBaseMotion_ << -0.3,0.3;
-//      } else {
-//          rewards_.record("standingJointVel", gv_.tail(12).squaredNorm());
-//          rewards_.record("standingJointPos", (gc_.tail(12)-gcInit_.tail(12)).squaredNorm());
-////          rewards_.record("rewJointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
-//          limitBaseMotion_ << -0.1,0.1;
-//      }
-        float posReward, negReward, posCoeffSum, negCoeffSum;
-        posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-        negReward = (float)(rewards_.getReward("pTarget") + rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
-        rewards_.record("negReward2", negReward);
+      float posReward, negReward;
+      posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
+      negReward = (float)(rewards_.getReward("pTarget") + rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
+      rewards_.record("negReward2", negReward);
 
       return (float)(std::exp(0.2 * negReward) * posReward);
   }
@@ -476,6 +497,9 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// update foot terrain
     updateFootToTerrain();
+
+    /// update previous footVel
+    preJointVel_ = gv_.tail(12);
   }
 
   void updateFootToTerrain(){
@@ -601,6 +625,12 @@ class ENVIRONMENT : public RaisimGymEnv {
   /// for tester.py
   void setCommand(Eigen::Vector3d command){
     command_ = command;
+    if (command_.norm()<0.2){
+      standingMode_ = true;
+      command_.setZero();
+    }else{
+      standingMode_ = false;
+    }
   }
   void setTerrain(int type, double curriculum, double mu){
       world_->removeObject(heightMap_);
@@ -633,7 +663,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::VectorXd gc_, gv_;
   Eigen::Vector<double,19> gcInit_, gcNoise_, gcDes_;
   Eigen::Vector<double,18> gvInit_, gvNoise_, gvDes_;
-  Eigen::Vector<double,12> pTarget_, prevTarget_, prevPrevTarget_;
+  Eigen::Vector<double,12> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_;
   raisim::Mat<3,3> rot_;
   Eigen::VectorXd actionMean_, actionStd_, obDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;

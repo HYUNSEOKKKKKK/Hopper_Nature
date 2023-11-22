@@ -13,7 +13,7 @@ environment:
   reward:
     # pos reward
     comAngularVel: 8
-    comLinearVel: 8
+    comLinearVel:  8
 
     # neg reward (not reward coefficient, about range)
     footSlip: -5e-1
@@ -23,6 +23,11 @@ environment:
     torque: -1e-4
     jointPos : -1e-1
     pTarget : -1e-1
+
+    # standing
+    standingJointPos: -1e-1
+    standingJointVel: -5e-2
+    standingJointAcc: -1.0
 
     # relaxed
     barrierJointPos:      1e-1
@@ -34,9 +39,11 @@ environment:
     barrierFootClearance: 1e-1
 
     # total sum
-    negReward2: 1.0 # only for record
-    negSumPos: 1.0
-    relaxedLog: 1.0
+    negReward2: 1.0          # only for record
+
+    standingNegReward : 8.0
+    negSumPos:          1.0
+    relaxedLog:         1.0
 
 architecture:
   policy_net: [256, 128, 64]
