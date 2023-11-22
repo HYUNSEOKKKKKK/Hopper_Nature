@@ -224,16 +224,20 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   float step(const Eigen::Ref<EigenVec>& action) final {
-    /// action scaling
-    pTarget_ = action.cast<double>();
-    pTarget_ = pTarget_.cwiseProduct(actionStd_);
-    pTarget_ += actionMean_;                                   /// joint P target
-    gcDes_.tail(12) = pTarget_;
-    hound_->setPdTarget(gcDes_, gvDes_);
+    /// delay
+    int delayIdx = int((0.002 / simulation_dt_ + 1e-10)); // 2ms delay
 
     /// simulation
     double avgReward = 0.0;
     for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
+      if (i == delayIdx){
+          /// action scaling
+          pTarget_ = action.cast<double>();
+          pTarget_ = pTarget_.cwiseProduct(actionStd_);
+          pTarget_ += actionMean_;                                   /// joint P target
+          gcDes_.tail(12) = pTarget_;
+          hound_->setPdTarget(gcDes_, gvDes_);
+      }
       if(server_) server_->lockVisualizationServerMutex();
       world_->integrate();
       if(server_) server_->unlockVisualizationServerMutex();
@@ -559,9 +563,20 @@ class ENVIRONMENT : public RaisimGymEnv {
           footContactPhase_.head(2), /// footContactPhase 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
 
-//          bodyLinearVel_,                                                       /// body linear velocity. 3
-//          footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
-//          footContact_.cast<double>();
+      double noise = 0.0;
+      for (int i=0; i<obDim_; i++){
+          if (i<3)       {noise = 0.03;}  /// body orientation
+          else if(i<6)   {noise = 0.1;}   /// body angular velocity (rad/sec)
+          else if(i<18)  {noise = 0.05;}  /// joint pos             (rad)
+          else if(i<30)  {noise = 0.5;}   /// joint vel             (rad/sec)
+          else if(i<54)  {noise = 0.01;}  /// action related
+          else if(i<90)  {noise = 0.0;}   /// action related
+          else if(i<126) {noise = 0.1;}  /// vel history
+          else if(i<138) {noise = 0.02;} /// relative foot pos (2 cm)
+          else           {noise = 0.0;}
+
+          obDouble_(i) += uniDist_(gen_) * noise;
+      }
 
     /// convert it to float
     ob = obDouble_.cast<float>();
