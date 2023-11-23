@@ -439,7 +439,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          barrierSmoothness2 += tempReward;
 //      }
 
-      double logClip = -50.0; // -100.0
+      double logClip = -100.0; // -100.0
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierBodyHeight = fmax(barrierBodyHeight,logClip);
       barrierBaseMotion = fmax(barrierBaseMotion,logClip);
