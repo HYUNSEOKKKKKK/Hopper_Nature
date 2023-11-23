@@ -88,19 +88,13 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// set limit for log barrier function
     for (int i=0;i<4;i++){
-//      limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
-////      limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
-////      limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
-//      limitJointPos_.row(i*3+1) << 0,2*hip; // hip : hip nominal (-hip,+hip)
-////      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+1.047197; // knee : knee nominal (-pi/3,+pi/3)
-//      limitJointPos_.row(i*3+2) << -2*hip-0.7164013,-2*hip+0.7164013; // knee : knee nominal (-pi/3,+pi/3)
-////      limitJointPos_.row(i*3+2) << -2*hip-1.047197,-2*hip+0.7164013; // knee : knee nominal (-pi/3,+pi/3)
         limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
         limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
-        limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
+//        limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
+        limitJointPos_.row(i*3+2) << -2.0943946,-0.5235987; // knee : -pi*5/6, -pi/6
     }
-    limitBodyHeight_ << 0.48, 0.62; // -> 52,66
-//    limitBodyHeight_ << 0.52, 0.64;
+//    limitBodyHeight_ << 0.48, 0.62; // -> 52,66
+    limitBodyHeight_ << 0.52, 0.66;
     limitBaseMotion_.row(0) << -0.3,0.3;
     limitBaseMotion_.row(1) << -0.5,0.5;
     limitJointVel_ << -8,8;
@@ -317,7 +311,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float getStandingReward(){  /// for standingMode_
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12), jointVelTemp(12),jointAccTemp(12);
-      jointPosWeight << 2.0, 0.,0.,2.,0.,0.,2.,0.,0.,2.,0.,0.;
+//      jointPosWeight << 2.0, 0.,0.,2.,0.,0.,2.,0.,0.,2.,0.,0.;
+      jointPosWeight << 2.0, 0.5,0.5,2.,0.5,0.5,2.,0.5,0.5,2.,0.5,0.5;
       if (!standingMode_){
           jointPosTemp.setZero();
           jointVelTemp.setZero();
@@ -444,7 +439,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          barrierSmoothness2 += tempReward;
 //      }
 
-      double logClip = -100.0; // -300.0
+      double logClip = -50.0; // -100.0
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierBodyHeight = fmax(barrierBodyHeight,logClip);
       barrierBaseMotion = fmax(barrierBaseMotion,logClip);
@@ -640,7 +635,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// if the contact body is not feet
     if (iter_>4200 and (iter_%4==2 or iter_%4==3)){
         for (int i=0; i<4; i++){
-            if (gc_(8+i*3)>3.0 or gc_(8+i*3)<-3.0)  {return true;}
+            if (gc_(9+i*3)>-0.1)  {return true;}
         }
         if ((pTarget_-actionMean_).squaredNorm() > 1e2)         {return true;}
     }else{
