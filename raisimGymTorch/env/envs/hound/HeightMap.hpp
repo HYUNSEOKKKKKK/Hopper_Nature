@@ -14,10 +14,10 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
     /// 2 -> stair
     /// 3 -> big stair
     /// curriculum : 0 ~ 3.0, max curriculum : 3.0
+    double hardness = (uniDist(gen) < 0.0) ? curriculum : curriculum * abs(uniDist(gen)); // 50% : curriculum, 50% : 0~curriculum
+//        double hardness = curriculum; // 50% : curriculum, 50% : 0~curriculum
 
     if (heightMapType == 0){
-        double hardness = (uniDist(gen) < 0.0) ? curriculum : curriculum * abs(uniDist(gen)); // 50% : curriculum, 50% : 0~curriculum
-//        double hardness = curriculum; // 50% : curriculum, 50% : 0~curriculum
         double roughness = hardness/3.0;
         std::vector<double> heightVec;
 
@@ -61,8 +61,6 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
 
     else if (heightMapType == 1){
         /// slope
-        double hardness = (uniDist(gen) < 0.0) ? curriculum : curriculum * abs(uniDist(gen)); // 55% : curriculum, 25% : 0~curriculum
-//        double hardness = curriculum; // 55% : curriculum, 25% : 0~curriculum
         double roughness = abs(uniDist(gen));
         double heightMax = 0.17 * hardness * 20;
         int xSampleNum = 50;
@@ -83,8 +81,6 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
 
     else if (heightMapType == 2){
         /// stair
-        double hardness = (uniDist(gen) < 0.0) ? curriculum : curriculum * abs(uniDist(gen)); // 50% : curriculum, 50% : 0~curriculum
-//        double hardness = curriculum; // 50% : curriculum, 50% : 0~curriculum
         double stepHeight = 0.065 * hardness;
         int xSampleNum = 6;
         int ySampleNum = 3600; //3600;
@@ -108,8 +104,6 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
 
     else if(heightMapType == 3){
         /// big stair
-        double hardness = (uniDist(gen) < 0.0) ? curriculum : curriculum * abs(uniDist(gen)); // 50% : curriculum, 50% : 0~curriculum
-//        double hardness = curriculum; // 50% : curriculum, 50% : 0~curriculum
         double stepHeight = 0.115 * hardness;
         int xSampleNum = 6;
         int ySampleNum = 3600;

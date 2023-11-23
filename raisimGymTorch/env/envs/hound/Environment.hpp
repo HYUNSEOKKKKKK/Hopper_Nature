@@ -331,9 +331,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("standingJointAcc", jointAccTemp.squaredNorm());
 
       float tempReward;
-      tempReward = rewards_.getReward("standingJointPos") + rewards_.getReward("standingJointVel") + rewards_.getReward("standingJointAcc");
-
-      return (float)(std::exp(0.2 * tempReward)); /// same weight with positive reward
+//      if (!standingMode_){
+//          return 0.0;
+//      }else{
+          tempReward = rewards_.getReward("standingJointPos") + rewards_.getReward("standingJointVel") + rewards_.getReward("standingJointAcc");
+          return (float)(std::exp(0.2 * tempReward)); /// same weight with positive reward
+//      }
   }
 
   float getNegPosReward(){
@@ -474,6 +477,9 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   void updateObservation() {
+    /// update previous footVel
+    preJointVel_ = gv_.tail(12);
+    /// update state
     hound_->getState(gc_, gv_);
     raisim::Vec<4> quat;
     quat[0] = gc_[3]; quat[1] = gc_[4]; quat[2] = gc_[5]; quat[3] = gc_[6];
@@ -497,9 +503,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// update foot terrain
     updateFootToTerrain();
-
-    /// update previous footVel
-    preJointVel_ = gv_.tail(12);
   }
 
   void updateFootToTerrain(){
@@ -592,18 +595,17 @@ class ENVIRONMENT : public RaisimGymEnv {
     terminalReward = float(terminalRewardCoeff_);
 
     /// if the contact body is not feet
-    for(auto& contact: hound_->getContacts())
-        if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
-//            return true;
+    if (iter_>4200 and (iter_%4==2 or iter_%4==3)){
+        for (int i=0; i<4; i++){
+            if (gc_(8+i*3)>3.0 or gc_(8+i*3)<-3.0)  {return true;}
         }
-
-//    for (int i=0; i<4; i++){
-//        if (gc_(8+i*3)>3.0 or gc_(8+i*3)<-3.0){
-//            return true;
-//        }
-//    }
-
-//    if ((pTarget_-actionMean_).squaredNorm() > 1e2) {return true;}
+        if ((pTarget_-actionMean_).squaredNorm() > 1e2)         {return true;}
+    }else{
+        for(auto& contact: hound_->getContacts())
+            if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
+                return true;
+            }
+    }
 
     terminalReward = -0.f;
     return false;

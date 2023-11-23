@@ -46,10 +46,10 @@ alpha_lower = -0.12
 alpha_upper = 0.12
 
 # Generate a range of x values
-x_values = np.linspace(-1, 1, 400)  # Avoiding x=alpha_lower directly as it goes to -inf in log
-y_values = [1e-1*relaxed_log_barrier(delta, alpha_lower, alpha_upper, x) for x in x_values]
+x_values = np.linspace(-20, 20, 400)  # Avoiding x=alpha_lower directly as it goes to -inf in log
+# y_values = [1e-1*relaxed_log_barrier(delta, alpha_lower, alpha_upper, x) for x in x_values]
 # y_values = [relaxed_barrier(alpha_lower, alpha_upper, x) for x in x_values]
-# y_values = [np.exp(-0.1*x**2) for x in x_values]
+y_values = [np.exp(-0.2*x**2) for x in x_values]
 
 # Plot the function
 plt.plot(x_values, y_values)
