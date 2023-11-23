@@ -42,7 +42,8 @@ env = VecEnv(RaisimGymEnv(home_path + "/rsc", dump(cfg['environment'], Dumper=Ro
 env.seed(cfg['seed'])
 
 # shortcuts
-ob_dim = env.num_obs
+actor_ob_dim = env.num_obs
+value_ob_dim = env.num_value_obs
 act_dim = env.num_acts
 num_threads = cfg['environment']['num_threads']
 
@@ -52,14 +53,14 @@ total_steps = n_steps * env.num_envs
 
 avg_rewards = []
 
-actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim, act_dim),
+actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, actor_ob_dim, act_dim),
                          ppo_module.MultivariateGaussianDiagonalCovariance(act_dim,
                                                                            env.num_envs,
                                                                            2.0,
                                                                            NormalSampler(act_dim),
                                                                            cfg['seed']),
                          device)
-critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['value_net'], nn.LeakyReLU, ob_dim, 1),
+critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['value_net'], nn.LeakyReLU, value_ob_dim, 1),
                            device)
 
 saver = ConfigurationSaver(log_dir=home_path + "/hound/raisimGymTorch/data/"+task_name,
@@ -103,7 +104,7 @@ for update in range(8000):
             'optimizer_state_dict': ppo.optimizer.state_dict(),
         }, saver.data_dir+"/full_"+str(update)+'.pt')
         # we create another graph just to demonstrate the save/load method
-        loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim, act_dim)
+        loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, actor_ob_dim, act_dim)
         loaded_graph.load_state_dict(torch.load(saver.data_dir+"/full_"+str(update)+'.pt')['actor_architecture_state_dict'])
 
         env.turn_on_visualization()
@@ -112,8 +113,8 @@ for update in range(8000):
         for step in range(n_steps):
             with torch.no_grad():
                 frame_start = time.time()
-                obs = env.observe(False)
-                action = loaded_graph.architecture(torch.from_numpy(obs).cpu())
+                actor_obs = env.observe(False)
+                action = loaded_graph.architecture(torch.from_numpy(actor_obs).cpu())
                 reward, dones = env.step(action.cpu().detach().numpy())
                 frame_end = time.time()
                 wait_time = cfg['environment']['control_dt'] - (frame_end-frame_start)
@@ -128,18 +129,20 @@ for update in range(8000):
 
     # actual training
     for step in range(n_steps):
-        obs = env.observe()
-        action = ppo.act(obs)
+        actor_obs = env.observe()
+        value_obs = env.value_observe(False)
+        action = ppo.act(actor_obs)
         reward, dones = env.step(action)
-        ppo.step(value_obs=obs, rews=reward, dones=dones)
+        ppo.step(value_obs=value_obs, rews=reward, dones=dones)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
         if (update % 20 == 0) or (update % 200 == 0) or (update % 202 == 0):
             reward_analyzer.add_reward_info(env.get_reward_info())
 
     # take st step to get value obs
-    obs = env.observe()
-    ppo.update(actor_obs=obs, value_obs=obs, log_this_iteration=update % 10 == 0, update=update)
+    actor_obs = env.observe()
+    value_obs = env.value_observe(False)
+    ppo.update(actor_obs=actor_obs, value_obs=value_obs, log_this_iteration=update % 10 == 0, update=update)
     average_ll_performance = reward_sum / total_steps
     average_dones = done_sum / total_steps
     avg_rewards.append(average_ll_performance)

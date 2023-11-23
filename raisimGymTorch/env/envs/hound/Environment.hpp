@@ -50,10 +50,12 @@ class ENVIRONMENT : public RaisimGymEnv {
     hound_->setGeneralizedForce(Eigen::VectorXd::Zero(18));
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
-    obDim_ = 171;
+    obDim_ = 144;
+    valueObDim_ = 171;
     actionDim_ = 12;
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
     obDouble_.setZero(obDim_);
+    valueObDouble_.setZero(valueObDim_);
 
     /// action scaling
     actionMean_ = gcInit_.tail(12);
@@ -97,7 +99,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
         limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
     }
-    limitBodyHeight_ << 0.48, 0.62;
+    limitBodyHeight_ << 0.48, 0.62; // -> 52,66
 //    limitBodyHeight_ << 0.52, 0.64;
     limitBaseMotion_.row(0) << -0.3,0.3;
     limitBaseMotion_.row(1) << -0.5,0.5;
@@ -229,16 +231,20 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   float step(const Eigen::Ref<EigenVec>& action) final {
-    /// action scaling
-    pTarget_ = action.cast<double>();
-    pTarget_ = pTarget_.cwiseProduct(actionStd_);
-    pTarget_ += actionMean_;                                   /// joint P target
-    gcDes_.tail(12) = pTarget_;
-    hound_->setPdTarget(gcDes_, gvDes_);
+    /// delay
+    int delayIdx = int((0.002 / simulation_dt_ + 1e-10)); // 2ms delay
 
     /// simulation
     double avgReward = 0.0;
     for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
+      if (i == delayIdx){
+          /// action scaling
+          pTarget_ = action.cast<double>();
+          pTarget_ = pTarget_.cwiseProduct(actionStd_);
+          pTarget_ += actionMean_;                                   /// joint P target
+          gcDes_.tail(12) = pTarget_;
+          hound_->setPdTarget(gcDes_, gvDes_);
+      }
       if(server_) server_->lockVisualizationServerMutex();
       world_->integrate();
       if(server_) server_->unlockVisualizationServerMutex();
@@ -563,7 +569,6 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   void observe(Eigen::Ref<EigenVec> ob) final {
-      double phase_sin = 0.0, phase_cos = 0.0;
       if (standingMode_){
           footContactPhase_.setZero();
       }
@@ -581,14 +586,53 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// relative foot position with respect to the body COM, expressed in the body frame 12
           command_,                                                             /// command 3
           footContactPhase_.head(2), /// footContactPhase 2
-          static_cast<double>(standingMode_),                                   /// standingMode 1
+          static_cast<double>(standingMode_);                                   /// standingMode 1
 
-          bodyLinearVel_,                                                       /// body linear velocity. 3
-          footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
-          footContact_.cast<double>();
+      double noise = 0.0;
+      for (int i=0; i<obDim_; i++){
+          if (i<3)       {noise = 0.03;}  /// body orientation
+          else if(i<6)   {noise = 0.1;}   /// body angular velocity (rad/sec)
+          else if(i<18)  {noise = 0.05;}  /// joint pos             (rad)
+          else if(i<30)  {noise = 0.5;}   /// joint vel             (rad/sec)
+          else if(i<54)  {noise = 0.01;}  /// action related
+          else if(i<90)  {noise = 0.0;}   /// action related
+          else if(i<126) {noise = 0.1;}  /// vel history
+          else if(i<138) {noise = 0.02;} /// relative foot pos (2 cm)
+          else           {noise = 0.0;}
+
+          obDouble_(i) += uniDist_(gen_) * noise;
+      }
 
     /// convert it to float
     ob = obDouble_.cast<float>();
+  }
+
+  void valueObserve(Eigen::Ref<EigenVec> ob) final {
+      if (standingMode_){
+          footContactPhase_.setZero();
+      }
+      valueObDouble_ << rot_.e().row(2).transpose(),                               /// body orientation. 3
+              bodyAngularVel_,                                                      /// body angular velocity. 3
+              gc_.tail(12),                                                      /// joint pos 12
+              gv_.tail(12),                                                      /// joint velocity 12
+
+              prevTarget_,                                                          /// previous action 12
+              prevPrevTarget_,                                                      /// preprevious action 12
+              jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 36 (0.18, 0.12, 0.6)
+              jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 36 (0.18, 0.12, 0.6)
+              rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[1].e() - gc_.head(3)),
+              rot_.e().transpose() * (footPos_[2].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[3].e() - gc_.head(3)),
+              /// relative foot position with respect to the body COM, expressed in the body frame 12
+              command_,                                                             /// command 3
+              footContactPhase_.head(2), /// footContactPhase 2
+              static_cast<double>(standingMode_),                                   /// standingMode 1
+
+              bodyLinearVel_,                                                       /// body linear velocity. 3
+              footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
+              footContact_.cast<double>();
+
+      /// convert it to float
+      ob = valueObDouble_.cast<float>();
   }
 
   bool isTerminalState(float& terminalReward) final {
@@ -667,7 +711,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Vector<double,18> gvInit_, gvNoise_, gvDes_;
   Eigen::Vector<double,12> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_;
   raisim::Mat<3,3> rot_;
-  Eigen::VectorXd actionMean_, actionStd_, obDouble_;
+  Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
   std::vector<size_t> footIndices_;
   /// additional
