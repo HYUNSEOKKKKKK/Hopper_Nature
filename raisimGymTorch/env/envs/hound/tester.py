@@ -32,7 +32,7 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-11-21-01-03-21/full_7638.pt"
-weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-11-21-16-18-26/full_6231.pt"
+weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-11-22-22-35-02/full_7638.pt"
 # weight_path = args.weight
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
@@ -43,11 +43,11 @@ else:
     print("Loaded weight from {}\n".format(weight_path))
     start = time.time()
 
-    env.set_terrain(0,0.0,1.0)
+    env.set_terrain(3,3.0,1.0)
     env.set_initial(0)
 
     env.reset()
-    env.set_command(1.0,0.0,0.3)
+    env.set_command(0.0,0.0,0.0)
 
     reward_ll_sum = 0
     done_sum = 0
@@ -67,10 +67,10 @@ else:
     max_steps = 10000 ## 10 secs
 
     for step in range(max_steps):
-        # if step % 400 == 0:
-            # env.set_command(np.random.uniform(0.0, 0.0, 1),
-            #                 np.random.uniform(0.0, 0.0, 1),
-            #                 np.random.uniform(-0.6, 0.6, 1))
+        if step % 400 == 0:
+            env.set_command(np.random.uniform(1.0, 1.2, 1),
+                            np.random.uniform(0.0, 0.0, 1),
+                            np.random.uniform(0.5, 0.6, 1))
 
         time.sleep(0.01)
         obs = env.observe(False)
