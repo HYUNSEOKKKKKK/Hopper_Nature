@@ -129,7 +129,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize gait
     phase_ = 0.0;
     gait_hz_ = 0.68;
-    footContactPhase_.setZero();
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
