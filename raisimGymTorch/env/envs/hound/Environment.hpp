@@ -89,7 +89,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// set limit for log barrier function
     for (int i=0;i<4;i++){
         limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
-        limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
+//        limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
+        limitJointPos_.row(i*3+1) << 0,1.45; // hip
 //        limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
         limitJointPos_.row(i*3+2) << -2.0943946,-0.5235987; // knee : -pi*5/6, -pi/6
     }
@@ -138,7 +139,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     double comCurriculum = (double)iter_ * 1.0/3600;
     comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum;
     if (iter_%4==0){
-      command_ << (1.0+comCurriculum) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [2.0, 0.6, 0.6]
+//      command_ << (1.0+comCurriculum) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [2.0, 0.6, 0.6]
+      command_ << (1.0+comCurriculum*1.2) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [2.2, 0.6, 0.6]
     }else{
       command_ << (1.0+comCurriculum*0.5) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
     }
