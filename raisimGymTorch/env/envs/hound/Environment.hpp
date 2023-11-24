@@ -170,6 +170,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         gcNoise_ = gcInit_;
         /// rot noise
         yawNoise_ = uniDist_(gen_) * 3.141592;
+//        yawNoise_ = 3.141592/2.0;
         rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
         quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
         quat_.normalize();
@@ -634,10 +635,12 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// if the contact body is not feet
     if (iter_>4200 and (iter_%4==2 or iter_%4==3)){
+//    if (iter_>4200){
         for (int i=0; i<4; i++){
             if (gc_(9+i*3)>-0.1)  {return true;}
         }
-        if ((pTarget_-actionMean_).squaredNorm() > 1e2)         {return true;}
+        if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
+        if (rewards_.getReward("smoothness1") < -5e2) {return true;}
     }else{
         for(auto& contact: hound_->getContacts())
             if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
@@ -657,6 +660,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
+//      heightMap_ = HeightMapSample(world_.get(),2,curriculum_,gen_,uniDist_);
   }
 
   void setSeed(int seed) {gen_.seed(seed);}
