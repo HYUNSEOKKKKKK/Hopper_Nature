@@ -35,8 +35,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero(); preJointVel_.setZero();
 
     /// this is nominal configuration of anymal
-    double hip = 0.62;
-    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
+//    double hip = 0.62;
+//    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
+    double hip = 0.58;
+    gcInit_ << 0, 0, 0.60-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
 //    double hip = 0.7854;
 //    gcInit_ << 0, 0, 0.51875, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
     gcInit_.segment(3,4).normalize();
@@ -88,7 +90,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     visualizationOn_ = false;
 
     /// set limit for log barrier function
-    hip = 0.62;
+//    hip = 0.62;
     for (int i=0;i<4;i++){
         limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
 //        limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
@@ -99,7 +101,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        limitJointPos_.row(i*3+2) << -2.0943946,-0.5235987; // knee : -pi*5/6, -pi/6
     }
 //    limitBodyHeight_ << 0.48, 0.62; // -> 52,66
-    limitBodyHeight_ << 0.52, 0.66;
+//    limitBodyHeight_ << 0.52, 0.66;
+    limitBodyHeight_ << 0.52, 0.68;
     limitBaseMotion_.row(0) << -0.3,0.3;
     limitBaseMotion_.row(1) << -0.5,0.5;
     limitJointVel_ << -8,8;
@@ -640,11 +643,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     terminalReward = float(terminalRewardCoeff_);
 
     /// if the contact body is not feet
-    if (iter_>4200 and (iter_%4==2 or iter_%4==3)){
+    if (iter_>3600 and (iter_%4==2 or iter_%4==3)){
 //    if (iter_>4200){
-        for (int i=0; i<4; i++){
-            if (gc_(9+i*3)>-0.1)  {return true;}
-        }
         if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
         if (rewards_.getReward("smoothness1") < -5e2) {return true;}
     }else{
@@ -652,6 +652,9 @@ class ENVIRONMENT : public RaisimGymEnv {
             if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
                 return true;
             }
+    }
+    for (int i=0; i<4; i++){
+        if (gc_(9+i*3)>-0.1)  {return true;}
     }
 
     terminalReward = -0.f;
