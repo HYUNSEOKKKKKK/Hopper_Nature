@@ -641,19 +641,18 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// if the contact body is not feet
     if (iter_>3600 and (iter_%4==2 or iter_%4==3)){
-//    if (iter_>4200){
         if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
-        if (rewards_.getReward("smoothness1") < -5e2) {return true;}
     }else{
         for(auto& contact: hound_->getContacts())
             if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
                 return true;
             }
-        for (int i=0; i<4; i++){
-            if (gc_(9+i*3)>-0.1)  {return true;}
-        }
     }
 
+    for (int i=0; i<4; i++){
+      if (gc_(9+i*3)>-0.1)  {return true;}
+    }
+    if (rewards_.getReward("smoothness1") < -5e2) {return true;}
 
     terminalReward = -0.f;
     return false;
