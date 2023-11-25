@@ -35,10 +35,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero(); preJointVel_.setZero();
 
     /// this is nominal configuration of anymal
-//    gcInit_ << 0, 0, 0.505, 1.0, 0.0, 0.0, 0.0, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708, -0.0, 0.7854, -1.5708, 0.0, 0.7854, -1.5708;
-    double hip = 0.7854;
-//    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
-    gcInit_ << 0, 0, 0.51875, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
+    double hip = 0.62;
+    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
+//    double hip = 0.7854;
+//    gcInit_ << 0, 0, 0.51875, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
@@ -60,7 +60,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
-      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
+//      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
+      actionStd_.segment(i*3,3) << 0.1, 0.15, 0.2;
     }
 
     /// Reward coefficients
