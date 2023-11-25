@@ -36,7 +36,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// this is nominal configuration of anymal
     double hip = 0.62;
-    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
+    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip-0.20, 0.0, hip, -2*hip-0.20, 0.0, hip, -2*hip-0.20, 0.0, hip, -2*hip-0.20;
 //    double hip = 0.7854;
 //    gcInit_ << 0, 0, 0.51875, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
     gcInit_.segment(3,4).normalize();
@@ -94,7 +94,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip : 0, pi*1/2
 //        limitJointPos_.row(i*3+1) << 0,1.45; // hip
 //        limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
-        limitJointPos_.row(i*3+2) << -2*hip-1.04720-0.20,-2*hip+1.04720-0.20; // knee : -pi*5/6, -pi/6
+        limitJointPos_.row(i*3+2) << -2*hip-1.04720-0.20,-2*hip+1.04720-0.20; // knee : -pi*5/6, -pi/6, -2.49, -0.39
 //        limitJointPos_.row(i*3+2) << -2.0943946,-0.5235987; // knee : -pi*5/6, -pi/6
     }
 //    limitBodyHeight_ << 0.48, 0.62; // -> 52,66
