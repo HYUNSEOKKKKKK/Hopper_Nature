@@ -94,7 +94,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip : 0, pi*1/2
 //        limitJointPos_.row(i*3+1) << 0,1.45; // hip
 //        limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
-        limitJointPos_.row(i*3+2) << -2*hip-1.04720,-2*hip+1.04720; // knee : -pi*5/6, -pi/6
+        limitJointPos_.row(i*3+2) << -2*hip-1.04720-0.20,-2*hip+1.04720-0.20; // knee : -pi*5/6, -pi/6
 //        limitJointPos_.row(i*3+2) << -2.0943946,-0.5235987; // knee : -pi*5/6, -pi/6
     }
 //    limitBodyHeight_ << 0.48, 0.62; // -> 52,66
@@ -642,9 +642,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// if the contact body is not feet
     if (iter_>3600 and (iter_%4==2 or iter_%4==3)){
 //    if (iter_>4200){
-        for (int i=0; i<4; i++){
-            if (gc_(9+i*3)>-0.1)  {return true;}
-        }
         if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
         if (rewards_.getReward("smoothness1") < -5e2) {return true;}
     }else{
@@ -652,6 +649,9 @@ class ENVIRONMENT : public RaisimGymEnv {
             if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
                 return true;
             }
+        for (int i=0; i<4; i++){
+            if (gc_(9+i*3)>-0.1)  {return true;}
+        }
     }
 
 
