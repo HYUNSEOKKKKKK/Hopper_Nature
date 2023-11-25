@@ -640,7 +640,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     terminalReward = float(terminalRewardCoeff_);
 
     /// if the contact body is not feet
-    if (iter_>3600 and (iter_%4==2 or iter_%4==3)){
+    if (iter_>4200 and (iter_%4==2 or iter_%4==3)){
         if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
     }else{
         for(auto& contact: hound_->getContacts())
