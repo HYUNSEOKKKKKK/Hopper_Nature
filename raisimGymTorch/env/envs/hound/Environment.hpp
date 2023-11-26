@@ -322,9 +322,10 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float getNegPosReward(){
       /// pos reward
-      Eigen::Vector3d tempCommand;
-      tempCommand.setZero(); tempCommand(2) = command_(2);
-      rewards_.record("comAngularVel", std::exp(-1.0 * (tempCommand - bodyAngularVel_).squaredNorm())); // regulation 같이
+      Eigen::Vector3d angVelWeight(0.5, 0.5, 1.5);
+      Eigen::Vector3d angVelTemp(-bodyAngularVel_(0), -bodyAngularVel_(1), command_(2) - bodyAngularVel_(2));
+      angVelTemp = angVelWeight.cwiseProduct(angVelTemp.eval());
+      rewards_.record("comAngularVel", std::exp(-1.0 * angVelTemp.squaredNorm())); // regulation 같이
       rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
       /// neg reward
