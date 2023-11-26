@@ -89,7 +89,7 @@ scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[1800
 if mode == 'retrain':
     load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
 
-for update in range(8000):
+for update in range(8001):
 # for update in range(12000):
     start = time.time()
     env.reset()

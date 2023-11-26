@@ -36,7 +36,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// this is nominal configuration of anymal
     double hip = 0.62;
-    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip-0.20, 0.0, hip, -2*hip-0.20, 0.0, hip, -2*hip-0.20, 0.0, hip, -2*hip-0.20;
+//    gcInit_ << 0, 0, 0.58-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip-0.20, 0.0, hip, -2*hip-0.20, 0.0, hip, -2*hip-0.20, 0.0, hip, -2*hip-0.20;
+    gcInit_ << 0, 0, 0.56-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip-0.07, 0.0, hip, -2*hip-0.07, 0.0, hip, -2*hip-0.07, 0.0, hip, -2*hip-0.07;
 //    double hip = 0.7854;
 //    gcInit_ << 0, 0, 0.51875, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
     gcInit_.segment(3,4).normalize();
@@ -60,8 +61,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
-//      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
-      actionStd_.segment(i*3,3) << 0.1, 0.15, 0.2;
+      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
+//      actionStd_.segment(i*3,3) << 0.1, 0.15, 0.2;
+//      actionStd_.segment(i*3,3) << 0.1, 0.15, 0.15;
     }
 
     /// Reward coefficients
@@ -94,7 +96,8 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip : 0, pi*1/2
 //        limitJointPos_.row(i*3+1) << 0,1.45; // hip
 //        limitJointPos_.row(i*3+2) << -2.6179933,-0.5235987; // knee : -pi*5/6, -pi/6
-        limitJointPos_.row(i*3+2) << -2*hip-1.04720-0.20,-2*hip+1.04720-0.20; // knee : -pi*5/6, -pi/6, -2.49, -0.39
+//        limitJointPos_.row(i*3+2) << -2*hip-1.04720-0.20,-2*hip+1.04720-0.20; // knee : -pi*5/6, -pi/6, -2.49, -0.39
+        limitJointPos_.row(i*3+2) << -2*hip-0.07-0.785398,-2*hip-0.07+0.785398; // knee : -pi*5/6, -pi/6, -2.49, -0.39
 //        limitJointPos_.row(i*3+2) << -2.0943946,-0.5235987; // knee : -pi*5/6, -pi/6
     }
 //    limitBodyHeight_ << 0.48, 0.62; // -> 52,66
@@ -176,7 +179,6 @@ class ENVIRONMENT : public RaisimGymEnv {
         gcNoise_ = gcInit_;
         /// rot noise
         yawNoise_ = uniDist_(gen_) * 3.141592;
-//        yawNoise_ = 3.141592/2.0;
         rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
         quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
         quat_.normalize();
@@ -225,7 +227,12 @@ class ENVIRONMENT : public RaisimGymEnv {
         for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
         for (auto& vec : jointVelHist_) { vec.setZero(); }
 
-        phase_ = 0.0;
+        if (uniDist_(gen_)<=0.0){
+            phase_ = 0.0;
+        }else{
+            phase_ = gait_hz_/2.0;
+        }
+
         footContactPhase_.setZero();
     }
   }
@@ -641,6 +648,10 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// if the contact body is not feet
     if (iter_>4200 and (iter_%4==2 or iter_%4==3)){
+        for (int i=0; i<4; i++){
+//            if (gc_(9+i*3)>-0.1)  {return true;}
+            if (gc_(9+i*3)>-0.0)  {return true;}
+        }
         if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
     }else{
         for(auto& contact: hound_->getContacts())
@@ -648,11 +659,6 @@ class ENVIRONMENT : public RaisimGymEnv {
                 return true;
             }
     }
-
-    for (int i=0; i<4; i++){
-      if (gc_(9+i*3)>-0.1)  {return true;}
-    }
-    if (rewards_.getReward("smoothness1") < -5e2) {return true;}
 
     terminalReward = -0.f;
     return false;
@@ -666,7 +672,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
-//      heightMap_ = HeightMapSample(world_.get(),2,curriculum_,gen_,uniDist_);
   }
 
   void setSeed(int seed) {gen_.seed(seed);}

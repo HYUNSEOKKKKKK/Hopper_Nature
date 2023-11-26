@@ -97,8 +97,7 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
             step++;
         }
 
-        double ySize = (0.325 + 0.075 * uniDist(gen)) * (double)stairNum; // 폭 [25,40]
-//        double ySize = 0.25 * (double)stairNum; // 폭 [20,40]
+        double ySize = (0.30 + 0.10 * uniDist(gen)) * (double)stairNum; // 폭 [20,40]
         return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
     }
 
