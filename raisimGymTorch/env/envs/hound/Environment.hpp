@@ -58,7 +58,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
-      actionStd_.segment(i*3,3) << 0.1, 0.15, 0.15;
+//      actionStd_.segment(i*3,3) << 0.1, 0.15, 0.15;
+      actionStd_.segment(i*3,3) << 0.133, 0.2, 0.2;
     }
 
     /// Reward coefficients
@@ -604,7 +605,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
             return true;
         }
-            if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
+//            if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
 //    }
 
     terminalReward = -0.f;
