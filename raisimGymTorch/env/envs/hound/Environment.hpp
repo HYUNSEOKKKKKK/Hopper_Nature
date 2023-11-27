@@ -129,15 +129,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void reset() final {
     double comCurriculum = (double)iter_ * 1.0/3600;
-    comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum;
-    if (iter_%4==0){
-      command_ << (1.0+comCurriculum*1.2) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [2.2, 0.6, 0.6]
-    }else{
-      command_ << (1.0+comCurriculum*0.5) * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_); // [1.5, 0.6, 0.6]
-    }
-    if (command_(0) < -1.0){
-      command_(0) = abs(command_(0));
-    }
+    comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
 
     /// with standing mode
     if (uniDist_(gen_) > 0.8) {
@@ -145,6 +137,11 @@ class ENVIRONMENT : public RaisimGymEnv {
         command_.setZero();
     }else{
         standingMode_ = false;
+        do {
+            double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.2) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.2, other 1.5
+            command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+            command_(0) = (command_(0) < -1.0) ? -command_(0) : command_(0);           // 뒤로가는 건 max -1.0
+        } while (command_.norm() < 0.2);
     }
 
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
