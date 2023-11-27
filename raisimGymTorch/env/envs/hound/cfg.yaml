@@ -25,8 +25,8 @@ environment:
     pTarget : -1e-1
 
     # standing
-    standingJointPos: -2.0 #-5e-1
-    standingJointVel: -5e-2
+    standingJointPos: -2.5e-1 #-5e-1
+    standingJointVel: -1e-1 #-5e-2
     standingJointAcc: -1.0
 
     # relaxed

@@ -68,9 +68,9 @@ else:
 
     for step in range(max_steps):
         if step % 400 == 0:
-            env.set_command(np.random.uniform(0.8, 1.2, 1),
+            env.set_command(np.random.uniform(0.6, 0.6, 1),
                             np.random.uniform(0.0, 0.0, 1),
-                            np.random.uniform(0.0, 0.0, 1))
+                            np.random.uniform(0.6, 0.6, 1))
 
         time.sleep(0.01)
         obs = env.observe(False)

@@ -98,7 +98,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.3,2;
-    limitFootClearance_ << -0.12,0.12; // 어차피 desired_foot_clearance 를
+//    limitFootClearance_ << -0.12,0.12; // 어차피 desired_foot_clearance 를
+            limitFootClearance_ << -0.8,0.30; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -140,7 +141,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         do {
             double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.2) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.2, other 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
-            command_(0) = (command_(0) < -1.0) ? -command_(0) : command_(0);           // 뒤로가는 건 max -1.0
+                    command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
         } while (command_.norm() < 0.2);
     }
 
@@ -588,17 +589,18 @@ class ENVIRONMENT : public RaisimGymEnv {
     terminalReward = float(terminalRewardCoeff_);
 
     /// if the contact body is not feet
-    if (iter_>4200 and (iter_%4==2 or iter_%4==3)){
-        for (int i=0; i<4; i++){
-            if (gc_(9+i*3)>-0.0)  {return true;}
+//    if (iter_>4200 and (iter_%4==2 or iter_%4==3)){
+//        for (int i=0; i<4; i++){
+//            if (gc_(9+i*3)>-0.0)  {return true;}
+//        }
+//        if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
+//    }else{
+    for(auto& contact: hound_->getContacts())
+        if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
+            return true;
         }
-        if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
-    }else{
-        for(auto& contact: hound_->getContacts())
-            if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
-                return true;
-            }
-    }
+            if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
+//    }
 
     terminalReward = -0.f;
     return false;
