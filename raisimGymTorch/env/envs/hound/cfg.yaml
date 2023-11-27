@@ -19,10 +19,10 @@ environment:
     footSlip: -5e-1
     smoothness1: -2.5
     smoothness2: -1.2
-    bodyOri: -0.5 #-1.0
+    bodyOri: -0.5
     torque: -1e-4
     jointPos : -1e-1
-    pTarget : -1e-1
+    pTarget : 0.0 #-1e-1
 
     # standing
     standingJointPos: -2.5e-1 #-5e-1
@@ -41,7 +41,7 @@ environment:
     # total sum
     negReward2: 1.0          # only for record
 
-    standingNegReward : 2.0
+    standingNegReward : 1.0 #2.0
     negSumPos:          1.0
     relaxedLog:         1.0
 
@@ -50,4 +50,6 @@ architecture:
 #  value_net: [256, 128, 64]
   policy_net: [256, 256, 128, 64]
   value_net: [256, 256, 128, 64]
+#  policy_net: [ 512, 256, 128, 64 ]
+#  value_net: [ 512, 256, 128, 64 ]
 

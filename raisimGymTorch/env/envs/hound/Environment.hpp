@@ -99,7 +99,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.3,2;
 //    limitFootClearance_ << -0.12,0.12; // 어차피 desired_foot_clearance 를
-            limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
+//            limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
+            limitFootClearance_ << -0.03,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -329,7 +330,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 2.0, 0.,0.,2.,0.,0.,2.,0.,0.,2.,0.,0.;
+//      jointPosWeight << 2.0, 0.,0.,2.,0.,0.,2.,0.,0.,2.,0.,0.;
+            jointPosWeight << 1.0, 0.,0.,1.,0.,0.,1.,0.,0.,1.,0.,0.;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
@@ -397,7 +399,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierFootClearance += tempReward;
       }
 
-      double logClip = -100.0; // -100.0
+      double logClip = -200.0; // -100.0
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierBodyHeight = fmax(barrierBodyHeight,logClip);
       barrierBaseMotion = fmax(barrierBaseMotion,logClip);
@@ -465,7 +467,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void updateFootToTerrain(){
     Eigen::Matrix<double, 3, 5> sample_point;
-    double point = 0.05;
+//    double point = 0.05;
+            double point = 0.10;
     sample_point.col(0) << point, 0.0, 0.0;
     sample_point.col(1) << 0.0, point, 0.0;
     sample_point.col(2) << -point, 0.0, 0.0;
