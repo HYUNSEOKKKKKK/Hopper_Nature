@@ -99,7 +99,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.3,2;
 //    limitFootClearance_ << -0.12,0.12; // 어차피 desired_foot_clearance 를
-            limitFootClearance_ << -0.8,0.30; // 어차피 desired_foot_clearance 를
+            limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -153,6 +153,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     gcNoise_ = gcInit_;
     /// rot noise
     yawNoise_ = uniDist_(gen_) * 3.141592;
+//    yawNoise_ = 3.141592/2.0;
     rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
     quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
     quat_.normalize();
@@ -271,6 +272,7 @@ class ENVIRONMENT : public RaisimGymEnv {
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
           }
+//                std::cout << "footClearance_ : " << footClearance_.transpose() << std::endl;
       } else { /// under standingMode_
           /// standingMode_ 는 zero command 로 부터 유추 가능, command 는 obs 이기 때문에, robot 은 standingMode_인지 아닌지 충분히 알 수 있음
           for (int i=0; i<4; i++){

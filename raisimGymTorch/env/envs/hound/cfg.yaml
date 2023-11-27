@@ -46,7 +46,8 @@ environment:
     relaxedLog:         1.0
 
 architecture:
-  policy_net: [256, 128, 64]
+#  policy_net: [256, 128, 64]
 #  value_net: [256, 128, 64]
+  policy_net: [256, 256, 128, 64]
   value_net: [256, 256, 128, 64]
 
