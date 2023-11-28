@@ -48,7 +48,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     hound_->setGeneralizedForce(Eigen::VectorXd::Zero(18));
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
-    obDim_ = 144;
+    obDim_ = 144+20;
     valueObDim_ = 171;
     actionDim_ = 12;
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
@@ -102,7 +102,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitFootContact_ << -0.3,2;
 //    limitFootClearance_ << -0.12,0.12; // 어차피 desired_foot_clearance 를
 //            limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
-            limitFootClearance_ << -0.03,1.0; // 어차피 desired_foot_clearance 를
+//            limitFootClearance_ << -0.03,1.0; // 어차피 desired_foot_clearance 를
+            limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -144,7 +145,8 @@ class ENVIRONMENT : public RaisimGymEnv {
         do {
             double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.2) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.2, other 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
-                    command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
+//                    command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
+                    command_ << 1.0,0.0,0.0;
         } while (command_.norm() < 0.2);
     }
 
@@ -155,8 +157,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize with noise
     gcNoise_ = gcInit_;
     /// rot noise
-    yawNoise_ = uniDist_(gen_) * 3.141592;
-//    yawNoise_ = 3.141592/2.0;
+//    yawNoise_ = uniDist_(gen_) * 3.141592;
+    yawNoise_ = 3.141592/2.0;
     rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
     quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
     quat_.normalize();
@@ -472,8 +474,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void updateFootToTerrain(){
     Eigen::Matrix<double, 3, 5> sample_point;
-//    double point = 0.05;
-            double point = 0.10;
+    double point = 0.05;
+//            double point = 0.10;
     sample_point.col(0) << point, 0.0, 0.0;
     sample_point.col(1) << 0.0, point, 0.0;
     sample_point.col(2) << -point, 0.0, 0.0;
@@ -546,7 +548,9 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// relative foot position with respect to the body COM, expressed in the body frame 12
           command_,                                                             /// command 3
           footContactPhase_.head(2), /// footContactPhase 2
-          static_cast<double>(standingMode_);                                   /// standingMode 1
+          static_cast<double>(standingMode_),
+
+          footToTerrain_;                                   /// standingMode 1
 
       double noise = 0.0;
       for (int i=0; i<obDim_; i++){
@@ -619,11 +623,13 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = (double)iter_ * (1.0/1800.0); /// 1800 iter -> 1.0
+//      curriculum_ = (double)iter_ * (1.0/1800.0); /// 1800 iter -> 1.0
+      curriculum_ = (double)iter_ * (1.0/600.0); /// 1800 iter -> 1.0
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
-      heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
+//      heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
+      heightMap_ = HeightMapSample(world_.get(),3,curriculum_,gen_,uniDist_);
   }
 
   void setSeed(int seed) {gen_.seed(seed);}
