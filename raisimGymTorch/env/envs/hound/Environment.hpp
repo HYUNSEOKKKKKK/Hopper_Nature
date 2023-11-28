@@ -48,7 +48,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     hound_->setGeneralizedForce(Eigen::VectorXd::Zero(18));
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
-    obDim_ = 144+20;
+//    obDim_ = 144+20;
+    obDim_ = 144;
     valueObDim_ = 171;
     actionDim_ = 12;
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
@@ -548,9 +549,9 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// relative foot position with respect to the body COM, expressed in the body frame 12
           command_,                                                             /// command 3
           footContactPhase_.head(2), /// footContactPhase 2
-          static_cast<double>(standingMode_),
+          static_cast<double>(standingMode_);
 
-          footToTerrain_;                                   /// standingMode 1
+//          footToTerrain_;                                   /// standingMode 1
 
       double noise = 0.0;
       for (int i=0; i<obDim_; i++){
