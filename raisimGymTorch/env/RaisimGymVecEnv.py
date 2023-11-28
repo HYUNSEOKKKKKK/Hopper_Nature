@@ -75,10 +75,6 @@ class RaisimGymVecEnv:
         self.wrapper.valueObserve(self._value_observation, update_statistics)
         return self._value_observation
 
-    def estimate(self):
-        self.wrapper.estimate(self._estimation)
-        return  self._estimation
-
     def get_reward_info(self):
         return self.wrapper.getRewardInfo()
 

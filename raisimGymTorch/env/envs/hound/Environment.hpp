@@ -50,7 +50,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// MUST BE DONE FOR ALL ENVIRONMENTS
     obDim_ = 144;
             estDim_ = 27;
-    valueObDim_ = 171;
+    valueObDim_ = obDim_ + estDim_;
     actionDim_ = 12;
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
     obDouble_.setZero(obDim_);
@@ -148,7 +148,6 @@ class ENVIRONMENT : public RaisimGymEnv {
             double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.2) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.2, other 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
                     command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
-                    command_.tail(2).setZero();
         } while (command_.norm() < 0.2);
     }
 
@@ -159,8 +158,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize with noise
     gcNoise_ = gcInit_;
     /// rot noise
-//    yawNoise_ = uniDist_(gen_) * 3.141592;
-    yawNoise_ = 3.141592/2.0;
+    yawNoise_ = uniDist_(gen_) * 3.141592;
+//    yawNoise_ = 3.141592/2.0;
     rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
     quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
     quat_.normalize();
@@ -573,16 +572,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     ob = obDouble_.cast<float>();
   }
 
-    void estimate(Eigen::Ref<EigenVec> est) final {
-                            estDouble_ <<  bodyLinearVel_,                                                       /// body linear velocity. 3
-                                    footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
-                                    footContact_.cast<double>();
-
-            est = estDouble_.cast<float>();
-  }
-
-
-  void valueObserve(Eigen::Ref<EigenVec> ob) final {
+  void valueObserve(Eigen::Ref<EigenVec> ob) final { /// obs + (true) estimated_state
       if (standingMode_){
           footContactPhase_.setZero();
       }
@@ -634,13 +624,13 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-//      curriculum_ = (double)iter_ * (1.0/1800.0); /// 1800 iter -> 1.0
-      curriculum_ = (double)iter_ * (1.0/600.0); /// 1800 iter -> 1.0
+      curriculum_ = (double)iter_ * (1.0/1800.0); /// 1800 iter -> 1.0
+//      curriculum_ = (double)iter_ * (1.0/600.0); /// 1800 iter -> 1.0
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
-//      heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
-      heightMap_ = HeightMapSample(world_.get(),3,curriculum_,gen_,uniDist_);
+      heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
+//      heightMap_ = HeightMapSample(world_.get(),3,curriculum_,gen_,uniDist_);
   }
 
   void setSeed(int seed) {gen_.seed(seed);}
