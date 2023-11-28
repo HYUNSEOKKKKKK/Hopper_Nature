@@ -49,7 +49,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
     obDim_ = 144;
-            estDim_ = 27;
+            estDim_ = 11; // 27 -> 11
     valueObDim_ = obDim_ + estDim_;
     actionDim_ = 12;
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
@@ -158,8 +158,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize with noise
     gcNoise_ = gcInit_;
     /// rot noise
-//    yawNoise_ = uniDist_(gen_) * 3.141592;
-    yawNoise_ = 3.141592/2.0;
+            yawNoise_ = uniDist_(gen_) * 3.141592;
+//    yawNoise_ = 3.141592/2.0;
     rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
     quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
     quat_.normalize();
@@ -211,6 +211,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         phase_ = gait_hz_/2.0;
     }
     footContactPhase_.setZero();
+            footClearance_.setZero();
   }
 
   float step(const Eigen::Ref<EigenVec>& action) final {
@@ -406,7 +407,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierFootClearance += tempReward;
       }
 
-      double logClip = -200.0; // -100.0
+      double logClip = -100.0;
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierBodyHeight = fmax(barrierBodyHeight,logClip);
       barrierBaseMotion = fmax(barrierBaseMotion,logClip);
@@ -590,7 +591,8 @@ class ENVIRONMENT : public RaisimGymEnv {
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
               bodyLinearVel_,                                                       /// body linear velocity. 3
-              footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
+//              footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
+                    footClearance_,                                                       /// min foot z
               footContact_.cast<double>();
 
       /// convert it to float
@@ -621,9 +623,12 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = (double)iter_ * (1.0/1800.0); /// 1800 iter -> 1.0
-//      curriculum_ = (double)iter_ * (1.0/600.0); /// 1800 iter -> 1.0
-      curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
+            if (curriculum_<2.0){
+                curriculum_ = (double)iter_ * (1.0/600.0); /// 600 iter -> 1.0
+            }else{
+                curriculum_ = (double)(iter_-1200) * (1.0/2000.0) + 2.0; /// 2000 iter -> 1.0
+                curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
+            }
 
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
