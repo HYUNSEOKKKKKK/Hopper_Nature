@@ -12,6 +12,7 @@ class PPO:
     def __init__(self,
                  actor,
                  critic,
+                 estimator,
                  num_envs,
                  num_transitions_per_env,
                  num_learning_epochs,
@@ -33,7 +34,8 @@ class PPO:
         # PPO components
         self.actor = actor
         self.critic = critic
-        self.storage = RolloutStorage(num_envs, num_transitions_per_env, actor.obs_shape, critic.obs_shape, actor.action_shape, device)
+        self.estimator = estimator
+        self.storage = RolloutStorage(num_envs, num_transitions_per_env, actor.obs_shape, critic.obs_shape, estimator.obs_shape,estimator.output_shape,actor.action_shape, device)
 
         if shuffle_batch:
             self.batch_sampler = self.storage.mini_batch_generator_shuffle
@@ -41,7 +43,7 @@ class PPO:
             self.batch_sampler = self.storage.mini_batch_generator_inorder
 
         # self.optimizer = optim.Adam([*self.actor.parameters(), *self.critic.parameters()], lr=learning_rate)
-        self.optimizer = AdamP([*self.actor.parameters(), *self.critic.parameters()], lr=learning_rate)
+        self.optimizer = AdamP([*self.actor.parameters(), *self.critic.parameters(), *self.estimator.parameters()], lr=learning_rate)
         self.device = device
 
         # env parameters
@@ -75,14 +77,17 @@ class PPO:
         self.actions_log_prob = None
         self.actor_obs = None
 
+        # Estimator
+        self.mse_loss = nn.MSELoss()
+
     def act(self, actor_obs):
         self.actor_obs = actor_obs
         with torch.no_grad():
             self.actions, self.actions_log_prob = self.actor.sample(torch.from_numpy(actor_obs).to(self.device))
         return self.actions
 
-    def step(self, value_obs, rews, dones):
-        self.storage.add_transitions(self.actor_obs, value_obs, self.actions, self.actor.action_mean, self.actor.distribution.std_np, rews, dones,
+    def step(self, value_obs, est_obs,true_state, rews, dones):
+        self.storage.add_transitions(self.actor_obs, value_obs, est_obs,true_state, self.actions, rews, dones,
                                      self.actions_log_prob)
 
     def update(self, actor_obs, value_obs, log_this_iteration, update):
@@ -90,7 +95,7 @@ class PPO:
 
         # Learning step
         self.storage.compute_returns(last_values.to(self.device), self.critic, self.gamma, self.lam)
-        mean_value_loss, mean_surrogate_loss, infos = self._train_step(log_this_iteration)
+        mean_value_loss, mean_surrogate_loss, mean_estimation_loss, infos = self._train_step(log_this_iteration)
         self.storage.clear()
 
         if log_this_iteration:
@@ -102,37 +107,22 @@ class PPO:
         self.writer.add_scalar('PPO/value_function', variables['mean_value_loss'], variables['it'])
         self.writer.add_scalar('PPO/surrogate', variables['mean_surrogate_loss'], variables['it'])
         self.writer.add_scalar('PPO/mean_noise_std', mean_std.item(), variables['it'])
+        self.writer.add_scalar('PPO/estimation_loss', variables['mean_estimation_loss'], variables['it'])
         # self.writer.add_scalar('PPO/learning_rate', self.learning_rate, variables['it'])
 
     def _train_step(self, log_this_iteration):
         mean_value_loss = 0
         mean_surrogate_loss = 0
+        mean_estimation_loss = 0
         for epoch in range(self.num_learning_epochs):
-            for actor_obs_batch, critic_obs_batch, actions_batch, old_sigma_batch, old_mu_batch, current_values_batch, advantages_batch, returns_batch, old_actions_log_prob_batch \
+            for actor_obs_batch, critic_obs_batch, est_obs_batch, true_state_batch,actions_batch, current_values_batch, advantages_batch, returns_batch, old_actions_log_prob_batch \
                     in self.batch_sampler(self.num_mini_batches):
-
                 actions_log_prob_batch, entropy_batch = self.actor.evaluate(actor_obs_batch, actions_batch)
                 value_batch = self.critic.evaluate(critic_obs_batch)
+                est_out_batch = self.estimator.evaluate(est_obs_batch)
 
-                # Adjusting the learning rate using KL divergence
-                # mu_batch = self.actor.action_mean
-                # sigma_batch = self.actor.distribution.std
-
-                # KL
-                # if self.desired_kl != None and self.schedule == 'adaptive':
-                #     with torch.no_grad():
-                #         kl = torch.sum(
-                #             torch.log(sigma_batch / old_sigma_batch + 1.e-5) + (torch.square(old_sigma_batch) + torch.square(old_mu_batch - mu_batch)) / (2.0 * torch.square(sigma_batch)) - 0.5, axis=-1)
-                #         kl_mean = torch.mean(kl)
-                #
-                #         if kl_mean > self.desired_kl * 2.0:
-                #             self.learning_rate = max(1e-5, self.learning_rate / 1.2)
-                #         elif kl_mean < self.desired_kl / 2.0 and kl_mean > 0.0:
-                #             # self.learning_rate = min(1e-2, self.learning_rate * 1.2)
-                #             self.learning_rate = min(1e-3, self.learning_rate * 1.2)
-                #
-                #         for param_group in self.optimizer.param_groups:
-                #             param_group['lr'] = self.learning_rate
+                # Estimator supervised loss
+                estimation_loss = self.mse_loss(est_out_batch,true_state_batch)
 
                 # Surrogate loss
                 ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob_batch))
@@ -151,7 +141,7 @@ class PPO:
                 else:
                     value_loss = (returns_batch - value_batch).pow(2).mean()
 
-                loss = surrogate_loss + self.value_loss_coef * value_loss - self.entropy_coef * entropy_batch.mean()
+                loss = surrogate_loss + self.value_loss_coef * value_loss - self.entropy_coef * entropy_batch.mean() + estimation_loss * 0.1
 
                 # Gradient step
                 self.optimizer.zero_grad()
@@ -162,10 +152,12 @@ class PPO:
                 if log_this_iteration:
                     mean_value_loss += value_loss.item()
                     mean_surrogate_loss += surrogate_loss.item()
+                    mean_estimation_loss += estimation_loss.item()
 
         if log_this_iteration:
             num_updates = self.num_learning_epochs * self.num_mini_batches
             mean_value_loss /= num_updates
             mean_surrogate_loss /= num_updates
+            mean_estimation_loss /= num_updates
 
-        return mean_value_loss, mean_surrogate_loss, locals()
+        return mean_value_loss, mean_surrogate_loss, mean_estimation_loss,locals()

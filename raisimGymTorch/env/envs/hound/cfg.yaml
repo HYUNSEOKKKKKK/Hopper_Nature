@@ -52,5 +52,6 @@ architecture:
 #  value_net: [256, 256, 128, 64]
 #  policy_net: [ 512, 256, 128, 64 ]
   policy_net: [ 256, 128, 64 ]
-  value_net: [ 512, 256, 128, 64 ]
+  estimator_net: [ 256, 128]
+  value_net: [256, 128, 64 ]
 

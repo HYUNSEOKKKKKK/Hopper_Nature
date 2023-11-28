@@ -57,6 +57,25 @@ class Critic:
         self.architecture.to(device)
 
     def predict(self, obs):
+        return self.architecture.architecture(obs).detach() # does not require gradient computation
+
+    def evaluate(self, obs):
+        return self.architecture.architecture(obs)
+
+    def parameters(self):
+        return [*self.architecture.parameters()]
+
+    @property
+    def obs_shape(self):
+        return self.architecture.input_shape
+
+class Estimator:
+    def __init__(self, architecture, device='cpu'):
+        super(Estimator, self).__init__()
+        self.architecture = architecture
+        self.architecture.to(device)
+
+    def predict(self, obs):
         return self.architecture.architecture(obs).detach()
 
     def evaluate(self, obs):
@@ -68,6 +87,9 @@ class Critic:
     @property
     def obs_shape(self):
         return self.architecture.input_shape
+
+    def output_shape(self):
+        return self.architecture.output_shape
 
 
 class MLP(nn.Module):
