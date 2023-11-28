@@ -43,7 +43,7 @@ class PPO:
             self.batch_sampler = self.storage.mini_batch_generator_inorder
 
         # self.optimizer = optim.Adam([*self.actor.parameters(), *self.critic.parameters()], lr=learning_rate)
-        self.optimizer = AdamP([*self.actor.parameters(), *self.critic.parameters()], lr=learning_rate)
+        self.optimizer = AdamP([*self.actor.parameters(), *self.critic.parameters(), *self.estimator.parameters()], lr=learning_rate)
         self.device = device
 
         # env parameters
