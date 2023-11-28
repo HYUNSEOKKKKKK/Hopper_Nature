@@ -587,21 +587,8 @@ class ENVIRONMENT : public RaisimGymEnv {
               footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
               footContact_.cast<double>();
 
-      double noise = 0.0;
-      for (int i=0; i<obDim_; i++){
-          if (i<3)       {noise = 0.03;}  /// body orientation
-          else if(i<6)   {noise = 0.1;}   /// body angular velocity (rad/sec)
-          else if(i<18)  {noise = 0.05;}  /// joint pos             (rad)
-          else if(i<30)  {noise = 0.5;}   /// joint vel             (rad/sec)
-          else if(i<54)  {noise = 0.01;}  /// action related
-          else if(i<90)  {noise = 0.0;}   /// action related
-          else if(i<126) {noise = 0.1;}  /// vel history
-          else if(i<138) {noise = 0.02;} /// relative foot pos (2 cm)
-          else           {noise = 0.0;}
 
-          obDouble_(i) += uniDist_(gen_) * noise;
-      }
-
+            valueObDouble_.head(obDim_) = obDouble_; /// with noise
       /// convert it to float
       ob = valueObDouble_.cast<float>();
   }
