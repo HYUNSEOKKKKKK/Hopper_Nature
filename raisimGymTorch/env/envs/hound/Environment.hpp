@@ -278,7 +278,6 @@ class ENVIRONMENT : public RaisimGymEnv {
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
           }
-//                std::cout << "footClearance_ : " << footClearance_.transpose() << std::endl;
       } else { /// under standingMode_
           /// standingMode_ 는 zero command 로 부터 유추 가능, command 는 obs 이기 때문에, robot 은 standingMode_인지 아닌지 충분히 알 수 있음
           for (int i=0; i<4; i++){
@@ -549,9 +548,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// relative foot position with respect to the body COM, expressed in the body frame 12
           command_,                                                             /// command 3
           footContactPhase_.head(2), /// footContactPhase 2
-          static_cast<double>(standingMode_);
-
-//          footToTerrain_;                                   /// standingMode 1
+          static_cast<double>(standingMode_);  /// standingMode 1
 
       double noise = 0.0;
       for (int i=0; i<obDim_; i++){
