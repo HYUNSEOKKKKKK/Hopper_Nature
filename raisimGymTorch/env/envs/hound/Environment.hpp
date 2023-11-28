@@ -158,8 +158,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize with noise
     gcNoise_ = gcInit_;
     /// rot noise
-    yawNoise_ = uniDist_(gen_) * 3.141592;
-//    yawNoise_ = 3.141592/2.0;
+//    yawNoise_ = uniDist_(gen_) * 3.141592;
+    yawNoise_ = 3.141592/2.0;
     rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
     quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
     quat_.normalize();

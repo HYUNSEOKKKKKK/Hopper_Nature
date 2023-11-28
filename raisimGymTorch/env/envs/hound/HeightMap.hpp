@@ -14,8 +14,8 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
     /// 2 -> stair
     /// 3 -> big stair
     /// curriculum : 0 ~ 3.0, max curriculum : 3.0
-    double hardness = (uniDist(gen) < 0.0) ? curriculum : curriculum * abs(uniDist(gen)); // 50% : curriculum, 50% : 0~curriculum
-//        double hardness = curriculum; // 50% : curriculum, 50% : 0~curriculum
+//    double hardness = (uniDist(gen) < 0.0) ? curriculum : curriculum * abs(uniDist(gen)); // 50% : curriculum, 50% : 0~curriculum
+        double hardness = curriculum; // 50% : curriculum, 50% : 0~curriculum
 
     if (heightMapType == 0){
         double roughness = hardness/3.0;
