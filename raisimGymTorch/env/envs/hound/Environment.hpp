@@ -95,7 +95,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     }
     limitBodyHeight_ << 0.52, 0.68;
     limitBaseMotion_.row(0) << -0.3,0.3;
-    limitBaseMotion_.row(1) << -0.5,0.5;
+//    limitBaseMotion_.row(1) << -0.5,0.5;
+            limitBaseMotion_.row(1) << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.3,2;
@@ -305,13 +306,15 @@ class ENVIRONMENT : public RaisimGymEnv {
           jointVelTemp.setZero();
           jointAccTemp.setZero();
           limitBaseMotion_.row(0) << -0.3,0.3;
-          limitBaseMotion_.row(1) << -0.5,0.5;
+//          limitBaseMotion_.row(1) << -0.5,0.5;
+          limitBaseMotion_.row(1) << -0.3,0.3;
       } else {
           jointPosTemp = gc_.tail(12)-gcInit_.tail(12);
           jointVelTemp = gv_.tail(12);
           jointAccTemp = gv_.tail(12) - preJointVel_;
           limitBaseMotion_.row(0) << -0.1,0.1;
-          limitBaseMotion_.row(1) << -0.3,0.3;
+//          limitBaseMotion_.row(1) << -0.3,0.3;
+          limitBaseMotion_.row(1) << -0.1,0.1;
       }
       rewards_.record("standingJointPos", jointPosTemp.squaredNorm());
       rewards_.record("standingJointVel", jointVelTemp.squaredNorm());
@@ -326,7 +329,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// pos reward
       Eigen::Vector3d tempCommand;
       tempCommand.setZero(); tempCommand(2) = command_(2);
-      rewards_.record("comAngularVel", std::exp(-1.0 * (tempCommand - bodyAngularVel_).squaredNorm())); // regulation 같이
+//      rewards_.record("comAngularVel", std::exp(-1.0 * (tempCommand - bodyAngularVel_).squaredNorm())); // regulation 같이
+      rewards_.record("comAngularVel", std::exp(-1.0 * pow(command_(2) - bodyAngularVel_(2),2))); // regulation 같이
       rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
       /// neg reward
@@ -587,8 +591,6 @@ class ENVIRONMENT : public RaisimGymEnv {
               footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
               footContact_.cast<double>();
 
-
-            valueObDouble_.head(obDim_) = obDouble_; /// with noise
       /// convert it to float
       ob = valueObDouble_.cast<float>();
   }
