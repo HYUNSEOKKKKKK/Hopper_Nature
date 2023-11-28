@@ -18,9 +18,11 @@ class RaisimGymVecEnv:
         self.wrapper = impl
         self.num_obs = self.wrapper.getObDim()
         self.num_value_obs = self.wrapper.getValueObDim()
+        self.num_est = self.wrapper.getEstDim()
         self.num_acts = self.wrapper.getActionDim()
         self._observation = np.zeros([self.num_envs, self.num_obs], dtype=np.float32)
         self._value_observation = np.zeros([self.num_envs, self.num_value_obs], dtype=np.float32)
+        self._estimation = np.zeros([self.num_envs, self.num_est], dtype=np.float32)
         self.actions = np.zeros([self.num_envs, self.num_acts], dtype=np.float32)
         self.log_prob = np.zeros(self.num_envs, dtype=np.float32)
         self._reward = np.zeros(self.num_envs, dtype=np.float32)
@@ -72,6 +74,10 @@ class RaisimGymVecEnv:
     def value_observe(self, update_statistics=True):
         self.wrapper.valueObserve(self._value_observation, update_statistics)
         return self._value_observation
+
+    def estimate(self):
+        self.wrapper.estimate(self._estimation)
+        return  self._estimation
 
     def get_reward_info(self):
         return self.wrapper.getRewardInfo()

@@ -48,13 +48,14 @@ class ENVIRONMENT : public RaisimGymEnv {
     hound_->setGeneralizedForce(Eigen::VectorXd::Zero(18));
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
-//    obDim_ = 144+20;
     obDim_ = 144;
+            estDim_ = 27;
     valueObDim_ = 171;
     actionDim_ = 12;
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
     obDouble_.setZero(obDim_);
     valueObDouble_.setZero(valueObDim_);
+            estDouble_.setZero(estDim_);
 
     /// action scaling
     actionMean_ = gcInit_.tail(12);
@@ -572,6 +573,15 @@ class ENVIRONMENT : public RaisimGymEnv {
     ob = obDouble_.cast<float>();
   }
 
+    void estimate(Eigen::Ref<EigenVec> est) final {
+                            estDouble_ <<  bodyLinearVel_,                                                       /// body linear velocity. 3
+                                    footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
+                                    footContact_.cast<double>();
+
+            est = estDouble_.cast<float>();
+  }
+
+
   void valueObserve(Eigen::Ref<EigenVec> ob) final {
       if (standingMode_){
           footContactPhase_.setZero();
@@ -679,7 +689,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Vector<double,18> gvInit_, gvNoise_, gvDes_;
   Eigen::Vector<double,12> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_;
   raisim::Mat<3,3> rot_;
-  Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_;
+  Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_, estDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
   std::vector<size_t> footIndices_;
   /// additional

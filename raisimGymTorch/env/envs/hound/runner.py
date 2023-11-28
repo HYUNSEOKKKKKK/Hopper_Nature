@@ -42,8 +42,9 @@ env = VecEnv(RaisimGymEnv(home_path + "/rsc", dump(cfg['environment'], Dumper=Ro
 env.seed(cfg['seed'])
 
 # shortcuts
-actor_ob_dim = env.num_obs
+ob_dim = env.num_obs
 value_ob_dim = env.num_value_obs
+est_dim = env.num_est
 act_dim = env.num_acts
 num_threads = cfg['environment']['num_threads']
 
@@ -53,7 +54,7 @@ total_steps = n_steps * env.num_envs
 
 avg_rewards = []
 
-actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, actor_ob_dim, act_dim),
+actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim+est_dim   , act_dim),
                          ppo_module.MultivariateGaussianDiagonalCovariance(act_dim,
                                                                            env.num_envs,
                                                                            # 2.0,
@@ -64,12 +65,16 @@ actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.Le
 critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['value_net'], nn.LeakyReLU, value_ob_dim, 1),
                            device)
 
+estimator = ppo_module.Estimator(ppo_module.MLP(cfg['architecture']['estimator_net'], nn.LeakyReLU, ob_dim,est_dim),
+                                 device)
+
 saver = ConfigurationSaver(log_dir=home_path + "/hound/raisimGymTorch/data/"+task_name,
                            save_items=[task_path + "/cfg.yaml", task_path + "/Environment.hpp"])
 tensorboard_launcher(saver.data_dir+"/..")  # press refresh (F5) after the first ppo update
 
 ppo = PPO.PPO(actor=actor,
               critic=critic,
+              estimator=estimator,
               num_envs=cfg['environment']['num_envs'],
               num_transitions_per_env=n_steps,
               num_learning_epochs=4,
@@ -85,13 +90,12 @@ ppo = PPO.PPO(actor=actor,
 reward_analyzer = RewardAnalyzer(env, ppo.writer)
 # scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000], gamma=0.333333)
 scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[1800], gamma=0.5)
-# scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000], gamma=0.5)
 
-if mode == 'retrain':
-    load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
+
+# if mode == 'retrain':
+#     load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
 
 for update in range(8001):
-# for update in range(12000):
     start = time.time()
     env.reset()
     reward_sum = 0
@@ -104,11 +108,14 @@ for update in range(8001):
             'actor_architecture_state_dict': actor.architecture.state_dict(),
             'actor_distribution_state_dict': actor.distribution.state_dict(),
             'critic_architecture_state_dict': critic.architecture.state_dict(),
+            'estimator_architecture_state_dict': estimator.architecture.state_dict(),  # added
             'optimizer_state_dict': ppo.optimizer.state_dict(),
         }, saver.data_dir+"/full_"+str(update)+'.pt')
         # we create another graph just to demonstrate the save/load method
-        loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, actor_ob_dim, act_dim)
+        loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim + est_dim, act_dim)
         loaded_graph.load_state_dict(torch.load(saver.data_dir+"/full_"+str(update)+'.pt')['actor_architecture_state_dict'])
+        loaded_graph_est = ppo_module.MLP(cfg['architecture']['estimator_net'], nn.LeakyReLU, ob_dim, est_dim)
+        loaded_graph_est.load_state_dict(torch.load(saver.data_dir+"/full_"+str(update)+'.pt')['estimator_architecture_state_dict'])
 
         env.turn_on_visualization()
         env.start_video_recording(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + "policy_"+str(update)+'.mp4')
@@ -116,8 +123,9 @@ for update in range(8001):
         for step in range(n_steps):
             with torch.no_grad():
                 frame_start = time.time()
-                actor_obs = env.observe(False)
-                action = loaded_graph.architecture(torch.from_numpy(actor_obs).cpu())
+                obs = env.observe(False)
+                est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
+                action = loaded_graph.architecture(torch.from_numpy(np.hstack((obs,est_out))).cpu())
                 reward, dones = env.step(action.cpu().detach().numpy())
                 frame_end = time.time()
                 wait_time = cfg['environment']['control_dt'] - (frame_end-frame_start)
@@ -132,11 +140,12 @@ for update in range(8001):
 
     # actual training
     for step in range(n_steps):
-        actor_obs = env.observe()
-        value_obs = env.value_observe(False)
-        action = ppo.act(actor_obs)
+        obs = env.observe()   # obs
+        est_out = estimator.predict(torch.from_numpy(obs).to(device)).cpu().numpy()
+        value_obs = env.value_observe(False) # obs + true state
+        action = ppo.act(np.hstack((obs,est_out)))
         reward, dones = env.step(action)
-        ppo.step(value_obs=value_obs, rews=reward, dones=dones)
+        ppo.step(value_obs=value_obs, est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
         # if (update % 200 == 0) or (update % 200 == 2): # 평지, stair
@@ -144,9 +153,10 @@ for update in range(8001):
             reward_analyzer.add_reward_info(env.get_reward_info())
 
     # take st step to get value obs
-    actor_obs = env.observe()
+    obs = env.observe()
+    est_out = estimator.predict(torch.from_numpy(obs).to(device)).cpu().numpy()
     value_obs = env.value_observe(False)
-    ppo.update(actor_obs=actor_obs, value_obs=value_obs, log_this_iteration=update % 10 == 0, update=update)
+    ppo.update(actor_obs=np.hstack((obs,est_out)), value_obs=value_obs,log_this_iteration=update % 10 == 0, update=update)
     average_ll_performance = reward_sum / total_steps
     average_dones = done_sum / total_steps
     avg_rewards.append(average_ll_performance)

@@ -30,8 +30,11 @@ class RaisimGymEnv {
   virtual void init() = 0;
   virtual void reset() = 0;
   virtual void observe(Eigen::Ref<EigenVec> ob) = 0;
+
   virtual void valueObserve(Eigen::Ref<EigenVec> ob) = 0;
-  virtual float step(const Eigen::Ref<EigenVec>& action) = 0;
+    virtual void estimate(Eigen::Ref<EigenVec> est) = 0;
+
+    virtual float step(const Eigen::Ref<EigenVec>& action) = 0;
   virtual bool isTerminalState(float& terminalReward) = 0;
   ////////////////////////////////////////
 
@@ -45,6 +48,8 @@ class RaisimGymEnv {
   void setControlTimeStep(double dt) { control_dt_ = dt; }
   int getObDim() { return obDim_; }
   int getValueObDimTest() { return valueObDim_; }
+
+    int getEstDim() { return estDim_; }
   int getActionDim() { return actionDim_; }
   double getControlTimeStep() { return control_dt_; }
   double getSimulationTimeStep() { return simulation_dt_; }
@@ -61,7 +66,7 @@ class RaisimGymEnv {
   double control_dt_ = 0.01;
   std::string resourceDir_;
   Yaml::Node cfg_;
-  int obDim_=0, valueObDim_=0, actionDim_=0;
+  int obDim_=0, valueObDim_=0, actionDim_=0, estDim_ = 0;
   std::unique_ptr<raisim::RaisimServer> server_;
   raisim::Reward rewards_;
   bool visualizationOn_;
