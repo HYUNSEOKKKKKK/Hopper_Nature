@@ -48,8 +48,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     hound_->setGeneralizedForce(Eigen::VectorXd::Zero(18));
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
-//    obDim_ = 144+20;
-    obDim_ = 144;
+    obDim_ = 144+20;
     valueObDim_ = 171;
     actionDim_ = 12;
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
@@ -146,8 +145,8 @@ class ENVIRONMENT : public RaisimGymEnv {
         do {
             double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.2) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.2, other 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
-//                    command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
-                    command_ << 1.0,0.0,0.0;
+                    command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
+                    command_.tail(2).setZero();
         } while (command_.norm() < 0.2);
     }
 
@@ -549,9 +548,9 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// relative foot position with respect to the body COM, expressed in the body frame 12
           command_,                                                             /// command 3
           footContactPhase_.head(2), /// footContactPhase 2
-          static_cast<double>(standingMode_);
+          static_cast<double>(standingMode_),
 
-//          footToTerrain_;                                   /// standingMode 1
+          footToTerrain_;                                   /// standingMode 1
 
       double noise = 0.0;
       for (int i=0; i<obDim_; i++){
