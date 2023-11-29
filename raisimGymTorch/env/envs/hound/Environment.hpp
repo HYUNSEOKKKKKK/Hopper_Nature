@@ -139,8 +139,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
 
     /// with standing mode
-    if (uniDist_(gen_) > 0.8) {
-        standingMode_ = true;      // 10 %
+    if (uniDist_(gen_) > 0.9) { // 5 %
+        standingMode_ = true;
         command_.setZero();
     }else{
         standingMode_ = false;
@@ -158,8 +158,13 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize with noise
     gcNoise_ = gcInit_;
     /// rot noise
-            yawNoise_ = uniDist_(gen_) * 3.141592;
-//    yawNoise_ = 3.141592/2.0;
+    if (uniDist_(gen_)>0.5){ // 25 % -> 올라가는 거 고정
+      yawNoise_ = 3.141592/2.0;
+      command_.tail(2).setZero();
+                command_(0) = abs(command_(0));
+    }else{
+      yawNoise_ = uniDist_(gen_) * 3.141592;
+    }
     rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
     quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
     quat_.normalize();
@@ -309,14 +314,12 @@ class ENVIRONMENT : public RaisimGymEnv {
           jointVelTemp.setZero();
           jointAccTemp.setZero();
           limitBaseMotion_.row(0) << -0.3,0.3;
-//          limitBaseMotion_.row(1) << -0.5,0.5;
           limitBaseMotion_.row(1) << -0.3,0.3;
       } else {
           jointPosTemp = gc_.tail(12)-gcInit_.tail(12);
           jointVelTemp = gv_.tail(12);
           jointAccTemp = gv_.tail(12) - preJointVel_;
           limitBaseMotion_.row(0) << -0.1,0.1;
-//          limitBaseMotion_.row(1) << -0.3,0.3;
           limitBaseMotion_.row(1) << -0.1,0.1;
       }
       rewards_.record("standingJointPos", jointPosTemp.squaredNorm());
@@ -330,15 +333,11 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float getNegPosReward(){
       /// pos reward
-      Eigen::Vector3d tempCommand;
-      tempCommand.setZero(); tempCommand(2) = command_(2);
-//      rewards_.record("comAngularVel", std::exp(-1.0 * (tempCommand - bodyAngularVel_).squaredNorm())); // regulation 같이
-      rewards_.record("comAngularVel", std::exp(-1.0 * pow(command_(2) - bodyAngularVel_(2),2))); // regulation 같이
+      rewards_.record("comAngularVel", std::exp(-1.0 * pow(command_(2) - bodyAngularVel_(2),2)));
       rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-//      jointPosWeight << 2.0, 0.,0.,2.,0.,0.,2.,0.,0.,2.,0.,0.;
             jointPosWeight << 1.0, 0.,0.,1.,0.,0.,1.,0.,0.,1.,0.,0.;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
@@ -476,7 +475,6 @@ class ENVIRONMENT : public RaisimGymEnv {
   void updateFootToTerrain(){
     Eigen::Matrix<double, 3, 5> sample_point;
     double point = 0.05;
-//            double point = 0.10;
     sample_point.col(0) << point, 0.0, 0.0;
     sample_point.col(1) << 0.0, point, 0.0;
     sample_point.col(2) << -point, 0.0, 0.0;
@@ -624,9 +622,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for each iteration
       iter_ ++;
             if (curriculum_<2.0){
-                curriculum_ = (double)iter_ * (1.0/600.0); /// 600 iter -> 1.0
+                curriculum_ = (double)iter_ * (1.0/500.0); /// 500 iter -> 1.0
             }else{
-                curriculum_ = (double)(iter_-1200) * (1.0/2000.0) + 2.0; /// 2000 iter -> 1.0
+                curriculum_ = (double)(iter_-1000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
                 curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
             }
 
