@@ -42,7 +42,7 @@ environment:
     negReward2: 1.0          # only for record
 
     standingNegReward : 1e-1 #1.0 #2.0
-    negSumPos:         0.2 #1.0
+    negSumPos:         0.5 #1.0
     relaxedLog:         1.0
 
 architecture:
