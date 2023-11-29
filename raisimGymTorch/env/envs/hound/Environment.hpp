@@ -226,6 +226,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// simulation
     double avgReward = 0.0;
+    barrierReward_ = 0.0;
     for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
       if (i == delayIdx){
           /// action scaling
@@ -240,6 +241,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       if(server_) server_->unlockVisualizationServerMutex();
       updateObservation();
       avgReward += getReward();
+        barrierReward_+= getLogBarReward();
 
       if(visualizationOn_){
           visualizeCommand();
@@ -247,11 +249,15 @@ class ENVIRONMENT : public RaisimGymEnv {
     }
 
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
+      barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
     updateHistory();
 
     return avgReward;
   }
 
+        float   getBarrierReward() final {
+            return barrierReward_;
+  }
   void updateHistory(){
       prevPrevTarget_ = prevTarget_;
       prevTarget_ = pTarget_;
@@ -264,46 +270,9 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   double getReward(){
-      /// for gait enforcing & foot clearance
-      phase_ += simulation_dt_;
-      footContactPhase_(0) = sin(phase_/gait_hz_ * 2*3.141592); // RR
-      footContactPhase_(1) = -footContactPhase_(0); // RL
-      footContactPhase_(2) = -footContactPhase_(0); // FR
-      footContactPhase_(3) = footContactPhase_(0); // FL
-//
-      if (!standingMode_){ /// walking
-          /// footContactDouble_ -> limit_foot_contact 에 있도록 (-0.3,3) -> Gait Enforcing (요 -0.3 이 벗어나도 되는 범위)
-          for(int i=0; i<4; i++) {
-              if (footContact_(i)) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
-              else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
-          }
-          /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.15;
-          for (int i=0; i<4; i++){
-              if (footContactPhase_(i) < -0.5) { /// during swing
-                  footClearance_(i) =
-                          footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
-              }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
-          }
-      } else { /// under standingMode_
-          /// standingMode_ 는 zero command 로 부터 유추 가능, command 는 obs 이기 때문에, robot 은 standingMode_인지 아닌지 충분히 알 수 있음
-          for (int i=0; i<4; i++){
-              footContactDouble_(i) = 1.0; // around max reward, where this value should go under (-0.3,3)
-              footClearance_(i) = 0.0; // max reward (not enforcing clearance)
-          }
-      }
-      footSlip_.setZero();
-      for (int i=0; i<4; i++){
-          if (footContact_(i)){
-                  footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
-          }
-      }
-
-      /// (exp(neg1)+exp(neg2))/2.0 * (exp(pos1) + exp(pos2)) + relaxedLogBarrier + standingNegReward
       rewards_.record("negSumPos",getNegPosReward());
-      rewards_.record("standingNegReward", getStandingReward());
-      rewards_.record("relaxedLog", getLogBarReward()); /// relaxed log barrier
-      return rewards_.sumModified();
+      getStandingReward();
+      return rewards_.getReward("negSumPos");
   }
 
   float getStandingReward(){
@@ -360,6 +329,44 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   float getLogBarReward(){
+      /// for gait enforcing & foot clearance
+      phase_ += simulation_dt_;
+      footContactPhase_(0) = sin(phase_/gait_hz_ * 2*3.141592); // RR
+      footContactPhase_(1) = -footContactPhase_(0); // RL
+      footContactPhase_(2) = -footContactPhase_(0); // FR
+      footContactPhase_(3) = footContactPhase_(0); // FL
+//
+      if (!standingMode_){ /// walking
+          /// footContactDouble_ -> limit_foot_contact 에 있도록 (-0.3,3) -> Gait Enforcing (요 -0.3 이 벗어나도 되는 범위)
+          for(int i=0; i<4; i++) {
+              if (footContact_(i)) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
+              else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
+          }
+          /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
+          double desiredFootZPosition = 0.15;
+          for (int i=0; i<4; i++){
+              if (footContactPhase_(i) < -0.5) { /// during swing
+                  footClearance_(i) =
+                          footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
+              }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
+          }
+      } else { /// under standingMode_
+          /// standingMode_ 는 zero command 로 부터 유추 가능, command 는 obs 이기 때문에, robot 은 standingMode_인지 아닌지 충분히 알 수 있음
+          for (int i=0; i<4; i++){
+              footContactDouble_(i) = 1.0; // around max reward, where this value should go under (-0.3,3)
+              footClearance_(i) = 0.0; // max reward (not enforcing clearance)
+          }
+      }
+      footSlip_.setZero();
+      for (int i=0; i<4; i++){
+          if (footContact_(i)){
+              footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
+          }
+      }
+
+
+      /// compute barrier reward
+
       double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0;
       double tempReward = 0.0;
       /// Log Barrier - limit_joint_pos
@@ -422,7 +429,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierTargetVel", barrierTargetVel);
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
-      return (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
+
+      float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
+          rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
+      return  logBarReward;
   }
 
   void relaxedLogBarrier(const double& delta,const double& alpha_lower,const double& alpha_upper,const double& x, double& y){
@@ -717,6 +727,8 @@ class ENVIRONMENT : public RaisimGymEnv {
   double curriculum_;
   int iter_;
   double mu_;
+  /// for barrier
+  float barrierReward_;
 
   thread_local static std::mt19937 gen_;
   thread_local static std::normal_distribution<double> normDist_;

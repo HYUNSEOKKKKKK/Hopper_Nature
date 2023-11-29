@@ -41,17 +41,13 @@ environment:
     # total sum
     negReward2: 1.0          # only for record
 
-    standingNegReward : 1e-1 #1.0 #2.0
-    negSumPos:         0.5 #1.0
+    standingNegReward : 0.0 #1.0 #2.0 # not used
+    negSumPos:         1.0 #1.0
     relaxedLog:         1.0
 
 architecture:
-#  policy_net: [256, 128, 64]
-#  value_net: [256, 128, 64]
-#  policy_net: [256, 256, 128, 64]
-#  value_net: [256, 256, 128, 64]
-#  policy_net: [ 512, 256, 128, 64 ]
   policy_net: [ 256, 128, 64 ]
   estimator_net: [ 256, 128]
   value_net: [256, 128, 64 ]
+  barrier_value_net: [256, 128, 64 ]
 

@@ -64,6 +64,9 @@ actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.Le
 critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['value_net'], nn.LeakyReLU, value_ob_dim, 1),
                            device)
 
+barrier_critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['barrier_value_net'], nn.LeakyReLU, value_ob_dim, 1),
+                           device)
+
 estimator = ppo_module.Estimator(ppo_module.MLP(cfg['architecture']['estimator_net'], nn.LeakyReLU, ob_dim,est_dim),
                                  device)
 
@@ -73,6 +76,7 @@ tensorboard_launcher(saver.data_dir+"/..")  # press refresh (F5) after the first
 
 ppo = PPO.PPO(actor=actor,
               critic=critic,
+              barrier_critic = barrier_critic,
               estimator=estimator,
               num_envs=cfg['environment']['num_envs'],
               num_transitions_per_env=n_steps,
@@ -107,6 +111,7 @@ for update in range(8001):
             'actor_architecture_state_dict': actor.architecture.state_dict(),
             'actor_distribution_state_dict': actor.distribution.state_dict(),
             'critic_architecture_state_dict': critic.architecture.state_dict(),
+            'barrier_critic_architecture_state_dict': barrier_critic.architecture.state_dict(),
             'estimator_architecture_state_dict': estimator.architecture.state_dict(),  # added
             'optimizer_state_dict': ppo.optimizer.state_dict(),
         }, saver.data_dir+"/full_"+str(update)+'.pt')
@@ -125,7 +130,7 @@ for update in range(8001):
                 obs = env.observe(False)
                 est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
                 action = loaded_graph.architecture(torch.from_numpy(np.hstack((obs,est_out))).cpu())
-                reward, dones = env.step(action.cpu().detach().numpy())
+                reward, dones, barrier_reward = env.step(action.cpu().detach().numpy())
                 frame_end = time.time()
                 wait_time = cfg['environment']['control_dt'] - (frame_end-frame_start)
                 if wait_time > 0.:
@@ -143,8 +148,8 @@ for update in range(8001):
         est_out = estimator.predict(torch.from_numpy(obs).to(device)).cpu().numpy()
         value_obs = env.value_observe(False) # obs + true state
         action = ppo.act(np.hstack((obs,est_out)))
-        reward, dones = env.step(action)
-        ppo.step(value_obs=value_obs, est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones)
+        reward, dones, barrier_reward = env.step(action)
+        ppo.step(value_obs=value_obs, est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones, bar_rews=barrier_reward)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
         if (update % 200 == 0): # 평지, stair
