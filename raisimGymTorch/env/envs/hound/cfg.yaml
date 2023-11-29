@@ -6,7 +6,7 @@ environment:
 # just testing commenting
   num_envs: 400
   eval_every_n: 500
-  num_threads: 128
+  num_threads: 200
   simulation_dt: 0.001
   control_dt: 0.01
   max_time: 4.0
