@@ -6,7 +6,7 @@ environment:
 # just testing commenting
   num_envs: 400
   eval_every_n: 500
-  num_threads: 30
+  num_threads: 128
   simulation_dt: 0.001
   control_dt: 0.01
   max_time: 4.0
@@ -42,7 +42,7 @@ environment:
     negReward2: 1.0          # only for record
 
     standingNegReward : 1e-1 #1.0 #2.0
-    negSumPos:          1.0
+    negSumPos:         0.2 #1.0
     relaxedLog:         1.0
 
 architecture:

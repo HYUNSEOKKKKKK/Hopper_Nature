@@ -30,7 +30,8 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
 
             for (int i=0; i<xSampleNum; i++){
                 for (int j=0; j<ySampleNum; j++){
-                    heightVec[j*xSampleNum + i] = (0.10 * roughness) * uniDist(gen) + 0.2;
+//                    heightVec[j*xSampleNum + i] = (0.10 * roughness) * uniDist(gen) + 0.2;
+                    heightVec[j*xSampleNum + i] = (0.12 * roughness) * uniDist(gen) + 0.2;
                 }
             }
             double ySize = 20;
@@ -45,7 +46,8 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
             Eigen::Matrix<double,10,10> squareHeight;
             for (int i=0;i<10;i++){
                 for (int j=0;j<10;j++){
-                    squareHeight(i,j) = 0.2 + (0.08 * roughness) * uniDist(gen);
+//                    squareHeight(i,j) = 0.2 + (0.08 * roughness) * uniDist(gen);
+                    squareHeight(i,j) = 0.2 + (0.12 * roughness) * uniDist(gen);
                 }
             }
             for (int i=0; i<xSampleNum; i++){
