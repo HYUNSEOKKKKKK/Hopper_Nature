@@ -93,7 +93,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        limitJointPos_.row(i*3+1) << 0,1.570796; // hip : 0, pi*1/2
 //        limitJointPos_.row(i*3+2) << -2.0943946,-0.5235987; // knee : -pi*5/6, -pi/6
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
-        limitJointPos_.row(i*3+2) << -2*hip-0.07-0.785398,-2*hip-0.07+0.785398; // knee
+//        limitJointPos_.row(i*3+2) << -2*hip-0.07-0.785398,-2*hip-0.07+0.785398; // knee
+        limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
     }
     limitBodyHeight_ << 0.52, 0.68;
     limitBaseMotion_.row(0) << -0.3,0.3;
