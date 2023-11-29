@@ -147,7 +147,7 @@ for update in range(8001):
         ppo.step(value_obs=value_obs, est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
-        if (update % 200 == 0) or (update % 200 == 2): # 평지, stair
+        if (update % 200 == 0): # 평지, stair
         # if (update % 200 == 0): # 평지, stair
             reward_analyzer.add_reward_info(env.get_reward_info())
 
@@ -171,7 +171,7 @@ for update in range(8001):
     end = time.time()
     scheduler.step()
 
-    if (update % 200 == 0) or (update % 200 == 2): # 평지, stair
+    if (update % 200 == 0): # 평지, stair
     # if (update % 200 == 0): # 평지, stair
         reward_analyzer.analyze_and_plot(update)
 
