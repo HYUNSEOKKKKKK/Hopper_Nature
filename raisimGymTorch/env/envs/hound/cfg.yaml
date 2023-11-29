@@ -26,8 +26,8 @@ environment:
 
     # standing
     standingJointPos: -2.5e-1 #-5e-1
-    standingJointVel: -1e-1 #-5e-2
-    standingJointAcc: -1.0
+    standingJointVel: -5e-2 #-1e-1 #-5e-2
+    standingJointAcc: -5e-1 #-1.0
 
     # relaxed
     barrierJointPos:      1e-1
@@ -41,7 +41,7 @@ environment:
     # total sum
     negReward2: 1.0          # only for record
 
-    standingNegReward : 1.0 #2.0
+    standingNegReward : 1e-1 #1.0 #2.0
     negSumPos:          1.0
     relaxedLog:         1.0
 
