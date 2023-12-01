@@ -98,8 +98,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitBaseMotion_.row(1) << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
-    limitFootContact_ << -0.3,2;
-    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
+//    limitFootContact_ << -0.3,2;
+    limitFootContact_ << -0.5,2;
+//    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
+    limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -116,7 +118,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// initialize gait
     phase_ = 0.0;
-    gait_hz_ = 0.72;
+//    gait_hz_ = 0.72;
+    gait_hz_ = 0.9;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -390,7 +393,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.015,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
