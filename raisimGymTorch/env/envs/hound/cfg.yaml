@@ -21,7 +21,7 @@ environment:
     smoothness2: -1.0 #-1.2
     bodyOri: -0.5
 
-    torque:   -5e-4
+    torque:   -1e-4
     jointPos : -5e-1
     jointVel: -5e-3
     jointAcc : -1e-1
