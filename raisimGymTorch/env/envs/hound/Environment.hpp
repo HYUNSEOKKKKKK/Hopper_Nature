@@ -119,7 +119,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize gait
     phase_ = 0.0;
 //    gait_hz_ = 0.72;
-    gait_hz_ = 0.9;
+    gait_hz_ = 1.2;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -393,7 +393,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.015,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
