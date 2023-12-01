@@ -99,7 +99,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
 //    limitFootContact_ << -0.3,2;
-    limitFootContact_ << -0.5,2;
+    limitFootContact_ << -0.7,2;
 //    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
     limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
 
@@ -289,7 +289,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.,0.,1.,0.,0.,1.,0.,0.,1.,0.,0.;
+      jointPosWeight << 1.0, 0.2,0.2,1.,0.2,0.2,1.,0.2,0.2,1.,0.2,0.2;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
@@ -328,7 +328,8 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
           double desiredFootZPosition = 0.15;
           for (int i=0; i<4; i++){
-              if (footContactPhase_(i) < -0.5) { /// during swing
+//              if (footContactPhase_(i) < -0.5) { /// during swing
+              if (footContactPhase_(i) < -0.8) { /// during swing
                   footClearance_(i) =
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
@@ -393,7 +394,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.015,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
