@@ -41,8 +41,8 @@ def relaxed_barrier(alpha_lower, alpha_upper, x):
     return -y  # Multiply by -1 as per the last line in your code
 
 # Set parameters
-delta = 0.03
-alpha_lower = -0.03
+delta = 0.015
+alpha_lower = -0.06
 alpha_upper = 1.0
 
 # Generate a range of x values

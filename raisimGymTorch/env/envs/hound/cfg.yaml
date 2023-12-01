@@ -23,7 +23,6 @@ environment:
 
     torque:   -1e-4
     jointPos : -5e-1
-    jointVel: -5e-3
     jointAcc : -5e-2
 
     # relaxed

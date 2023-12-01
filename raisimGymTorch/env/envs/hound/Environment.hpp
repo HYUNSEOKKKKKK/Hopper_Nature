@@ -281,8 +281,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float getNegPosReward(){
       /// pos reward
-      rewards_.record("comAngularVel", std::exp(-1.0 * pow(command_(2) - bodyAngularVel_(2),2)));
-      rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
+      rewards_.record("comAngularVel", std::exp(-2.0 * pow(command_(2) - bodyAngularVel_(2),2)));
+      rewards_.record("comLinearVel", std::exp(-2.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
@@ -298,12 +298,11 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
-      rewards_.record("jointVel", gv_.tail(12).squaredNorm());
       rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
 
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("jointAcc"));
+      negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("jointAcc"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
