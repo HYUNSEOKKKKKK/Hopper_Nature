@@ -19,12 +19,12 @@ environment:
     footSlip: -5e-1
     smoothness1: -2.0 #-2.5
     smoothness2: -1.0 #-1.2
-    bodyOri: -0.5
+    bodyOri: -1.0
 
     torque:   -1e-4
     jointPos : -5e-1
     jointVel: -5e-3
-    jointAcc : -1e-1
+    jointAcc : -5e-2
 
     # relaxed
     barrierJointPos:      1e-1
