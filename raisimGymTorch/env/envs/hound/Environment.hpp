@@ -99,7 +99,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
 //    limitFootContact_ << -0.3,2;
-    limitFootContact_ << -0.7,2;
+    limitFootContact_ << -0.6,2;
 //    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
     limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
 
@@ -119,7 +119,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize gait
     phase_ = 0.0;
 //    gait_hz_ = 0.72;
-    gait_hz_ = 1.2;
+    gait_hz_ = 0.92;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
