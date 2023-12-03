@@ -98,10 +98,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitBaseMotion_.row(1) << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
-//    limitFootContact_ << -0.3,2;
     limitFootContact_ << -0.6,2;
-//    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
-    limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
+//    limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
+    limitFootClearance_ << -0.12,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -111,6 +110,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     footClearance_.setZero();
     footSlip_.setZero();
     standingMode_ = false;
+    jointVelTemp_.setZero();
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
@@ -119,7 +119,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize gait
     phase_ = 0.0;
 //    gait_hz_ = 0.72;
-    gait_hz_ = 0.92;
+//    gait_hz_ = 0.92;
+    gait_hz_ = 0.82;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -266,30 +267,32 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   double getReward(){
-      rewards_.record("negSumPos",getNegPosReward());
       standingReward();
+      rewards_.record("negSumPos",getNegPosReward());
       return rewards_.getReward("negSumPos");
   }
 
   void standingReward(){
       /// for standingMode
+      jointVelTemp_.setZero();
       if (!standingMode_){
           limitBaseMotion_.row(0) << -0.3,0.3;
           limitBaseMotion_.row(1) << -0.3,0.3;
       } else {
           limitBaseMotion_.row(0) << -0.1,0.1;
           limitBaseMotion_.row(1) << -0.1,0.1;
+          jointVelTemp_ = gv_.tail(12);
       }
   }
 
   float getNegPosReward(){
       /// pos reward
-      rewards_.record("comAngularVel", std::exp(-2.0 * pow(command_(2) - bodyAngularVel_(2),2)));
-      rewards_.record("comLinearVel", std::exp(-2.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
+      rewards_.record("comAngularVel", std::exp(-1.5 * pow(command_(2) - bodyAngularVel_(2),2)));
+      rewards_.record("comLinearVel", std::exp(-1.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.2,0.2,1.,0.2,0.2,1.,0.2,0.2,1.,0.2,0.2;
+      jointPosWeight << 1.0, 0.5,0.5,1.,0.5,0.5,1.,0.5,0.5,1.,0.5,0.5;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
@@ -302,10 +305,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
       rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
+      rewards_.record("standingJointVel",jointVelTemp_.squaredNorm());
 
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("jointAcc"));
+      negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("standingJointVel"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -372,7 +376,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
       for (int i=0;i<2;i++){
-          relaxedLogBarrier(0.3,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
+          relaxedLogBarrier(0.2,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
+//          relaxedLogBarrier(0.3,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
           barrierBaseMotion += tempReward;
       }
       /// Log Barrier - limit_joint_vel
@@ -700,6 +705,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
   ///
   std::vector<Eigen::Vector<double,12>> jointPosErrorHist_, jointVelHist_;
+  Eigen::Vector<double,12> jointVelTemp_;
   /// initialize
   Eigen::Matrix<double,3,3> rotYawNoise_,rotTotalNoise_;
   Eigen::Quaterniond quat_;
