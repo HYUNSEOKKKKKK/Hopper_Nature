@@ -32,8 +32,8 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-# weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-11-27-10-53-54/full_3000.pt"
-weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-02-13-02-04/full_500.pt"
+# weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-02-13-02-04/full_8000.pt"
+weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-04-10-55-36/full_3000.pt"
 # weight_path = args.weight
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
@@ -44,7 +44,7 @@ else:
     print("Loaded weight from {}\n".format(weight_path))
     start = time.time()
 
-    env.set_terrain(0,0.0,1.0)
+    env.set_terrain(3,3.0,1.0)
     env.set_initial(0)
 
     env.reset()
@@ -71,7 +71,7 @@ else:
 
     for step in range(max_steps):
         if step % 400 == 0:
-            env.set_command(np.random.uniform(0.6, 0.6, 1),
+            env.set_command(np.random.uniform(0.3, 0.3, 1),
                             np.random.uniform(0.0, 0.0, 1),
                             np.random.uniform(0.0, 0.0, 1))
 
