@@ -283,7 +283,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       } else {
           limitBaseMotion_.row(0) << -0.1,0.1;
           limitBaseMotion_.row(1) << -0.1,0.1;
-          jointVelTemp_ = gv_.tail(12);
+//          jointVelTemp_ = gv_.tail(12);
           standingSmoothness_ = 1.5;
       }
   }
@@ -335,8 +335,8 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
           double desiredFootZPosition = 0.15;
           for (int i=0; i<4; i++){
-//              if (footContactPhase_(i) < -0.8) { /// during swing
-              if (footContactPhase_(i) < -0.6) { /// during swing
+              if (footContactPhase_(i) < -0.8) { /// during swing
+//              if (footContactPhase_(i) < -0.6) { /// during swing
                   footClearance_(i) =
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
