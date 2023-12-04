@@ -99,8 +99,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.6,2;
-//    limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
-    limitFootClearance_ << -0.12,1.0; // 어차피 desired_foot_clearance 를
+//    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
+    limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -292,7 +292,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.4,0.4,1.,0.4,0.4,1.,0.4,0.4,1.,0.4,0.4;
+      jointPosWeight << 1.0, 0.2,0.2,1.,0.2,0.2,1.,0.2,0.2,1.,0.2,0.2;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
