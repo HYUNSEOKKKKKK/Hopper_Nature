@@ -126,6 +126,28 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
 //        double ySize = (1.2 ) * (double)stairNum; // 폭 [140,200]
         return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
     }
+
+    else if (heightMapType == 5) {
+        /// big stair 2
+        double stepHeight = 0.115 * hardness;
+        int xSampleNum = 6;
+        int ySampleNum = 3600;
+        int stairNum = 12;
+        std::vector<double> heightVec;
+        heightVec.resize(xSampleNum*ySampleNum);
+
+        int step = 0;
+        for (int j=0; j<ySampleNum; j++){
+            heightVec[j*xSampleNum] = (int((double)step/(double)(ySampleNum/stairNum))%2) * stepHeight + 0.2; // 12 계단
+            for (int i=1; i<xSampleNum; i++){
+                heightVec[j*xSampleNum+i] = heightVec[j*xSampleNum];
+            }
+            step++;
+        }
+
+        double ySize = (2.0) * (double)stairNum; // 폭 [120,150]
+        return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
+    }
 }
 
 #endif //_RAISIM_GYM_TORCH_HEIGHTMAP_HPP
