@@ -293,7 +293,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.0,0.0,1.,0.0,0.0,1.,0.0,0.0,1.,0.0,0.0;
+      jointPosWeight << 1.0, 0.1,0.1,1.,0.1,0.1,1.,0.1,0.1,1.,0.1,0.1;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
