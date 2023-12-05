@@ -167,7 +167,7 @@ for update in range(8001):
 
     actor.update()
     if update < 2500: # terrain curriculum
-        actor.distribution.enforce_minimum_std((torch.ones(12)*0.8).to(device))
+        actor.distribution.enforce_minimum_std((torch.ones(12)*0.7).to(device))
     else:
         actor.distribution.enforce_minimum_std((torch.ones(12)*0.2).to(device))
     actor.distribution.enforce_maximum_std((torch.ones(12)*1.5).to(device))
@@ -190,4 +190,5 @@ for update in range(8001):
     print('{:<40} {:>6}'.format("fps: ", '{:6.0f}'.format(total_steps / (end - start))))
     print('{:<40} {:>6}'.format("real time factor: ", '{:6.0f}'.format(total_steps / (end - start)
                                                                        * cfg['environment']['control_dt'])))
+    print(actor.distribution.std)
     print('----------------------------------------------------\n')
