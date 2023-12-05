@@ -60,7 +60,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
-      actionStd_.segment(i*3,3) << 0.1, 0.3, 0.3;
+//      actionStd_.segment(i*3,3) << 0.1, 0.3, 0.3;
+      actionStd_.segment(i*3,3) << 0.1, 0.4, 0.4;
 //        actionStd_.segment(i*3,3) << 0.1, 0.15, 0.15;
     }
 
@@ -282,7 +283,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       } else {
           limitBaseMotion_.row(0) << -0.1,0.1;
           limitBaseMotion_.row(1) << -0.1,0.1;
-          standingSmoothness_ = 1.5;
+          standingSmoothness_ = 1.2;
       }
   }
 
