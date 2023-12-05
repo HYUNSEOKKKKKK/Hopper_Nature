@@ -166,8 +166,10 @@ for update in range(8001):
     avg_rewards.append(average_ll_performance)
 
     actor.update()
-    actor.distribution.enforce_minimum_std((torch.ones(12)*0.2).to(device))
-    # actor.distribution.enforce_maximum_std((torch.ones(12)*2).to(device))
+    if update < 2500: # terrain curriculum
+        actor.distribution.enforce_minimum_std((torch.ones(12)*0.8).to(device))
+    else:
+        actor.distribution.enforce_minimum_std((torch.ones(12)*0.2).to(device))
     actor.distribution.enforce_maximum_std((torch.ones(12)*1.5).to(device))
 
     # curriculum update. Implement it in Environment.hpp
