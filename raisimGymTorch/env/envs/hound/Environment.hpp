@@ -275,7 +275,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void standingReward(){
       /// for standingMode
-      jointVelTemp_.setZero();
       if (!standingMode_){
           limitBaseMotion_.row(0) << -0.3,0.3;
           limitBaseMotion_.row(1) << -0.3,0.3;
@@ -283,7 +282,6 @@ class ENVIRONMENT : public RaisimGymEnv {
       } else {
           limitBaseMotion_.row(0) << -0.1,0.1;
           limitBaseMotion_.row(1) << -0.1,0.1;
-          jointVelTemp_ = gv_.tail(12);
           standingSmoothness_ = 1.5;
       }
   }
@@ -295,7 +293,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.2,0.2,1.,0.2,0.2,1.,0.2,0.2,1.,0.2,0.2;
+      jointPosWeight << 1.0, 0.0,0.0,1.,0.0,0.0,1.,0.0,0.0,1.,0.0,0.0;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
@@ -308,11 +306,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
       rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
-      rewards_.record("standingJointVel",jointVelTemp_.squaredNorm());
 
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("standingJointVel"));
+      negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
