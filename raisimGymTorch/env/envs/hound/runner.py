@@ -98,7 +98,7 @@ scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[1800
 # if mode == 'retrain':
 #     load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
 
-for update in range(8001):
+for update in range(12001):
     start = time.time()
     env.reset()
     reward_sum = 0
@@ -166,8 +166,8 @@ for update in range(8001):
     avg_rewards.append(average_ll_performance)
 
     actor.update()
-    if update < 2500: # terrain curriculum
-        actor.distribution.enforce_minimum_std((torch.ones(12)*0.7).to(device))
+    if update < 3000: # command curriculum
+        actor.distribution.enforce_minimum_std((torch.ones(12)*0.75).to(device))
     else:
         actor.distribution.enforce_minimum_std((torch.ones(12)*0.2).to(device))
     actor.distribution.enforce_maximum_std((torch.ones(12)*1.5).to(device))

@@ -138,7 +138,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     }else{
         standingMode_ = false;
 
-        double comCurriculum = (double)iter_ * 1.0/3600;
+        double comCurriculum = (double)iter_ * 1.0/3000;
         comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
         do {
             double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.0) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.2, other 1.5
