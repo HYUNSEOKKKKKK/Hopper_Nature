@@ -166,18 +166,9 @@ for update in range(12001):
     avg_rewards.append(average_ll_performance)
 
     actor.update()
-    if update < 1000:
-        actor.distribution.enforce_minimum_std((torch.ones(12)*0.90).to(device))
-    elif update < 2000:
-        actor.distribution.enforce_minimum_std((torch.ones(12)*0.80).to(device))
-    elif update < 3000:
-        actor.distribution.enforce_minimum_std((torch.ones(12)*0.70).to(device))
-    elif update < 4000:  # command curriculum
-        actor.distribution.enforce_minimum_std((torch.ones(12)*0.60).to(device))
-    elif update < 5000:  # command curriculum
-        actor.distribution.enforce_minimum_std((torch.ones(12)*0.50).to(device))
-    else:
-        actor.distribution.enforce_minimum_std((torch.ones(12)*0.30).to(device))
+    std_value = 0.90 - 0.10 * (update // 1000)
+    std_value = max(std_value, 0.30)
+    actor.distribution.enforce_minimum_std(torch.ones(12) * std_value).to(device)
 
     actor.distribution.enforce_maximum_std((torch.ones(12)*1.5).to(device))
 
