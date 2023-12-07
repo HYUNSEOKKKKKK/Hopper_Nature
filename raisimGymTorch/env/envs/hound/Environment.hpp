@@ -404,7 +404,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       relaxedLogBarrier(barrierCurriculum,limitBaseMotion_(0),limitBaseMotion_(1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
       for (int i=0;i<2;i++){
-          relaxedLogBarrier(barrierCurriculum-0.1,limitBaseMotion_(0),limitBaseMotion_(1),bodyAngularVel_(i),tempReward);
+          relaxedLogBarrier(barrierCurriculum+0.1,limitBaseMotion_(0),limitBaseMotion_(1),bodyAngularVel_(i),tempReward);
           barrierBaseMotion += tempReward;
       }
       /// Log Barrier - limit_target_vel
