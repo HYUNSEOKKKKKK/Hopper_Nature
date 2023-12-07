@@ -95,8 +95,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+2) << -2.02,-0.52; // knee
     }
     limitBodyHeight_ << 0.52, 0.68;
-    limitBaseMotion_.row(0) << -0.3,0.3;
-    limitBaseMotion_.row(1) << -0.3,0.3;
+    limitBaseMotion_ << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.6,2;
@@ -286,12 +285,10 @@ class ENVIRONMENT : public RaisimGymEnv {
   void standingReward(){
       /// for standingMode
       if (!standingMode_){
-          limitBaseMotion_.row(0) << -0.3,0.3;
-          limitBaseMotion_.row(1) << -0.3,0.3;
+          limitBaseMotion_ << -0.3,0.3;
           standingSmoothness_ = 1.0;
       } else {
-          limitBaseMotion_.row(0) << -0.1,0.1;
-          limitBaseMotion_.row(1) << -0.1,0.1;
+          limitBaseMotion_ << -0.1,0.1;
           standingSmoothness_ = 1.2;
       }
   }
@@ -345,7 +342,6 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
           double desiredFootZPosition = 0.15;
           for (int i=0; i<4; i++){
-//              if (footContactPhase_(i) < -0.8) { /// during swing
               if (footContactPhase_(i) < -0.6) { /// during swing
                   footClearance_(i) =
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
@@ -367,7 +363,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 
 
       /// compute barrier reward
-
       double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0;
       double tempReward = 0.0;
       /// Log Barrier - limit_joint_pos
@@ -385,25 +380,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       tempHeight /= 4;
       relaxedLogBarrier(0.05,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,barrierBodyHeight);
-      /// Log Barrier - limit_base_motion
-      relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
-      barrierBaseMotion += tempReward;
-      for (int i=0;i<2;i++){
-          relaxedLogBarrier(0.2,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
-          barrierBaseMotion += tempReward;
-      }
       /// Log Barrier - limit_joint_vel
       for (int i=0;i<12;i++){
           relaxedLogBarrier(3.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
           barrierJointVel += tempReward;
       }
-      /// Log Barrier - limit_target_vel
-      relaxedLogBarrier(0.1,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
-      barrierTargetVel += tempReward;
-      relaxedLogBarrier(0.1,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
-      barrierTargetVel += tempReward;
-      relaxedLogBarrier(0.1,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
-      barrierTargetVel += tempReward;
       /// Log Barrier - limit_foot_contact
       for (int i=0;i<4;i++){
           relaxedLogBarrier(0.1,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
@@ -414,6 +395,25 @@ class ENVIRONMENT : public RaisimGymEnv {
           relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
+
+      /// curriculum for basemotion and targetvel
+      double barrierCurriculum = 0.3 - (double)iter_/1500.0/10.0; /// 1500 iter 에 -0.1 씩
+      barrierCurriculum = (barrierCurriculum < 0.1)? 0.1 : barrierCurriculum;
+
+      /// Log Barrier - limit_base_motion
+      relaxedLogBarrier(barrierCurriculum,limitBaseMotion_(0),limitBaseMotion_(1),bodyLinearVel_(2),tempReward);
+      barrierBaseMotion += tempReward;
+      for (int i=0;i<2;i++){
+          relaxedLogBarrier(barrierCurriculum,limitBaseMotion_(0),limitBaseMotion_(1),bodyAngularVel_(i),tempReward);
+          barrierBaseMotion += tempReward;
+      }
+      /// Log Barrier - limit_target_vel
+      relaxedLogBarrier(barrierCurriculum,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
+      barrierTargetVel += tempReward;
+      relaxedLogBarrier(barrierCurriculum,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
+      barrierTargetVel += tempReward;
+      relaxedLogBarrier(barrierCurriculum,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
+      barrierTargetVel += tempReward;
 
       double logClip = -100.0;
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
@@ -715,7 +715,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   /// log barrier function
   Eigen::Matrix<double,12,2> limitJointPos_;
   Eigen::Matrix<double,1,2> limitBodyHeight_;
-  Eigen::Matrix<double,2,2> limitBaseMotion_; // z vel, roll,pitch vel
+  Eigen::Matrix<double,1,2> limitBaseMotion_; // z vel, roll,pitch vel
   Eigen::Matrix<double,1,2> limitJointVel_;
   Eigen::Matrix<double,1,2> limitTargetVel_;
   Eigen::Matrix<double,1,2> limitFootClearance_;
