@@ -23,7 +23,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    hound_ = world_->addArticulatedSystem(resourceDir_+"../URDF_HoundOne_OldFoot_1207/HoundOne_generated.urdf");
+    hound_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/URDF_HoundOne_OldFoot_1207/HoundOne_generated.urdf");
     hound_->setName("hound");
     hound_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
