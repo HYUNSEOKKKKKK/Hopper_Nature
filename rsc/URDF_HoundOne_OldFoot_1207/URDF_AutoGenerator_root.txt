@@ -1,0 +1,556 @@
+
+<robot name="Hound_description" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <material name="black">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.0 0.0 0.8 1.0"/>
+  </material>
+  <material name="green">
+    <color rgba="0.0 0.8 0.0 1.0"/>
+  </material>
+  <material name="grey">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+  <material name="silver">
+    <color rgba="0.913725490196 0.913725490196 0.847058823529 1.0"/>
+  </material>
+  <material name="orange">
+    <color rgba="1.0 0.423529411765 0.0392156862745 1.0"/>
+  </material>
+  <material name="brown">
+    <color rgba="0.870588235294 0.811764705882 0.764705882353 1.0"/>
+  </material>
+  <material name="red">
+    <color rgba="0.8 0.0 0.0 1.0"/>
+  </material>
+  <material name="white">
+    <color rgba="1.0 1.0 1.0 1.0"/>
+  </material>
+
+  <link name="trunk">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="base.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="trunk_collision_length_x trunk_collision_length_y trunk_collision_length_z"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="trunk_CoM_x trunk_CoM_y trunk_CoM_z"/>
+      <mass value="trunk_mass"/>
+      <inertia ixx="trunk_inertia_ixx" ixy="trunk_inertia_ixy" ixz="trunk_inertia_ixz" iyy="trunk_inertia_iyy" iyz="trunk_inertia_iyz" izz="trunk_inertia_izz"/>
+    </inertial>
+  </link>
+
+
+  <joint name="lidar_fixed" type="fixed">
+    <origin rpy="0 0 0" xyz="0.4215 0 -0.070"/>
+    <parent link="trunk"/>
+    <child link="lidar"/>
+  </joint>
+  <link name="lidar">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="lidar.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0671 0 0.042"/>
+      <geometry>
+        <box size="0.140 0.163 0.233"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.05231314 0.00155470 0.03320621"/>
+      <mass value="1.715"/>
+      <inertia ixx="0.01284248" ixy="-0.00000496" ixz="0.00048574" iyy="0.01182010" iyz="-0.00012288" izz="0.00771190"/>
+    </inertial>
+  </link>
+
+  <joint name="rear_cam_fixed" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.4215 0 -0.070"/>
+    <parent link="trunk"/>
+    <child link="rear_cam"/>
+  </joint>
+  <link name="rear_cam">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="rear_cam.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0745 0 -0.020"/>
+      <geometry>
+        <box size="0.150 0.080 0.040"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.07235258 -0.00001318 -0.01430797"/>
+      <mass value="0.176"/>
+      <inertia ixx="0.00008264" ixy="0.00000000" ixz="-0.00000147" iyy="0.00031979" iyz="0.00000000" izz="0.00038072"/>
+    </inertial>
+  </link>
+
+
+  <joint name="RR_roll_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="-roll_joint_x -roll_joint_y roll_joint_z"/>
+    <parent link="trunk"/>
+    <child link="RR_shoulder"/>
+    <axis xyz="1 0 0"/>
+    <dynamics rotor_inertia="roll_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="roll_max_torque" lower="-roll_angle" upper="roll_angle" velocity="roll_max_speed"/>
+  </joint>
+  <link name="RR_shoulder">
+    <visual>
+      <origin rpy="0 3.141592 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="shoulder.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="1.57079632679 0 0" xyz="0 -shoulder_collision_cylinder_offset 0"/>
+      <geometry>
+        <cylinder length="shoulder_collision_cylinder_length" radius="shoulder_collision_cylinder_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-shoulder_CoM_x shoulder_CoM_y -shoulder_CoM_z"/>
+      <mass value="shoulder_mass"/>
+      <inertia ixx="shoulder_inertia_ixx" ixy="-shoulder_inertia_ixy" ixz="shoulder_inertia_ixz" iyy="shoulder_inertia_iyy" iyz="-shoulder_inertia_iyz" izz="shoulder_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="RR_hip_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 -hip_joint_y 0"/>
+    <parent link="RR_shoulder"/>
+    <child link="RR_thigh"/>
+    <axis xyz="0 1 0"/>
+    <dynamics rotor_inertia="hip_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="hip_max_torque" lower="-hip_angle" upper="hip_angle" velocity="hip_max_speed"/>
+  </joint>
+  <link name="RR_thigh">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="thigh.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 thigh_collision_box_offset"/>
+      <geometry>
+        <box size="thigh_collision_box_x thigh_collision_box_y thigh_collision_box_z"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="thigh_CoM_x thigh_CoM_y thigh_CoM_z"/>
+      <mass value="thigh_mass"/>
+      <inertia ixx="thigh_inertia_ixx" ixy="thigh_inertia_ixy" ixz="thigh_inertia_ixz" iyy="thigh_inertia_iyy" iyz="thigh_inertia_iyz" izz="thigh_inertia_izz"/>
+    </inertial>
+  </link>
+
+  <joint name="RR_knee_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 knee_joint_z"/>
+    <parent link="RR_thigh"/>
+    <child link="RR_calf"/>
+    <axis xyz="0 1 0"/>
+    <dynamics rotor_inertia="knee_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="knee_max_torque" lower="-knee_angle" upper="knee_angle" velocity="knee_max_speed"/>
+  </joint>
+  <link name="RR_calf">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="calf.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 calf_collision_cylinder_offset"/>
+      <geometry>
+        <cylinder length="calf_collision_cylinder_length" radius="calf_collision_cylinder_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="calf_CoM_x calf_CoM_y calf_CoM_z"/>
+      <mass value="calf_mass"/>
+      <inertia ixx="calf_inertia_ixx" ixy="calf_inertia_ixy" ixz="calf_inertia_ixz" iyy="calf_inertia_iyy" iyz="calf_inertia_iyz" izz="calf_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="RR_foot_fixed" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 foot_joint_z"/>
+    <parent link="RR_calf"/>
+    <child link="RR_foot"/>
+  </joint>
+  <link name="RR_foot">
+<!--
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="foot_collision_sphere_radius"/>
+      </geometry>
+    </visual>
+-->
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="foot_collision_sphere_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" ixy="0.0" ixz="0.0" iyy="0.000001" iyz="0.0" izz="0.000001"/>
+    </inertial>
+  </link>
+
+	
+  <joint name="RL_roll_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="-roll_joint_x roll_joint_y roll_joint_z"/>
+    <parent link="trunk"/>
+    <child link="RL_shoulder"/>
+    <axis xyz="1 0 0"/>
+    <dynamics rotor_inertia="roll_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="roll_max_torque" lower="-roll_angle" upper="roll_angle" velocity="roll_max_speed"/>
+  </joint>
+  <link name="RL_shoulder">
+    <visual>
+      <origin rpy="0 0 3.141592" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="shoulder.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="1.57079632679 0 0" xyz="0 shoulder_collision_cylinder_offset 0"/>
+      <geometry>
+        <cylinder length="shoulder_collision_cylinder_length" radius="shoulder_collision_cylinder_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-shoulder_CoM_x -shoulder_CoM_y shoulder_CoM_z"/>
+      <mass value="shoulder_mass"/>
+      <inertia ixx="shoulder_inertia_ixx" ixy="shoulder_inertia_ixy" ixz="-shoulder_inertia_ixz" iyy="shoulder_inertia_iyy" iyz="-shoulder_inertia_iyz" izz="shoulder_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="RL_hip_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 hip_joint_y 0"/>
+    <parent link="RL_shoulder"/>
+    <child link="RL_thigh"/>
+    <axis xyz="0 1 0"/>
+    <dynamics rotor_inertia="hip_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="hip_max_torque" lower="-hip_angle" upper="hip_angle" velocity="hip_max_speed"/>
+  </joint>
+  <link name="RL_thigh">
+    <visual>
+      <origin rpy="0 0 3.141592" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="thigh.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 thigh_collision_box_offset"/>
+      <geometry>
+        <box size="thigh_collision_box_x thigh_collision_box_y thigh_collision_box_z"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-thigh_CoM_x -thigh_CoM_y thigh_CoM_z"/>
+      <mass value="thigh_mass"/>
+      <inertia ixx="thigh_inertia_ixx" ixy="thigh_inertia_ixy" ixz="-thigh_inertia_ixz" iyy="thigh_inertia_iyy" iyz="-thigh_inertia_iyz" izz="thigh_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="RL_knee_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 knee_joint_z"/>
+    <parent link="RL_thigh"/>
+    <child link="RL_calf"/>
+    <axis xyz="0 1 0"/>
+    <dynamics rotor_inertia="knee_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="knee_max_torque" lower="-knee_angle" upper="knee_angle" velocity="knee_max_speed"/>
+  </joint>
+  <link name="RL_calf">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="calf.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 calf_collision_cylinder_offset"/>
+      <geometry>
+        <cylinder length="calf_collision_cylinder_length" radius="calf_collision_cylinder_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="calf_CoM_x -calf_CoM_y calf_CoM_z"/>
+      <mass value="calf_mass"/>
+      <inertia ixx="calf_inertia_ixx" ixy="-calf_inertia_ixy" ixz="calf_inertia_ixz" iyy="calf_inertia_iyy" iyz="-calf_inertia_iyz" izz="calf_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="RL_foot_fixed" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 foot_joint_z"/>
+    <parent link="RL_calf"/>
+    <child link="RL_foot"/>
+  </joint>
+  <link name="RL_foot">
+<!--
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="foot_collision_sphere_radius"/>
+      </geometry>
+    </visual>
+-->
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="foot_collision_sphere_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" ixy="0.0" ixz="0.0" iyy="0.000001" iyz="0.0" izz="0.000001"/>
+    </inertial>
+  </link>
+
+
+  <joint name="FR_roll_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="roll_joint_x -roll_joint_y roll_joint_z"/>
+    <parent link="trunk"/>
+    <child link="FR_shoulder"/>
+    <axis xyz="1 0 0"/>
+    <dynamics rotor_inertia="roll_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="roll_max_torque" lower="-roll_angle" upper="roll_angle" velocity="roll_max_speed"/>
+  </joint>
+  <link name="FR_shoulder">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="shoulder.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="1.57079632679 0 0" xyz="0 -shoulder_collision_cylinder_offset 0"/>
+      <geometry>
+        <cylinder length="shoulder_collision_cylinder_length" radius="shoulder_collision_cylinder_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="shoulder_CoM_x shoulder_CoM_y shoulder_CoM_z"/>
+      <mass value="shoulder_mass"/>
+      <inertia ixx="shoulder_inertia_ixx" ixy="shoulder_inertia_ixy" ixz="shoulder_inertia_ixz" iyy="shoulder_inertia_iyy" iyz="shoulder_inertia_iyz" izz="shoulder_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="FR_hip_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 -hip_joint_y 0"/>
+    <parent link="FR_shoulder"/>
+    <child link="FR_thigh"/>
+    <axis xyz="0 1 0"/>
+    <dynamics rotor_inertia="hip_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="hip_max_torque" lower="-hip_angle" upper="hip_angle" velocity="hip_max_speed"/>
+  </joint>
+  <link name="FR_thigh">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="thigh.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 thigh_collision_box_offset"/>
+      <geometry>
+        <box size="thigh_collision_box_x thigh_collision_box_y thigh_collision_box_z"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="thigh_CoM_x thigh_CoM_y thigh_CoM_z"/>
+      <mass value="thigh_mass"/>
+      <inertia ixx="thigh_inertia_ixx" ixy="thigh_inertia_ixy" ixz="thigh_inertia_ixz" iyy="thigh_inertia_iyy" iyz="thigh_inertia_iyz" izz="thigh_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="FR_knee_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 knee_joint_z"/>
+    <parent link="FR_thigh"/>
+    <child link="FR_calf"/>
+    <axis xyz="0 1 0"/>
+    <dynamics rotor_inertia="knee_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="knee_max_torque" lower="-knee_angle" upper="knee_angle" velocity="knee_max_speed"/>
+  </joint>
+  <link name="FR_calf">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="calf.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 calf_collision_cylinder_offset"/>
+      <geometry>
+        <cylinder length="calf_collision_cylinder_length" radius="calf_collision_cylinder_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="calf_CoM_x calf_CoM_y calf_CoM_z"/>
+      <mass value="calf_mass"/>
+      <inertia ixx="calf_inertia_ixx" ixy="calf_inertia_ixy" ixz="calf_inertia_ixz" iyy="calf_inertia_iyy" iyz="calf_inertia_iyz" izz="calf_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="FR_foot_fixed" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 foot_joint_z"/>
+    <parent link="FR_calf"/>
+    <child link="FR_foot"/>
+  </joint>
+  <link name="FR_foot">
+<!--
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="foot_collision_sphere_radius"/>
+      </geometry>
+    </visual>
+-->
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="foot_collision_sphere_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" ixy="0.0" ixz="0.0" iyy="0.000001" iyz="0.0" izz="0.000001"/>
+    </inertial>
+  </link>
+
+
+  <joint name="FL_roll_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="roll_joint_x roll_joint_y roll_joint_z"/>
+    <parent link="trunk"/>
+    <child link="FL_shoulder"/>
+    <axis xyz="1 0 0"/>
+    <dynamics rotor_inertia="roll_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="roll_max_torque" lower="-roll_angle" upper="roll_angle" velocity="roll_max_speed"/>
+  </joint>
+  <link name="FL_shoulder">
+    <visual>
+      <origin rpy="3.141592 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="shoulder.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="1.57079632679 0 0" xyz="0 shoulder_collision_cylinder_offset 0"/>
+      <geometry>
+        <cylinder length="shoulder_collision_cylinder_length" radius="shoulder_collision_cylinder_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="shoulder_CoM_x -shoulder_CoM_y -shoulder_CoM_z"/>
+      <mass value="shoulder_mass"/>
+      <inertia ixx="shoulder_inertia_ixx" ixy="-shoulder_inertia_ixy" ixz="-shoulder_inertia_ixz" iyy="shoulder_inertia_iyy" iyz="shoulder_inertia_iyz" izz="shoulder_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="FL_hip_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 hip_joint_y 0"/>
+    <parent link="FL_shoulder"/>
+    <child link="FL_thigh"/>
+    <axis xyz="0 1 0"/>
+    <dynamics rotor_inertia="hip_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="hip_max_torque" lower="-hip_angle" upper="hip_angle" velocity="hip_max_speed"/>
+  </joint>
+  <link name="FL_thigh">
+    <visual>
+      <origin rpy="0 0 3.141592" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="thigh.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 thigh_collision_box_offset"/>
+      <geometry>
+        <box size="thigh_collision_box_x thigh_collision_box_y thigh_collision_box_z"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-thigh_CoM_x -thigh_CoM_y thigh_CoM_z"/>
+      <mass value="thigh_mass"/>
+      <inertia ixx="thigh_inertia_ixx" ixy="thigh_inertia_ixy" ixz="-thigh_inertia_ixz" iyy="thigh_inertia_iyy" iyz="-thigh_inertia_iyz" izz="thigh_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="FL_knee_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 knee_joint_z"/>
+    <parent link="FL_thigh"/>
+    <child link="FL_calf"/>
+    <axis xyz="0 1 0"/>
+    <dynamics rotor_inertia="knee_rotor_inertia" damping="0" friction="0"/>
+    <limit effort="knee_max_torque" lower="-knee_angle" upper="knee_angle" velocity="knee_max_speed"/>
+  </joint>
+  <link name="FL_calf">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="calf.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 calf_collision_cylinder_offset"/>
+      <geometry>
+        <cylinder length="calf_collision_cylinder_length" radius="calf_collision_cylinder_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="calf_CoM_x -calf_CoM_y calf_CoM_z"/>
+      <mass value="calf_mass"/>
+      <inertia ixx="calf_inertia_ixx" ixy="-calf_inertia_ixy" ixz="calf_inertia_ixz" iyy="calf_inertia_iyy" iyz="-calf_inertia_iyz" izz="calf_inertia_izz"/>
+    </inertial>
+  </link>
+  <joint name="FL_foot_fixed" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 foot_joint_z"/>
+    <parent link="FL_calf"/>
+    <child link="FL_foot"/>
+  </joint>
+  <link name="FL_foot">
+<!--
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="foot_collision_sphere_radius"/>
+      </geometry>
+    </visual>
+-->
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="foot_collision_sphere_radius"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" ixy="0.0" ixz="0.0" iyy="0.000001" iyz="0.0" izz="0.000001"/>
+    </inertial>
+  </link>
+
+
+</robot>
+

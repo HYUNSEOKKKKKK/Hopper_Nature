@@ -37,7 +37,6 @@ environment:
     # total sum
     negReward2: 1.0          # only for record
 
-    standingNegReward : 0.0 #1.0 #2.0 # not used
     negSumPos:         1.0 #1.0
     relaxedLog:         1.0
 

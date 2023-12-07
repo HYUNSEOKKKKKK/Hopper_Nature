@@ -167,12 +167,14 @@ for update in range(12001):
 
     actor.update()
     if update < 1000:
-        actor.distribution.enforce_minimum_std((torch.ones(12)*1.00).to(device))
-    elif update < 2500:
+        actor.distribution.enforce_minimum_std((torch.ones(12)*0.90).to(device))
+    elif update < 2000:
+        actor.distribution.enforce_minimum_std((torch.ones(12)*0.80).to(device))
+    elif update < 3000:
         actor.distribution.enforce_minimum_std((torch.ones(12)*0.70).to(device))
-    elif update < 3500:  # command curriculum
-        actor.distribution.enforce_minimum_std((torch.ones(12)*0.6).to(device))
-    elif update < 4500:  # command curriculum
+    elif update < 4000:  # command curriculum
+        actor.distribution.enforce_minimum_std((torch.ones(12)*0.60).to(device))
+    elif update < 5000:  # command curriculum
         actor.distribution.enforce_minimum_std((torch.ones(12)*0.50).to(device))
     else:
         actor.distribution.enforce_minimum_std((torch.ones(12)*0.30).to(device))

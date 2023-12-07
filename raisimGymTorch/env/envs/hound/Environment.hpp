@@ -23,7 +23,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    hound_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hound/Hound_foot_cylinder_20230328.urdf");
+    hound_ = world_->addArticulatedSystem(resourceDir_+"../URDF_HoundOne_OldFoot_1207/HoundOne_generated.urdf");
     hound_->setName("hound");
     hound_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -36,7 +36,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// this is nominal configuration of anymal
     double hip = 0.62;
-    gcInit_ << 0, 0, 0.56-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip-0.07, 0.0, hip, -2*hip-0.07, 0.0, hip, -2*hip-0.07, 0.0, hip, -2*hip-0.07;
+//    gcInit_ << 0, 0, 0.56-0.002, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip-0.07, 0.0, hip, -2*hip-0.07, 0.0, hip, -2*hip-0.07, 0.0, hip, -2*hip-0.07;
+    gcInit_ << 0, 0, 0.59, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
@@ -109,8 +110,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     footSlip_.setZero();
     standingMode_ = false;
     jointVelTemp_.setZero();
-      phaseSin_.setZero();
-      standingSmoothness_ = 1.0;
+    phaseSin_.setZero();
+    standingSmoothness_ = 1.0;
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
@@ -118,7 +119,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// initialize gait
     phase_ = 0.0;
-//    gait_hz_ = 0.72;
     gait_hz_ = 0.82;
 
     /// heightMap_ initialization
@@ -298,7 +298,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
+      jointPosWeight << 1.0, 0.7,0.7,1.,0.7,0.7,1.,0.7,0.7,1.,0.7,0.7;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
@@ -404,7 +404,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.006,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
