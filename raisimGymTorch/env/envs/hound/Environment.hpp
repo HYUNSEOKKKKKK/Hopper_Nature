@@ -61,7 +61,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
       actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
-//        actionStd_.segment(i*3,3) << 0.1, 0.3, 0.3;
     }
 
     /// Reward coefficients
@@ -299,7 +298,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.1,0.1,1.,0.1,0.1,1.,0.1,0.1,1.,0.1,0.1;
+      jointPosWeight << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
@@ -408,25 +407,6 @@ class ENVIRONMENT : public RaisimGymEnv {
           relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
-
-      /// curriculum for basemotion and targetvel
-      double barrierCurriculum = 0.3 - (double)iter_/1500.0/10.0; /// 1500 iter 에 -0.1 씩
-      barrierCurriculum = (barrierCurriculum < 0.1)? 0.1 : barrierCurriculum;
-
-      /// Log Barrier - limit_base_motion
-      relaxedLogBarrier(barrierCurriculum,limitBaseMotion_(0),limitBaseMotion_(1),bodyLinearVel_(2),tempReward);
-      barrierBaseMotion += tempReward;
-      for (int i=0;i<2;i++){
-          relaxedLogBarrier(barrierCurriculum+0.1,limitBaseMotion_(0),limitBaseMotion_(1),bodyAngularVel_(i),tempReward);
-          barrierBaseMotion += tempReward;
-      }
-      /// Log Barrier - limit_target_vel
-      relaxedLogBarrier(barrierCurriculum,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
-      barrierTargetVel += tempReward;
-      relaxedLogBarrier(barrierCurriculum,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
-      barrierTargetVel += tempReward;
-      relaxedLogBarrier(barrierCurriculum,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
-      barrierTargetVel += tempReward;
 
       double logClip = -100.0;
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
