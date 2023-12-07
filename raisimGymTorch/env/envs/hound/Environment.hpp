@@ -91,13 +91,15 @@ class ENVIRONMENT : public RaisimGymEnv {
     for (int i=0;i<4;i++){
         limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
-        limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
+//        limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
+        limitJointPos_.row(i*3+2) << -2.02,-0.52; // knee
     }
     limitBodyHeight_ << 0.52, 0.68;
     limitBaseMotion_.row(0) << -0.3,0.3;
     limitBaseMotion_.row(1) << -0.3,0.3;
     limitJointVel_ << -8,8;
-    limitTargetVel_ << -0.2,0.2;
+//    limitTargetVel_ << -0.2,0.2;
+    limitTargetVel_ << -0.05,0.05;
     limitFootContact_ << -0.6,2;
 //    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
     limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
@@ -120,7 +122,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize gait
     phase_ = 0.0;
 //    gait_hz_ = 0.72;
-//    gait_hz_ = 0.92;
     gait_hz_ = 0.82;
 
     /// heightMap_ initialization
@@ -288,8 +289,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float getNegPosReward(){
       /// pos reward
-      rewards_.record("comAngularVel", std::exp(-2.0 * pow(command_(2) - bodyAngularVel_(2),2)));
-      rewards_.record("comLinearVel", std::exp(-2.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
+      rewards_.record("comAngularVel", std::exp(-3.0 * pow(command_(2) - bodyAngularVel_(2),2)));
+      rewards_.record("comLinearVel", std::exp(-3.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
@@ -385,11 +386,14 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierJointVel += tempReward;
       }
       /// Log Barrier - limit_target_vel
-      relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
+//      relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
+      relaxedLogBarrier(0.02,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
       barrierTargetVel += tempReward;
-      relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
+//      relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
+      relaxedLogBarrier(0.02,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
       barrierTargetVel += tempReward;
-      relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
+//      relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
+      relaxedLogBarrier(0.02,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
       barrierTargetVel += tempReward;
       /// Log Barrier - limit_foot_contact
       for (int i=0;i<4;i++){
