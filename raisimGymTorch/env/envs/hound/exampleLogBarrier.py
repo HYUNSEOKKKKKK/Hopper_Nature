@@ -49,7 +49,7 @@ alpha_upper = 0.05
 x_values = np.linspace(-0.3, 0.3, 400)  # Avoiding x=alpha_lower directly as it goes to -inf in log
 y_values = [relaxed_log_barrier(delta, alpha_lower, alpha_upper, x) for x in x_values]
 # y_values = [relaxed_barrier(alpha_lower, alpha_upper, x) for x in x_values]
-# y_values = [np.exp(0.2*x) for x in x_values]
+# y_values = [np.exp(-3.0*x**2) for x in x_values]
 
 # Plot the function
 plt.plot(x_values, y_values)

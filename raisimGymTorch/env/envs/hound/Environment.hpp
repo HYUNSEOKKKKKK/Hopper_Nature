@@ -113,6 +113,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     footSlip_.setZero();
     standingMode_ = false;
     jointVelTemp_.setZero();
+      phaseSin_.setZero();
       standingSmoothness_ = 1.0;
 
     /// initialize history
@@ -135,15 +136,15 @@ class ENVIRONMENT : public RaisimGymEnv {
   void init() final { }
 
   void reset() final {
-    double comCurriculum = (double)iter_ * 1.0/3600;
-    comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
-
     /// with standing mode
     if (uniDist_(gen_) > 0.8) { // 10 %
         standingMode_ = true;
         command_.setZero();
     }else{
         standingMode_ = false;
+
+        double comCurriculum = (double)iter_ * 1.0/3600;
+        comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
         do {
             double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.0) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.2, other 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
@@ -155,37 +156,45 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_->setDefaultMaterial(mu_, 0, 0);
 
 
-    /// initialize with noise
-    gcNoise_ = gcInit_;
-    /// rot noise
-    if (uniDist_(gen_)>0.2){ // 40 % -> 올라가는 거 고정
-      yawNoise_ = 3.141592/2.0;
-      command_.tail(2).setZero();
-                command_(0) = abs(command_(0));
-    }else{
-      yawNoise_ = uniDist_(gen_) * 3.141592;
-    }
-    rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
-    quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
-    quat_.normalize();
-    rotTotalNoise_ = quat_;
-    rotTotalNoise_ = rotTotalNoise_.eval() * rotYawNoise_;
-    quat_ = rotTotalNoise_;
-    quat_.normalize();
-    gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
-    /// joint noise
-    for (int i = 7; i < 19; i++){
-        gcNoise_(i) += uniDist_(gen_) * 0.2;
-    }
-    /// Generalized Velocities randomization.
-    gvNoise_.setZero();
-    for (int i = 0; i < 18; i++) {
-        if (i < 3) {
-            gvNoise_(i) = uniDist_(gen_) * 0.5;
-        } else if (i < 6) {
-            gvNoise_(i) = uniDist_(gen_) * 0.5;
-        } else {
-            gvNoise_(i) = uniDist_(gen_) * 2.0;
+
+    /// initialize the pose
+    if(standingMode_){ /// command -> sudden stop
+        gcNoise_ = gc_;
+        gvNoise_ = gv_;
+        gcNoise_.head(3) = gcInit_.head(3);
+    }else{ /// reset
+        /// initialize with noise
+        gcNoise_ = gcInit_;
+        /// rot noise
+        if (uniDist_(gen_)>0.2){ // 40 % -> 올라가는 거 고정
+            yawNoise_ = 3.141592/2.0;
+            command_.tail(2).setZero();
+            command_(0) = abs(command_(0));
+        }else{
+            yawNoise_ = uniDist_(gen_) * 3.141592;
+        }
+        rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
+        quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
+        quat_.normalize();
+        rotTotalNoise_ = quat_;
+        rotTotalNoise_ = rotTotalNoise_.eval() * rotYawNoise_;
+        quat_ = rotTotalNoise_;
+        quat_.normalize();
+        gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
+        /// joint noise
+        for (int i = 7; i < 19; i++){
+            gcNoise_(i) += uniDist_(gen_) * 0.2;
+        }
+        /// Generalized Velocities randomization.
+        gvNoise_.setZero();
+        for (int i = 0; i < 18; i++) {
+            if (i < 3) {
+                gvNoise_(i) = uniDist_(gen_) * 0.5;
+            } else if (i < 6) {
+                gvNoise_(i) = uniDist_(gen_) * 0.5;
+            } else {
+                gvNoise_(i) = uniDist_(gen_) * 2.0;
+            }
         }
     }
 
@@ -204,19 +213,21 @@ class ENVIRONMENT : public RaisimGymEnv {
     updateObservation();
 
 
-    /// reset
-    pTarget_ = gc_.tail(12);
-    gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
-    for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
-    for (auto& vec : jointVelHist_) { vec.setZero(); }
+    /// reset (except the standingMode_ -> which preserves previous state for sudden command stop)
+    if (!standingMode_){
+        pTarget_ = gc_.tail(12);
+        gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
+        for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
+        for (auto& vec : jointVelHist_) { vec.setZero(); }
 
-    if (uniDist_(gen_)<=0.0){
-        phase_ = 0.0;
-    }else{
-        phase_ = gait_hz_/2.0;
+        if (uniDist_(gen_)<=0.0){
+            phase_ = 0.0;
+        }else{
+            phase_ = gait_hz_/2.0;
+        }
+        footContactPhase_.setZero();
+        footClearance_.setZero();
     }
-    footContactPhase_.setZero();
-            footClearance_.setZero();
   }
 
   float step(const Eigen::Ref<EigenVec>& action) final {
@@ -323,6 +334,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       footContactPhase_(1) = -footContactPhase_(0); // RL
       footContactPhase_(2) = -footContactPhase_(0); // FR
       footContactPhase_(3) = footContactPhase_(0); // FL
+
+      phaseSin_(0) = sin(phase_/gait_hz_ * 2*3.141592); // for observation
+      phaseSin_(1) = cos(phase_/gait_hz_ * 2*3.141592); // for observation
 //
       if (!standingMode_){ /// walking
           /// footContactDouble_ -> limit_foot_contact 에 있도록 (-0.3,3) -> Gait Enforcing (요 -0.3 이 벗어나도 되는 범위)
@@ -534,7 +548,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void observe(Eigen::Ref<EigenVec> ob) final {
       if (standingMode_){
-          footContactPhase_.setZero();
+//          footContactPhase_.setZero();
+          phaseSin_.setZero();
       }
       obDouble_ << rot_.e().row(2).transpose(),                               /// body orientation. 3
           bodyAngularVel_,                                                      /// body angular velocity. 3
@@ -549,7 +564,8 @@ class ENVIRONMENT : public RaisimGymEnv {
           rot_.e().transpose() * (footPos_[2].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[3].e() - gc_.head(3)),
           /// relative foot position with respect to the body COM, expressed in the body frame 12
           command_,                                                             /// command 3
-          footContactPhase_.head(2), /// footContactPhase 2
+//          footContactPhase_.head(2), /// footContactPhase 2
+          phaseSin_, /// phase encoding 2
           static_cast<double>(standingMode_);  /// standingMode 1
 
       double noise = 0.0;
@@ -573,7 +589,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void valueObserve(Eigen::Ref<EigenVec> ob) final { /// obs + (true) estimated_state
       if (standingMode_){
-          footContactPhase_.setZero();
+//          footContactPhase_.setZero();
+          phaseSin_.setZero();
       }
       valueObDouble_ << rot_.e().row(2).transpose(),                               /// body orientation. 3
               bodyAngularVel_,                                                      /// body angular velocity. 3
@@ -588,12 +605,13 @@ class ENVIRONMENT : public RaisimGymEnv {
               rot_.e().transpose() * (footPos_[2].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[3].e() - gc_.head(3)),
               /// relative foot position with respect to the body COM, expressed in the body frame 12
               command_,                                                             /// command 3
-              footContactPhase_.head(2), /// footContactPhase 2
+//              footContactPhase_.head(2), /// footContactPhase 2
+              phaseSin_, /// phase sin cos 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
               bodyLinearVel_,                                                       /// body linear velocity. 3
 //              footToTerrain_,                                                       /// foot z position 20 (5 sample * 4 foot)
-                    footClearance_,                                                       /// min foot z
+              footClearance_,                                                       /// min foot z
               footContact_.cast<double>();
 
       /// convert it to float
@@ -697,6 +715,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,4,1> footClearance_;     // foot clearance
   Eigen::Matrix<double,4,1> footSlip_;     // foot clearance
   Eigen::Matrix<double,20,1> footToTerrain_; // 5 sample point for each foot
+  Eigen::Matrix<double,2,1> phaseSin_;  // sin cos representation of phase
   bool standingMode_;
   /// log barrier function
   Eigen::Matrix<double,12,2> limitJointPos_;
