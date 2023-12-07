@@ -548,8 +548,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void observe(Eigen::Ref<EigenVec> ob) final {
       if (standingMode_){
-//          footContactPhase_.setZero();
-          phaseSin_.setZero();
+          footContactPhase_.setZero();
+//          phaseSin_.setZero();
       }
       obDouble_ << rot_.e().row(2).transpose(),                               /// body orientation. 3
           bodyAngularVel_,                                                      /// body angular velocity. 3
@@ -564,8 +564,8 @@ class ENVIRONMENT : public RaisimGymEnv {
           rot_.e().transpose() * (footPos_[2].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[3].e() - gc_.head(3)),
           /// relative foot position with respect to the body COM, expressed in the body frame 12
           command_,                                                             /// command 3
-//          footContactPhase_.head(2), /// footContactPhase 2
-          phaseSin_, /// phase encoding 2
+          footContactPhase_.head(2), /// footContactPhase 2
+//          phaseSin_, /// phase encoding 2
           static_cast<double>(standingMode_);  /// standingMode 1
 
       double noise = 0.0;
@@ -589,8 +589,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void valueObserve(Eigen::Ref<EigenVec> ob) final { /// obs + (true) estimated_state
       if (standingMode_){
-//          footContactPhase_.setZero();
-          phaseSin_.setZero();
+          footContactPhase_.setZero();
+//          phaseSin_.setZero();
       }
       valueObDouble_ << rot_.e().row(2).transpose(),                               /// body orientation. 3
               bodyAngularVel_,                                                      /// body angular velocity. 3
@@ -605,8 +605,8 @@ class ENVIRONMENT : public RaisimGymEnv {
               rot_.e().transpose() * (footPos_[2].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[3].e() - gc_.head(3)),
               /// relative foot position with respect to the body COM, expressed in the body frame 12
               command_,                                                             /// command 3
-//              footContactPhase_.head(2), /// footContactPhase 2
-              phaseSin_, /// phase sin cos 2
+              footContactPhase_.head(2), /// footContactPhase 2
+//              phaseSin_, /// phase sin cos 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
               bodyLinearVel_,                                                       /// body linear velocity. 3
