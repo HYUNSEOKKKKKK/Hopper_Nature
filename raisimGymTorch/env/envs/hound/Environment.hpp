@@ -98,10 +98,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitBaseMotion_.row(0) << -0.3,0.3;
     limitBaseMotion_.row(1) << -0.3,0.3;
     limitJointVel_ << -8,8;
-//    limitTargetVel_ << -0.2,0.2;
-    limitTargetVel_ << -0.1,0.1;
+    limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.6,2;
-//    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
     limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
@@ -391,7 +389,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
       for (int i=0;i<2;i++){
-          relaxedLogBarrier(0.3,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
+          relaxedLogBarrier(0.2,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
           barrierBaseMotion += tempReward;
       }
       /// Log Barrier - limit_joint_vel
@@ -400,13 +398,10 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierJointVel += tempReward;
       }
       /// Log Barrier - limit_target_vel
-//      relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
       relaxedLogBarrier(0.1,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
       barrierTargetVel += tempReward;
-//      relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
       relaxedLogBarrier(0.1,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
       barrierTargetVel += tempReward;
-//      relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
       relaxedLogBarrier(0.1,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
       barrierTargetVel += tempReward;
       /// Log Barrier - limit_foot_contact
@@ -416,7 +411,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
