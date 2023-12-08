@@ -153,7 +153,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
     world_->setDefaultMaterial(mu_, 0, 0);
 
-
     /// initialize the pose
     if(standingMode_){ /// command -> sudden stop
         gcNoise_ = gc_;
