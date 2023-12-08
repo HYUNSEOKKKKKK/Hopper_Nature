@@ -94,7 +94,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        limitJointPos_.row(i*3+1) << 0.0,1.570796; // hip
         limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
     }
-    limitBodyHeight_ << 0.52, 0.70;
+    limitBodyHeight_ << 0.54, 0.72;
 //    limitBodyHeight_ << 0.56, 1.00; // no limit for upper -> due to the downward directiob
     limitBaseMotion_ << -0.3,0.3;
     limitJointVel_ << -8,8;
@@ -300,7 +300,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// neg reward
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.2,0.2,1.,0.2,0.2,1.,0.2,0.2,1.,0.2,0.2;
+      jointPosWeight << 1.0, 0.4,0.4,1.,0.4,0.4,1.,0.4,0.4,1.,0.4,0.4;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
@@ -379,7 +379,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           tempHeight += gc_(2) - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
       }
       tempHeight /= 4;
-      relaxedLogBarrier(0.01,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,barrierBodyHeight);
+      relaxedLogBarrier(0.03,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,barrierBodyHeight);
       /// Log Barrier - limit_base_motion
       relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
@@ -406,7 +406,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.006,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
