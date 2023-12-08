@@ -51,7 +51,7 @@ else:
     print("Loaded weight from {}\n".format(weight_path))
     start = time.time()
 
-    env.set_terrain(0,0.0,0.7)
+    env.set_terrain(3,2.0,0.7)
     env.set_initial(0)
 
     env.reset()
@@ -94,9 +94,9 @@ else:
                 env.set_command(command_x,command_y,command_yaw)
         else:
             if step % 400 == 0:
-                env.set_command(np.random.uniform(0.6, 0.6, 1),
+                env.set_command(np.random.uniform(0.3, 0.3, 1),
                                 np.random.uniform(0.0, 0.0, 1),
-                                np.random.uniform(0.0, 0.6, 1))
+                                np.random.uniform(0.0, 0.0, 1))
 
         time.sleep(0.01)
         with torch.no_grad():
