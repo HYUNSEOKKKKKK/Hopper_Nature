@@ -84,8 +84,8 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
     else if (heightMapType == 2){
         /// stair
         double stepHeight = 0.065 * hardness;
-        int xSampleNum = 6;
-        int ySampleNum = 3600; //3600;
+        int xSampleNum = 60;
+        int ySampleNum = 1200; //3600;
         int stairNum = 60;
         std::vector<double> heightVec;
         heightVec.resize(xSampleNum*ySampleNum);
@@ -107,8 +107,8 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
     else if(heightMapType == 3){
         /// big stair
         double stepHeight = 0.115 * hardness;
-        int xSampleNum = 6;
-        int ySampleNum = 3600;
+        int xSampleNum = 60;
+        int ySampleNum = 1200;
         int stairNum = 12;
         std::vector<double> heightVec;
         heightVec.resize(xSampleNum*ySampleNum);

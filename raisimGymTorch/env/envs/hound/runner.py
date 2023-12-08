@@ -167,7 +167,7 @@ for update in range(12001):
     avg_rewards.append(average_ll_performance)
 
     actor.update()
-    std_value = 0.90 - 0.10 * (update // 1000)
+    std_value = 0.80 - 0.10 * (update // 1000)
     std_value = max(std_value, 0.30)
     actor.distribution.enforce_minimum_std((torch.ones(12) * std_value).to(device))
 
