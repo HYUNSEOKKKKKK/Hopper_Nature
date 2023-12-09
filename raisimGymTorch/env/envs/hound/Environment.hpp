@@ -90,9 +90,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// set limit for log barrier function
     for (int i=0;i<4;i++){
         limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
-//        limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
+        limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
 //        limitJointPos_.row(i*3+1) << 0.0,1.570796; // hip
-        limitJointPos_.row(i*3+1) << -0.3,1.57; // hip
         limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
     }
     limitBodyHeight_ << 0.54, 0.72;
