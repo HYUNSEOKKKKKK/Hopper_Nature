@@ -113,7 +113,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     standingMode_ = false;
     jointVelTemp_.setZero();
     phaseSin_.setZero();
-    standingSmoothness_ = 1.0;
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
@@ -154,7 +153,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_->setDefaultMaterial(mu_, 0, 0);
 
     /// initialize the pose
-    if(standingMode_){ /// command -> sudden stop
+    bool reset = !standingMode_;
+    if (standingMode_){ reset = uniDist_(gen_) > 0.0;}
+
+    if(!reset){ /// command -> sudden stop
         gcNoise_ = gc_;
         gvNoise_ = gv_;
         gcNoise_.head(3) = gcInit_.head(3);
@@ -210,7 +212,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
 
     /// reset (except the standingMode_ -> which preserves previous state for sudden command stop)
-    if (!standingMode_){
+    if (reset){
         pTarget_ = gc_.tail(12);
         gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
         for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
@@ -285,10 +287,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for standingMode
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
-          standingSmoothness_ = 1.0;
       } else {
           limitBaseMotion_ << -0.1,0.1;
-          standingSmoothness_ = 1.2;
       }
   }
 
@@ -306,8 +306,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("footSlip", footSlip_.sum());
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
 
-      rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm() * standingSmoothness_);
-      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
+      rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
+      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
 
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
@@ -717,7 +717,6 @@ class ENVIRONMENT : public RaisimGymEnv {
   ///
   std::vector<Eigen::Vector<double,12>> jointPosErrorHist_, jointVelHist_;
   Eigen::Vector<double,12> jointVelTemp_;
-  double standingSmoothness_;
   /// initialize
   Eigen::Matrix<double,3,3> rotYawNoise_,rotTotalNoise_;
   Eigen::Quaterniond quat_;
