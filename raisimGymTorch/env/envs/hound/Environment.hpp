@@ -143,8 +143,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         double comCurriculum = (double)iter_ * 1.0/3000;
         comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
         do {
-//            double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.0) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.2, other 1.5
-            double maxCommand = 1.0 + comCurriculum * 0.5; // lin x max 1.5
+            double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.0) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.0, other 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
                     command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
         } while (command_.norm() < 0.2);
@@ -639,6 +638,9 @@ class ENVIRONMENT : public RaisimGymEnv {
                 curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
             }
 
+            if (iter_ > 6000){
+                curriculum_ = (double)floor((uniDist_(gen_) + 1.0) / 0.5); /// each 25% prob -> 0,1,2,3
+            }
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
 //      heightMap_ = HeightMapSample(world_.get(),3,curriculum_,gen_,uniDist_);
