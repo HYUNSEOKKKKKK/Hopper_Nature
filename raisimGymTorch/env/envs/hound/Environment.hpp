@@ -101,7 +101,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.6,2;
 //    limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
-    limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
+//    limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
+    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -621,7 +622,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
             return true;
         }
-//            if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
+    if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
 //    }
 
     terminalReward = -0.f;
