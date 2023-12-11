@@ -613,6 +613,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   bool isTerminalState(float& terminalReward) final {
     terminalReward = float(terminalRewardCoeff_);
 
+    
     /// if the contact body is not feet
 //    if (iter_>4200 and (iter_%4==2 or iter_%4==3)){
 //        for (int i=0; i<4; i++){
