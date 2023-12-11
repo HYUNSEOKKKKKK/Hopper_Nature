@@ -309,6 +309,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
+      rewards_.record("pTarget", (pTarget_-actionMean_).squaredNorm());
 
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
@@ -410,7 +411,8 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierFootClearance += tempReward;
       }
 
-      double logClip = -100.0;
+//      double logClip = -100.0;
+      double logClip = -300.0;
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierBodyHeight = fmax(barrierBodyHeight,logClip);
       barrierBaseMotion = fmax(barrierBaseMotion,logClip);
@@ -622,7 +624,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
             return true;
         }
-    if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
+//    if ((pTarget_-actionMean_).squaredNorm() > 1e2)   {return true;}
 //    }
 
     terminalReward = -0.f;

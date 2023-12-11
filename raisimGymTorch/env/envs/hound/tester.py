@@ -40,7 +40,7 @@ est_dim = env.num_est
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-02-13-02-04/full_1000.pt"
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-05-23-01-33/full_1500.pt"
-weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-10-01-52-03/full_10000.pt"
+weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-10-23-55-33/full_10000.pt"
 # weight_path = args.weight
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
@@ -96,7 +96,7 @@ else:
             if step % 400 == 0:
                 env.set_command(np.random.uniform(1.2, 1.2, 1),
                                 np.random.uniform(0.0, 0.0, 1),
-                                np.random.uniform(0.0, 0.0, 1))
+                                np.random.uniform(0.3, 0.6, 1))
 
         time.sleep(0.01)
         with torch.no_grad():
