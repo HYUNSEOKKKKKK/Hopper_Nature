@@ -731,7 +731,6 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
   ///
   std::vector<Eigen::Vector<double,12>> jointPosErrorHist_, jointVelHist_;
-  Eigen::Vector<double,12> jointVelTemp_;
   /// initialize
   Eigen::Matrix<double,3,3> rotYawNoise_,rotTotalNoise_;
   Eigen::Quaterniond quat_;
