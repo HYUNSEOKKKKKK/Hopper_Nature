@@ -23,10 +23,10 @@ environment:
     torque:      -5e-5
 
     # standing
-    jointPos: -1.0 #-5e-1
-    jointVel: -5e-2 #-2.5e-1
-    jointAcc: -1.0 #-5.0
-
+    jointPos: -1e-1
+    jointVel: -5e-2
+    jointAcc: -1.0
+    
     # relaxed
     barrierJointPos:      1e-1
     barrierBodyHeight:    1e-1
