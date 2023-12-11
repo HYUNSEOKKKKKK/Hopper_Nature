@@ -1,5 +1,5 @@
 seed: 1
-record_video: yes
+record_video: no
 
 environment:
   render: True
@@ -16,14 +16,16 @@ environment:
     comLinearVel:  8
 
     # neg reward (not reward coefficient, about range)
-    footSlip: -5e-1
+    footSlip:    -5e-1
     smoothness1: -2.5 #-2.0
     smoothness2: -1.2 #-1.0
-    bodyOri: -2.5
-    jointAcc: -5e-2
+    bodyOri:     -2.5
+    torque:      -5e-5
 
-    torque:   -5e-5
-    jointPos : -1.0
+    # standing
+    jointPos: -5e-1
+    jointVel: -2.5e-1
+    jointAcc: -5.0
 
     # relaxed
     barrierJointPos:      1e-1
@@ -35,10 +37,12 @@ environment:
     barrierFootClearance: 1e-1
 
     # total sum
-    negReward2: 1.0          # only for record
-
-    negSumPos:         1.0 #1.0
+    standingReward:     5.0
+    negSumPos:          1.0 #1.0
     relaxedLog:         1.0
+
+    # only for record
+    negReward2: 1.0
 
 architecture:
   policy_net: [ 256, 128, 64 ]
