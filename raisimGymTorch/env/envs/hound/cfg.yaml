@@ -20,12 +20,10 @@ environment:
     smoothness1: -2.5 #-2.0
     smoothness2: -1.2 #-1.0
     bodyOri: -2.5
+    jointAcc: -5e-2
 
-    pTarget : -1e-1 # not added
     torque:   -5e-5
     jointPos : -1.0
-    jointAcc : -5e-2
-    standingJointVel: -5e-2
 
     # relaxed
     barrierJointPos:      1e-1
