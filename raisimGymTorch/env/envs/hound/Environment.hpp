@@ -303,7 +303,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       standingReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc"));
       rewards_.record("standingRewardLogging2", standingReward); /// only for recording
 
-      return (float)(std::exp(standingReward));
+      return (float)(std::exp(5.0*standingReward));
   }
 
   float getNegPosReward(){
