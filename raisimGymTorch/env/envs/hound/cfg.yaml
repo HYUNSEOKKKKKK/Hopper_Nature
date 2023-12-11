@@ -43,6 +43,7 @@ environment:
 
     # only for record
     negReward2: 1.0
+    standingRewardLogging2: 1.0
 
 architecture:
   policy_net: [ 256, 128, 64 ]
