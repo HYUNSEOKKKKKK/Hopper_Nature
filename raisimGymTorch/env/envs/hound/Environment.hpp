@@ -114,6 +114,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     standingMode_ = false;
     jointVelTemp_.setZero();
     phaseSin_.setZero();
+      jointVelTemp_.setZero();
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
@@ -155,7 +156,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// initialize the pose
     bool reset = !standingMode_;
-    if (standingMode_){ reset = uniDist_(gen_) > 0.0;}
+    if (standingMode_){ reset = uniDist_(gen_) > -0.5;}
 
     if(!reset){ /// command -> sudden stop
         gcNoise_ = gc_;
@@ -288,8 +289,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for standingMode
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
+          jointVelTemp_.setZero();
       } else {
           limitBaseMotion_ << -0.1,0.1;
+          jointVelTemp_ = gv_.tail(12);
       }
   }
 
@@ -314,10 +317,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
       rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
+      rewards_.record("standingJointVel", jointVelTemp_.squaredNorm());
 
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("pTarget") +rewards_.getReward("jointPos") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
+      negReward = (float)(rewards_.getReward("standingJointVel")+rewards_.getReward("jointPos") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -715,6 +719,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,4,1> footSlip_;     // foot clearance
   Eigen::Matrix<double,20,1> footToTerrain_; // 5 sample point for each foot
   Eigen::Matrix<double,2,1> phaseSin_;  // sin cos representation of phase
+  Eigen::Matrix<double,12,1> jointVelTemp_;
   bool standingMode_;
   /// log barrier function
   Eigen::Matrix<double,12,2> limitJointPos_;
