@@ -284,7 +284,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for standingMode
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
-          standingRegulation_ = 0.1;
+          standingRegulation_ = 0.0;
       } else {
           limitBaseMotion_ << -0.1,0.1;
           standingRegulation_ = 1.0;
