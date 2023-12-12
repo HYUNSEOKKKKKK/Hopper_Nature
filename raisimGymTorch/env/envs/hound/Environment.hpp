@@ -60,8 +60,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
-//      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
-      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
+      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
     }
 
     /// Reward coefficients
@@ -284,7 +283,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for standingMode
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
-          standingRegulation_ = 0.0;
+          standingRegulation_ = 0.2;
       } else {
           limitBaseMotion_ << -0.1,0.1;
           standingRegulation_ = 1.0;
@@ -571,10 +570,10 @@ class ENVIRONMENT : public RaisimGymEnv {
           else if(i<6)   {noise = 0.1;}   /// body angular velocity (rad/sec)
           else if(i<18)  {noise = 0.05;}  /// joint pos             (rad)
           else if(i<30)  {noise = 0.5;}   /// joint vel             (rad/sec)
-          else if(i<54)  {noise = 0.0;}  /// action related
+          else if(i<54)  {noise = 0.01;}  /// action related
           else if(i<90)  {noise = 0.0;}   /// action related
-          else if(i<126) {noise = 0.05;}  /// vel history
-          else if(i<138) {noise = 0.01;} /// relative foot pos (1 cm)
+          else if(i<126) {noise = 0.1;}  /// vel history
+          else if(i<138) {noise = 0.02;} /// relative foot pos (2 cm)
           else           {noise = 0.0;}
 
           obDouble_(i) += uniDist_(gen_) * noise;
