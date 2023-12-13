@@ -93,7 +93,8 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
     }
     limitBodyHeight_ << 0.54, 0.72;
-    limitBaseMotion_ << -0.3,0.3;
+//    limitBaseMotion_ << -0.3,0.3;
+    limitBaseMotion_ << -0.2,0.2;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.6,2;
@@ -282,13 +283,13 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float standingReward(){
       /// for standingMode
-      if (!standingMode_){
-          limitBaseMotion_ << -0.3,0.3;
-          standingRegulation_ = 0.01;
-      } else {
-          limitBaseMotion_ << -0.1,0.1;
-          standingRegulation_ = 1.0;
-      }
+//      if (!standingMode_){
+//          limitBaseMotion_ << -0.3,0.3;
+//          limitJointVel_ << -8,8;
+//      } else {
+//          limitBaseMotion_ << -0.1,0.1;
+//          limitJointVel_ << -8,8;
+//      }
 //      float standingReward;
 //      standingReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc"));
 //      rewards_.record("standingRewardLogging2", standingReward); /// only for recording
@@ -686,7 +687,7 @@ class ENVIRONMENT : public RaisimGymEnv {
  private:
   int gcDim_, gvDim_;
   bool visualizable_ = false;
-  double terminalRewardCoeff_ = -10.0;
+  double terminalRewardCoeff_ = -1.0;
   raisim::ArticulatedSystem* hound_;
 
   Eigen::VectorXd gc_, gv_;

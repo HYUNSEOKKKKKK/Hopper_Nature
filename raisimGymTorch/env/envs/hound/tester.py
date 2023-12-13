@@ -41,7 +41,8 @@ est_dim = env.num_est
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-11-11-54-10/full_1000.pt"
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-11-11-54-10/full_10000.pt"
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-11-16-28-57/full_2500.pt"
-weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-13-14-34-18/full_6000.pt"
+# weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-13-14-34-18/full_6000.pt"
+weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-13-17-31-42/full_7500.pt"
 # weight_path = args.weight
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
@@ -53,7 +54,7 @@ else:
     print("Loaded weight from {}\n".format(weight_path))
     start = time.time()
 
-    env.set_terrain(1,3.0,0.7)
+    env.set_terrain(3,3.0,0.7)
     env.set_initial(0)
 
     env.reset()
@@ -96,7 +97,7 @@ else:
                 env.set_command(command_x,command_y,command_yaw)
         else:
             if step % 400 == 0:
-                env.set_command(np.random.uniform(0.3, 0.3, 1),
+                env.set_command(np.random.uniform(0.0, 0.0, 1),
                                 np.random.uniform(0.0, 0.0, 1),
                                 np.random.uniform(0.0, 0.0, 1))
 
