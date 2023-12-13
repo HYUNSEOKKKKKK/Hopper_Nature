@@ -16,15 +16,15 @@ environment:
     comLinearVel:  8
 
     # neg reward (not reward coefficient, about range)
-    footSlip:    -1.0
+    footSlip:    -0.75
     smoothness1: -3.0 #-2.5
     smoothness2: -1.5 #-1.2
-    bodyOri:     -1.0 #-2.5
+    bodyOri:     -0.5 #-2.5
     torque:      -5e-5
 
-    jointPos: -5e-1 #-1.0
-    jointVel: -1e-3
-    jointAcc: -2e-2
+    jointPos: -2.0 # -5e-1
+    jointVel: -5e-3 # -1e-3
+    jointAcc: -4e-2
 
     # relaxed
     barrierJointPos:      1e-1
