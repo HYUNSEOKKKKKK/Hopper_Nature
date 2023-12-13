@@ -168,12 +168,13 @@ for update in range(12001):
 
     actor.update()
     if update<3000:
-        actor.distribution.enforce_minimum_std((torch.ones(12) * 0.7).to(device))
-    elif update<6000:
-        actor.distribution.enforce_minimum_std((torch.ones(12) * 0.5).to(device))
+        lower_limit = 0.7
+    elif update<7000:
+        lower_limit = 0.7 - (update - 3000)/4000 * 0.4
     else:
-        actor.distribution.enforce_minimum_std((torch.ones(12) * 0.3).to(device))
+        lower_limit = 0.3
 
+    actor.distribution.enforce_minimum_std((torch.ones(12) * lower_limit).to(device))
     actor.distribution.enforce_maximum_std((torch.ones(12)*1.5).to(device))
 
     # curriculum update. Implement it in Environment.hpp
