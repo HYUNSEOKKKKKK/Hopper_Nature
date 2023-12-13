@@ -283,26 +283,16 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for standingMode
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
-          standingRegulation_ = 0.2;
+          standingRegulation_ = 0.01;
       } else {
           limitBaseMotion_ << -0.1,0.1;
           standingRegulation_ = 1.0;
       }
-      /// standing reward regulation
-      Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.5,0.5,1.,0.5,0.5,1.,0.5,0.5,1.,0.5,0.5;
-      jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
-      jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
-
-      rewards_.record("jointPos", jointPosTemp.squaredNorm() * standingRegulation_);
-      rewards_.record("jointVel", gv_.tail(12).squaredNorm() * standingRegulation_);
-      rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm() * standingRegulation_);
-
-      float standingReward;
-      standingReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc"));
-      rewards_.record("standingRewardLogging2", standingReward); /// only for recording
-
-      return (float)(std::exp(1.0*standingReward));
+//      float standingReward;
+//      standingReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc"));
+//      rewards_.record("standingRewardLogging2", standingReward); /// only for recording
+//      return (float)(std::exp(1.0*standingReward));
+      return 0.0;
   }
 
   float getNegPosReward(){
@@ -317,11 +307,19 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
+      Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
+      jointPosWeight << 1.0, 0.5,0.5,1.,0.5,0.5,1.,0.5,0.5,1.,0.5,0.5;
+      jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
+      jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
+
+      rewards_.record("jointPos", jointPosTemp.squaredNorm());
+      rewards_.record("jointVel", gv_.tail(12).squaredNorm());
+      rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
+
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-//      negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
-      negReward = (float)(rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
+      negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
