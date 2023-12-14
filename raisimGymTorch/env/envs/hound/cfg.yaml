@@ -22,7 +22,7 @@ environment:
     bodyOri:     -0.5 #-2.5
     torque:      -5e-5
 
-    jointPos: -8.0 # -5e-1
+    jointPos: -2.0 # -5e-1
     jointVel: -5e-3 # -1e-3
     jointAcc: -4e-2
 
