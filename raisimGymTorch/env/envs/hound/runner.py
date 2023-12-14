@@ -168,9 +168,9 @@ for update in range(16002):
 
     actor.update()
     if update<3000:
-        lower_limit = 0.7
+        lower_limit = 0.8
     elif update<7000:
-        lower_limit = 0.7 - (update - 3000)/4000 * 0.4
+        lower_limit = 0.8 - (update - 3000)/4000 * 0.5
     else:
         lower_limit = 0.3
 

@@ -22,9 +22,9 @@ environment:
     bodyOri:     -0.5 #-2.5
     torque:      -1e-4 #-5e-5
 
-    jointPos: -2.0 # -5e-1
-    jointVel: -5e-3 # -1e-3
-    jointAcc: -4e-2
+    jointPos: -2.0 # -2.0
+    jointVel: -2e-3 # -5e-3
+    jointAcc: -2e-2 # -4e-2
 
     # relaxed
     barrierJointPos:      1e-1
