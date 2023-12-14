@@ -130,6 +130,12 @@ class ENVIRONMENT : public RaisimGymEnv {
   void init() final { }
 
   void reset() final {
+    /// pd gain randomization
+    Eigen::Vector<double,18> jointPgain, jointDgain;
+    jointPgain.setZero(); jointPgain.tail(12).setConstant(50.0 + 2.5*uniDist_(gen_));
+    jointDgain.setZero(); jointDgain.tail(12).setConstant(1.0 + 0.1*uniDist_(gen_));
+    hound_->setPdGains(jointPgain, jointDgain);
+
     /// with standing mode
     if (uniDist_(gen_) > 0.8) { // 10 %
         standingMode_ = true;
