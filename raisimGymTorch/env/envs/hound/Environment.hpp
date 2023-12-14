@@ -109,6 +109,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     standingMode_ = false;
     standingRegulation_ = 0.0;
     phaseSin_.setZero();
+      footObsNoise_.setZero();
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
@@ -135,6 +136,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointPgain.setZero(); jointPgain.tail(12).setConstant(50.0 + 2.5*uniDist_(gen_));
     jointDgain.setZero(); jointDgain.tail(12).setConstant(1.0 + 0.1*uniDist_(gen_));
     hound_->setPdGains(jointPgain, jointDgain);
+    /// foot obs noise
+    for (int i=0;i<12;i++){
+      footObsNoise_(i) = 0.02 * uniDist_(gen_);
+    }
 
     /// with standing mode
     if (uniDist_(gen_) > 0.8) { // 10 %
@@ -579,7 +584,8 @@ class ENVIRONMENT : public RaisimGymEnv {
           else if(i<54)  {noise = 0.01;}  /// action related
           else if(i<90)  {noise = 0.0;}   /// action related
           else if(i<126) {noise = 0.1;}  /// vel history
-          else if(i<138) {noise = 0.02;} /// relative foot pos (2 cm)
+//          else if(i<138) {noise = 0.02;} /// relative foot pos (2 cm)
+          else if(i<138) {noise = footObsNoise_(i-126);} /// relative foot pos (2 cm)
           else           {noise = 0.0;}
 
           obDouble_(i) += uniDist_(gen_) * noise;
@@ -718,6 +724,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,4,1> footSlip_;     // foot clearance
   Eigen::Matrix<double,20,1> footToTerrain_; // 5 sample point for each foot
   Eigen::Matrix<double,2,1> phaseSin_;  // sin cos representation of phase
+  Eigen::Matrix<double,12,1> footObsNoise_;
   bool standingMode_;
   double standingRegulation_;
   /// log barrier function
