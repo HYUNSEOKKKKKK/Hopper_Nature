@@ -239,7 +239,12 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float step(const Eigen::Ref<EigenVec>& action) final {
     /// delay
-    int delayIdx = int((0.002 / simulation_dt_ + 1e-10)); // 2ms delay
+      int delayIdx = 0;
+    if (uniDist_(gen_)<0.0){
+        delayIdx= int((0.003 / simulation_dt_ + 1e-10)); // 3ms delay
+    }else{
+        delayIdx = int((0.004 / simulation_dt_ + 1e-10)); // 4ms delay
+    }
 
     /// simulation
     double avgReward = 0.0;
