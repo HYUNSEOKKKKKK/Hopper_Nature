@@ -99,7 +99,7 @@ scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000
 # if mode == 'retrain':
 #     load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
 
-for update in range(12001):
+for update in range(16002):
     start = time.time()
     env.reset()
     reward_sum = 0
@@ -167,13 +167,12 @@ for update in range(12001):
     avg_rewards.append(average_ll_performance)
 
     actor.update()
-    # if update<3000:
-    #     lower_limit = 0.7
-    # elif update<7000:
-    #     lower_limit = 0.7 - (update - 3000)/4000 * 0.4
-    # else:
-    #     lower_limit = 0.3
-    lower_limit = 0.3
+    if update<3000:
+        lower_limit = 0.7
+    elif update<7000:
+        lower_limit = 0.7 - (update - 3000)/4000 * 0.4
+    else:
+        lower_limit = 0.3
 
     actor.distribution.enforce_minimum_std((torch.ones(12) * lower_limit).to(device))
     actor.distribution.enforce_maximum_std((torch.ones(12)*1.5).to(device))

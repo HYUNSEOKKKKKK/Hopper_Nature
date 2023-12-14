@@ -148,11 +148,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     }else{
         standingMode_ = false;
 
-//        double comCurriculum = (double)iter_ * 1.0/3000;
-//        comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
+        double comCurriculum = (double)iter_ * 1.0/3000;
+        comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
         do {
-//            double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.0) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.0, other 1.5
-            double maxCommand = 1.0;
+            double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.0) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.0, other 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
                     command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
         } while (command_.norm() < 0.2);
@@ -239,7 +238,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float step(const Eigen::Ref<EigenVec>& action) final {
     /// delay
-      int delayIdx = 0;
+    int delayIdx = 0;
     if (uniDist_(gen_)<0.0){
         delayIdx= int((0.003 / simulation_dt_ + 1e-10)); // 3ms delay
     }else{
@@ -653,12 +652,11 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-//      curriculum_ = (double)(iter_) * (1.0/1500.0); /// 1500 iter -> 1.0
-//      curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
+      curriculum_ = (double)(iter_) * (1.0/1500.0); /// 1500 iter -> 1.0
+      curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
-      heightMap_ = HeightMapSample(world_.get(),0,0.0,gen_,uniDist_);
-//      heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
+      heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
   }
 //            if (curriculum_<2.0){
 //                curriculum_ = (double)iter_ * (1.0/500.0); /// 500 iter -> 1.0
