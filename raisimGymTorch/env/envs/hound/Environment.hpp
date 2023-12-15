@@ -298,14 +298,13 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float standingReward(){
       /// for standingMode
-      if (!standingMode_){
-          limitBaseMotion_ << -0.3,0.3;
-//          standingSmoothness_ = 1.0;
-      } else {
-          limitBaseMotion_ << -0.1,0.1;
-//          standingSmoothness_ = 1.2;
-      }
-
+//      if (!standingMode_){
+//          limitBaseMotion_ << -0.3,0.3;
+////          standingSmoothness_ = 1.0;
+//      } else {
+//          limitBaseMotion_ << -0.1,0.1;
+////          standingSmoothness_ = 1.2;
+//      }
       return 0.0;
   }
 
@@ -649,22 +648,12 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-            if (curriculum_<2.0){
-                curriculum_ = (double)iter_ * (1.0/500.0); /// 500 iter -> 1.0
-            }else{
-                curriculum_ = (double)(iter_-1000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
-                curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
-            }
+      curriculum_ = (double)(iter_) * (1.0/1800.0); /// 1500 iter -> 1.0
+      curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
   }
-//            if (curriculum_<2.0){
-//                curriculum_ = (double)iter_ * (1.0/500.0); /// 500 iter -> 1.0
-//            }else{
-//                curriculum_ = (double)(iter_-1000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
-//                curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
-//            }
 
   void setSeed(int seed) {gen_.seed(seed);}
 
