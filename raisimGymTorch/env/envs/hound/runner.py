@@ -167,13 +167,12 @@ for update in range(16002):
     avg_rewards.append(average_ll_performance)
 
     actor.update()
-    if update<3000:
-        lower_limit = 0.8
-    elif update<7000:
-        lower_limit = 0.8 - (update - 3000)/4000 * 0.5
-    else:
-        lower_limit = 0.3
-
+    # if update<3000:
+    #     lower_limit = 0.3
+    # elif update<7000:
+    #     lower_limit = 0.3 - (update - 3000)/4000 * 0.5
+    # else:
+    lower_limit = 0.3
 
     actor.distribution.enforce_minimum_std((torch.ones(12) * lower_limit).to(device))
     actor.distribution.enforce_maximum_std((torch.ones(12)*1.5).to(device))
