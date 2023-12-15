@@ -298,17 +298,14 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   float standingReward(){
       /// for standingMode
-//      if (!standingMode_){
-//          limitBaseMotion_ << -0.3,0.3;
-//          limitJointVel_ << -8,8;
-//      } else {
-//          limitBaseMotion_ << -0.1,0.1;
-//          limitJointVel_ << -8,8;
-//      }
-//      float standingReward;
-//      standingReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc"));
-//      rewards_.record("standingRewardLogging2", standingReward); /// only for recording
-//      return (float)(std::exp(1.0*standingReward));
+      if (!standingMode_){
+          limitBaseMotion_ << -0.3,0.3;
+//          standingSmoothness_ = 1.0;
+      } else {
+          limitBaseMotion_ << -0.1,0.1;
+//          standingSmoothness_ = 1.2;
+      }
+
       return 0.0;
   }
 
@@ -652,8 +649,12 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = (double)(iter_) * (1.0/1800.0); /// 1500 iter -> 1.0
-      curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
+            if (curriculum_<2.0){
+                curriculum_ = (double)iter_ * (1.0/500.0); /// 500 iter -> 1.0
+            }else{
+                curriculum_ = (double)(iter_-1000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
+                curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
+            }
 
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
