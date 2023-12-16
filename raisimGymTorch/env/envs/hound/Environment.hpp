@@ -653,7 +653,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
-      heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
+      if (uniDist_(gen_) > 0.8){  // 10 %
+          heightMap_ = HeightMapSample(world_.get(),0,0.0,gen_,uniDist_); /// plain
+      }else{  // 90 %
+          heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
+      }
+
   }
 
   void setSeed(int seed) {gen_.seed(seed);}
