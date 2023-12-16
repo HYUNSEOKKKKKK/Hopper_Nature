@@ -124,6 +124,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
     curriculum_ = 0.0;
+    coeffCurriculum_ = 0.0;
     iter_ = 0;
     mu_ = 0.7 + 0.3 * uniDist_(gen_);  // [0.4, 1.0]
     world_->setDefaultMaterial(mu_, 0, 0);
@@ -334,9 +335,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
-      rewards_.record("jointPos", jointPosTemp.squaredNorm());
-      rewards_.record("jointVel", gv_.tail(12).squaredNorm());
-      rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
+      rewards_.record("jointPos", jointPosTemp.squaredNorm() * coeffCurriculum_);
+      rewards_.record("jointVel", gv_.tail(12).squaredNorm() * coeffCurriculum_);
+      rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm() * coeffCurriculum_);
 
       /// sum
       float posReward, negReward;
@@ -650,17 +651,14 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = (double)(iter_) * (1.0/1800.0); /// 1500 iter -> 1.0
+      curriculum_ = (double)(iter_) * (1.0/1800.0); /// 1800 iter -> 1.0
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
-//      if (uniDist_(gen_) > 0.8){  // 10 %
-//          heightMap_ = HeightMapSample(world_.get(),0,0.0,gen_,uniDist_); /// plain
-//      }else{  // 90 %
-//          heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
-//      }
 
+      coeffCurriculum_ = (double)(iter_) * (1.0/6000.0); /// 6000 iter -> 1.0
+      coeffCurriculum_ = (coeffCurriculum_ > 1.0) ? 1.0 : coeffCurriculum_;
   }
 
   void setSeed(int seed) {gen_.seed(seed);}
@@ -747,6 +745,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   raisim::HeightMap* heightMap_;
   /// curriculum
   double curriculum_;
+  double coeffCurriculum_;
   int iter_;
   double mu_;
   /// for barrier
