@@ -60,7 +60,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
-      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
+//      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
+      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
     }
 
     /// Reward coefficients
@@ -315,6 +316,13 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("comLinearVel", std::exp(-5.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
       /// neg reward
+      footSlip_.setZero();
+      for (int i=0; i<4; i++){
+          if (footContact_(i)){
+              footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
+          }
+      }
+
       rewards_.record("footSlip", footSlip_.sum());
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
@@ -371,13 +379,6 @@ class ENVIRONMENT : public RaisimGymEnv {
               footClearance_(i) = 0.0; // max reward (not enforcing clearance)
           }
       }
-      footSlip_.setZero();
-      for (int i=0; i<4; i++){
-          if (footContact_(i)){
-              footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
-          }
-      }
-
 
       /// compute barrier reward
       double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0;
@@ -649,15 +650,15 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = (double)(iter_) * (1.0/1500.0); /// 1500 iter -> 1.0
+      curriculum_ = (double)(iter_) * (1.0/1800.0); /// 1500 iter -> 1.0
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
-      if (uniDist_(gen_) > 0.8){  // 10 %
-          heightMap_ = HeightMapSample(world_.get(),0,0.0,gen_,uniDist_); /// plain
-      }else{  // 90 %
-          heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
-      }
+//      if (uniDist_(gen_) > 0.8){  // 10 %
+//          heightMap_ = HeightMapSample(world_.get(),0,0.0,gen_,uniDist_); /// plain
+//      }else{  // 90 %
+//          heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
+//      }
 
   }
 
