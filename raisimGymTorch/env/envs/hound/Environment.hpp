@@ -336,8 +336,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
       rewards_.record("negReward2", negReward); /// only for recording
 
-//      return (float)(std::exp(0.2 * negReward) * posReward);
-      return (float)(std::exp(0.1 * negReward) * posReward);
+      return (float)(std::exp(0.2 * negReward) * posReward);
   }
 
   float getLogBarReward(){
@@ -650,7 +649,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = (double)(iter_) * (1.0/1800.0); /// 1800 iter -> 1.0
+      curriculum_ = (double)(iter_) * (1.0/1500.0); /// 1500 iter -> 1.0
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
