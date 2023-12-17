@@ -301,12 +301,13 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for standingMode
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
-//          standingSmoothness_ = 1.0;
+          limitTargetVel_ << -0.2,0.2;
+          limitJointVel_ << -8,8;
       } else {
           limitBaseMotion_ << -0.1,0.1;
-//          standingSmoothness_ = 1.2;
+          limitTargetVel_ << -0.1,0.1;
+          limitJointVel_ << -3,3;
       }
-
       return 0.0;
   }
 
