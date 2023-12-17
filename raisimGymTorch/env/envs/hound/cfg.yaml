@@ -24,8 +24,8 @@ environment:
     pTarget:     -2e-1
 
     jointPos:    -1e-1 #-1.0 # -2.0
-    jointVel:    -5e-4 #-1e-3 # -5e-3
-    jointAcc:    -1e-2 # -1e-3 #-1e-2 # -4e-2
+    jointVel:    -5e-3 #-1e-3 # -5e-3
+    jointAcc:    -2e-2 # -1e-3 #-1e-2 # -4e-2
 
     # relaxed
     barrierJointPos:      1e-1
