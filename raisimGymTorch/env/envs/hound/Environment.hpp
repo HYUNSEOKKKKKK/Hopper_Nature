@@ -124,7 +124,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
     curriculum_ = 0.0;
-    coeffCurriculum_ = 0.0;
     iter_ = 0;
     mu_ = 0.7 + 0.3 * uniDist_(gen_);  // [0.4, 1.0]
     world_->setDefaultMaterial(mu_, 0, 0);
@@ -242,9 +241,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// delay
     int delayIdx = 0;
     if (uniDist_(gen_)<0.0){
-        delayIdx= int((0.003 / simulation_dt_ + 1e-10)); // 3ms delay
+        delayIdx= int((0.003 / simulation_dt_ + 1e-10)); // 5ms delay
     }else{
-        delayIdx = int((0.004 / simulation_dt_ + 1e-10)); // 4ms delay
+        delayIdx = int((0.004 / simulation_dt_ + 1e-10)); // 6ms delay
     }
 
     /// simulation
@@ -329,20 +328,21 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
+      rewards_.record("pTarget", (pTarget_-actionMean_).squaredNorm());
 
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
       jointPosWeight << 1.0, 0.5,0.5,1.,0.5,0.5,1.,0.5,0.5,1.,0.5,0.5;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
-      rewards_.record("jointPos", jointPosTemp.squaredNorm() * coeffCurriculum_);
-      rewards_.record("jointVel", gv_.tail(12).squaredNorm() * coeffCurriculum_);
-      rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm() * coeffCurriculum_);
+      rewards_.record("jointPos", jointPosTemp.squaredNorm());
+      rewards_.record("jointVel", gv_.tail(12).squaredNorm());
+      rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm());
 
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
+      negReward = (float)(rewards_.getReward("pTarget") + rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -656,9 +656,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
-
-      coeffCurriculum_ = (double)(iter_) * (1.0/6000.0); /// 6000 iter -> 1.0
-      coeffCurriculum_ = (coeffCurriculum_ > 1.0) ? 1.0 : coeffCurriculum_;
   }
 
   void setSeed(int seed) {gen_.seed(seed);}
@@ -745,7 +742,6 @@ class ENVIRONMENT : public RaisimGymEnv {
   raisim::HeightMap* heightMap_;
   /// curriculum
   double curriculum_;
-  double coeffCurriculum_;
   int iter_;
   double mu_;
   /// for barrier
