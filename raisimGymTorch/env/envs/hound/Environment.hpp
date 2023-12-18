@@ -61,7 +61,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
 //      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
-      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
+//      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
+      actionStd_.segment(i*3,3) << 0.2, 0.2, 0.2;
     }
 
     /// Reward coefficients
@@ -173,7 +174,8 @@ class ENVIRONMENT : public RaisimGymEnv {
         /// initialize with noise
         gcNoise_ = gcInit_;
         /// rot noise
-        if (uniDist_(gen_)>0.2 and !standingMode_){ // 40 % -> 올라가는 거 고정
+//        if (uniDist_(gen_)>0.2 and !standingMode_){ // 40 % -> 올라가는 거 고정
+        if (uniDist_(gen_)>0.6 and !standingMode_ and iter_ < 5400){ // 20 % -> 올라가는 거 고정
             yawNoise_ = 3.141592/2.0;
             command_(0) = abs(command_(0));
         }else{
@@ -332,7 +334,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.5,0.5,1.,0.5,0.5,1.,0.5,0.5,1.,0.5,0.5;
+      jointPosWeight << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
