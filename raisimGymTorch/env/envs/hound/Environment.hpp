@@ -245,16 +245,16 @@ class ENVIRONMENT : public RaisimGymEnv {
     }else{
         delayIdx = int((0.004 / simulation_dt_ + 1e-10)); // 6ms delay
     }
+    /// action scaling
+    pTarget_ = action.cast<double>();
+    pTarget_ = pTarget_.cwiseProduct(actionStd_);
+    pTarget_ += actionMean_;                                   /// joint P target
 
     /// simulation
     double avgReward = 0.0;
     barrierReward_ = 0.0;
     for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
       if (i == delayIdx){
-          /// action scaling
-          pTarget_ = action.cast<double>();
-          pTarget_ = pTarget_.cwiseProduct(actionStd_);
-          pTarget_ += actionMean_;                                   /// joint P target
           gcDes_.tail(12) = pTarget_;
           hound_->setPdTarget(gcDes_, gvDes_);
       }
@@ -263,7 +263,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       if(server_) server_->unlockVisualizationServerMutex();
       updateObservation();
       avgReward += getReward();
-        barrierReward_+= getLogBarReward();
+      barrierReward_+= getLogBarReward();
 
       if(visualizationOn_){
           visualizeCommand();
@@ -271,15 +271,16 @@ class ENVIRONMENT : public RaisimGymEnv {
     }
 
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
-      barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
+    barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
     updateHistory();
 
     return avgReward;
   }
 
-        float   getBarrierReward() final {
+  float getBarrierReward() final {
             return barrierReward_;
   }
+
   void updateHistory(){
       prevPrevTarget_ = prevTarget_;
       prevTarget_ = pTarget_;
