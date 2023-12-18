@@ -60,8 +60,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
-//      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
-      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
+      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
     }
 
     /// Reward coefficients
@@ -241,9 +240,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// delay
     int delayIdx = 0;
     if (uniDist_(gen_)<0.0){
-        delayIdx= int((0.003 / simulation_dt_ + 1e-10)); // 5ms delay
+        delayIdx= int((0.003 / simulation_dt_ + 1e-10)); // 3ms delay
     }else{
-        delayIdx = int((0.004 / simulation_dt_ + 1e-10)); // 6ms delay
+        delayIdx = int((0.004 / simulation_dt_ + 1e-10)); // 4ms delay
     }
     /// action scaling
     pTarget_ = action.cast<double>();
@@ -652,7 +651,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = (double)(iter_) * (1.0/1800.0); /// 1800 iter -> 1.0
+      curriculum_ = (double)(iter_) * (1.0/1500.0); /// 1500 iter -> 1.0
       curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
 
       world_->removeObject(heightMap_);
