@@ -19,7 +19,7 @@ environment:
     footSlip:    -0.5
     smoothness1: -5.0 #-3.0 #-2.5
     smoothness2: -2.5 #-1.5 #-1.2
-    bodyOri:     -0.1 #-2.5
+    bodyOri:     -0.2 #-2.5
     torque:      -1e-4 #-5e-5
 
     jointPos:    -1.0 #-1.0 # -2.0
