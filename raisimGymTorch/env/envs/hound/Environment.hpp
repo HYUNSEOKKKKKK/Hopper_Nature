@@ -60,9 +60,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(12);
     for (int i=0; i<4; i++){
-//      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
-//      actionStd_.segment(i*3,3) << 0.1, 0.2, 0.2;
-      actionStd_.segment(i*3,3) << 0.2, 0.2, 0.2;
+      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
     }
 
     /// Reward coefficients
@@ -111,7 +109,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     standingMode_ = false;
     standingRegulation_ = 0.0;
     phaseSin_.setZero();
-      footObsNoise_.setZero();
+    footObsNoise_.setZero();
+    standingSmoothness_ = 1.0;
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
@@ -174,9 +173,9 @@ class ENVIRONMENT : public RaisimGymEnv {
         /// initialize with noise
         gcNoise_ = gcInit_;
         /// rot noise
-//        if (uniDist_(gen_)>0.2 and !standingMode_){ // 40 % -> 올라가는 거 고정
-        if (uniDist_(gen_)>0.6 and !standingMode_ and iter_ < 5400){ // 20 % -> 올라가는 거 고정
+        if (uniDist_(gen_)>0.2 and !standingMode_){ // 40 % -> 올라가는 거 고정
             yawNoise_ = 3.141592/2.0;
+            command_.tail(2).setZero();
             command_(0) = abs(command_(0));
         }else{
             yawNoise_ = uniDist_(gen_) * 3.141592;
@@ -306,10 +305,12 @@ class ENVIRONMENT : public RaisimGymEnv {
           limitBaseMotion_ << -0.3,0.3;
           limitTargetVel_ << -0.2,0.2;
           limitJointVel_ << -8,8;
+          standingSmoothness_ = 1.0;
       } else {
           limitBaseMotion_ << -0.1,0.1;
           limitTargetVel_ << -0.1,0.1;
           limitJointVel_ << -3,3;
+          standingSmoothness_ = 1.4;
       }
       return 0.0;
   }
@@ -329,12 +330,12 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       rewards_.record("footSlip", footSlip_.sum());
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
-      rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm());
-      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
+      rewards_.record("smoothness1",(pTarget_ - prevTarget_).squaredNorm() * standingSmoothness_);
+      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
       Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
+      jointPosWeight << 1.0, 0.5,0.5,1.,0.5,0.5,1.,0.5,0.5,1.,0.5,0.5;
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
 
@@ -654,8 +655,12 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = (double)(iter_) * (1.0/1800.0); /// 1800 iter -> 1.0
-      curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
+      if (curriculum_<2.0){
+          curriculum_ = (double)iter_ * (1.0/500.0); /// 500 iter -> 1.0
+      }else{
+          curriculum_ = (double)(iter_-1000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
+          curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
+      }
 
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
@@ -736,6 +741,8 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
   ///
   std::vector<Eigen::Vector<double,12>> jointPosErrorHist_, jointVelHist_;
+  double standingSmoothness_;
+
   /// initialize
   Eigen::Matrix<double,3,3> rotYawNoise_,rotTotalNoise_;
   Eigen::Quaterniond quat_;
