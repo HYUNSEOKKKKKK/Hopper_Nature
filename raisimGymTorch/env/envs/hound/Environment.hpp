@@ -303,14 +303,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for standingMode
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
-          limitTargetVel_ << -0.2,0.2;
           limitJointVel_ << -8,8;
           standingSmoothness_ = 1.0;
       } else {
           limitBaseMotion_ << -0.1,0.1;
-          limitTargetVel_ << -0.1,0.1;
           limitJointVel_ << -3,3;
-          standingSmoothness_ = 1.4;
+          standingSmoothness_ = 1.2;
       }
       return 0.0;
   }
@@ -433,8 +431,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierFootClearance += tempReward;
       }
 
-//      double logClip = -100.0;
-      double logClip = -300.0;
+      double logClip = -100.0;
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierBodyHeight = fmax(barrierBodyHeight,logClip);
       barrierBaseMotion = fmax(barrierBaseMotion,logClip);
