@@ -17,8 +17,8 @@ environment:
 
     # neg reward (not reward coefficient, about range)
     footSlip:    -0.5
-    smoothness1: -3.5 #-5.0
-    smoothness2: -1.8 #-2.5
+    smoothness1: -4.0 #-5.0
+    smoothness2: -2.0 #-2.5
     bodyOri:     -0.5 #-2.5
     torque:      -1e-4 #-5e-5
 
