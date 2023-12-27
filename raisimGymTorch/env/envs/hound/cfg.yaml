@@ -16,7 +16,7 @@ environment:
     comLinearVel:  12
 
     # neg reward (not reward coefficient, about range)
-    footSlip:    -0.5
+    footSlip:    -0.75
     smoothness1: -4.0 #-5.0
     smoothness2: -2.0 #-2.5
     bodyOri:     -0.5 #-2.5
