@@ -90,7 +90,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     for (int i=0;i<4;i++){
         limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
-        limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
+//        limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
+        limitJointPos_.row(i*3+2) << -2.0,-0.52; // knee
     }
     limitBodyHeight_ << 0.54, 0.72;
     limitBaseMotion_ << -0.3,0.3;
@@ -410,7 +411,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_joint_vel
       for (int i=0;i<12;i++){
-          relaxedLogBarrier(3.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
+//          relaxedLogBarrier(3.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
+          relaxedLogBarrier(2.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
           barrierJointVel += tempReward;
       }
       /// Log Barrier - limit_target_vel
