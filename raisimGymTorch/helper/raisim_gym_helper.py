@@ -18,7 +18,7 @@ class ConfigurationSaver:
     @property
     def data_dir(self):
         return self._data_dir
-        
+
 
 def tensorboard_launcher(directory_path):
     from tensorboard import program
