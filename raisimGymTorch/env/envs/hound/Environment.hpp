@@ -98,7 +98,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.6,2;
-    limitFootClearance_ << -0.12,1.0; // 어차피 desired_foot_clearance 를
+//    limitFootClearance_ << -0.12,1.0; // 어차피 desired_foot_clearance 를
+            limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -452,13 +453,15 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierTargetVel", barrierTargetVel);
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
-//      std::cout << "barrierJointPos : " <<  barrierJointPos << std::endl;
-//      std::cout << "barrierBodyHeight : " <<  barrierBodyHeight << std::endl;
-//      std::cout << "barrierBaseMotion : " <<  barrierBaseMotion << std::endl;
-//      std::cout << "barrierJointVel : " <<  barrierJointVel << std::endl;
-//      std::cout << "barrierTargetVel : " <<  barrierTargetVel << std::endl;
-//      std::cout << "barrierFootContact : " <<  barrierFootContact << std::endl;
-//      std::cout << "barrierFootClearance : " <<   barrierFootClearance << std::endl;
+//        if (barrierFootClearance < -40) {
+//            std::cout << "barrierJointPos : " <<  barrierJointPos << std::endl;
+//            std::cout << "barrierBodyHeight : " <<  barrierBodyHeight << std::endl;
+//            std::cout << "barrierBaseMotion : " <<  barrierBaseMotion << std::endl;
+//            std::cout << "barrierJointVel : " <<  barrierJointVel << std::endl;
+//            std::cout << "barrierTargetVel : " <<  barrierTargetVel << std::endl;
+//            std::cout << "barrierFootContact : " <<  barrierFootContact << std::endl;
+//            std::cout << "barrierFootClearance : " <<   barrierFootClearance << std::endl;
+//        }
 
       float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
