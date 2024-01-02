@@ -76,7 +76,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     footFrames_.push_back("FR_foot_fixed");
     footFrames_.push_back("FL_foot_fixed");
 
-    /// visualize if it is the first environment
+       /// visualize if it is the first environment
     if (visualizable_) {
       server_ = std::make_unique<raisim::RaisimServer>(world_.get());
       server_->launchServer();
@@ -90,7 +90,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     for (int i=0;i<4;i++){
         limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
-                limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
+//                limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
+                limitJointPos_.row(i*3+2) << -2.4,-0.52; // knee
 //        limitJointPos_.row(i*3+2) << -2.0,-0.52; // knee
     }
     limitBodyHeight_ << 0.54, 0.72;
