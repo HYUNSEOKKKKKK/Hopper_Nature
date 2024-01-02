@@ -113,6 +113,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     phaseSin_.setZero();
     footObsNoise_.setZero();
     standingSmoothness_ = 1.0;
+      jointPosWeight_.setZero(12);
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
@@ -296,23 +297,24 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   double getReward(){
-      rewards_.record("standingReward",standingReward()); /// there is order
+      standingReward(); /// there is order
       rewards_.record("negSumPos",getNegPosReward());
-      return rewards_.getReward("negSumPos") + rewards_.getReward("standingReward");
+      return rewards_.getReward("negSumPos");
   }
 
-  float standingReward(){
+  void standingReward(){
       /// for standingMode
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
           limitJointVel_ << -8,8;
           standingSmoothness_ = 1.0;
+          jointPosWeight_ << 1.0, 0.4,0.4,1.,0.4,0.4,1.,0.4,0.4,1.,0.4,0.4;
       } else {
           limitBaseMotion_ << -0.1,0.1;
           limitJointVel_ << -3,3;
           standingSmoothness_ = 1.4;
+          jointPosWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
       }
-      return 0.0;
   }
 
   float getNegPosReward(){
@@ -334,10 +336,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
-      Eigen::VectorXd jointPosTemp(12), jointPosWeight(12);
-      jointPosWeight << 1.0, 0.5,0.5,1.,0.5,0.5,1.,0.5,0.5,1.,0.5,0.5;
+      Eigen::VectorXd jointPosTemp(12);
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
-      jointPosTemp = jointPosWeight.cwiseProduct(jointPosTemp.eval());
+      jointPosTemp = jointPosWeight_.cwiseProduct(jointPosTemp.eval());
 
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
       rewards_.record("jointVel", gv_.tail(12).squaredNorm());
@@ -745,6 +746,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,12,1> footObsNoise_;
   bool standingMode_;
   double standingRegulation_;
+    Eigen::VectorXd jointPosWeight_;
   /// log barrier function
   Eigen::Matrix<double,12,2> limitJointPos_;
   Eigen::Matrix<double,1,2> limitBodyHeight_;
