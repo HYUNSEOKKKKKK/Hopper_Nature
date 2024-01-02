@@ -38,7 +38,7 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2024-01-02-13-58-08/full_2000.pt"
+weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2024-01-02-17-32-23/full_6000.pt"
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-08-11-12-57_hiking/full_8000.pt"
 # weight_path = args.weight
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
@@ -92,9 +92,9 @@ else:
                 if (command_yaw > 0.6):
                     command_yaw = 0.6
                 env.set_command(command_x,command_y,command_yaw)
-        else:
+        # else:
             if step % 400 == 0:
-                env.set_command(np.random.uniform(0.6, 0.6, 1),
+                env.set_command(np.random.uniform(0.3, 0.3, 1),
                                 np.random.uniform(0.0, 0.0, 1),
                                 np.random.uniform(0.0, 0.0, 1))
 
