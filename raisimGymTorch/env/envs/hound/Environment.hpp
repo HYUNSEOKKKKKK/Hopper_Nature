@@ -99,7 +99,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitTargetVel_ << -0.2,0.2;
     limitFootContact_ << -0.6,2;
 //    limitFootClearance_ << -0.12,1.0; // 어차피 desired_foot_clearance 를
-            limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
+            limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -432,12 +432,22 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      std::cout << "---------------" << std::endl;
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
 //                std::cout << i<<" th foot : " << tempReward << std::endl;
       }
 
-      double logClip = -300.0; /// 애초에 너무 밖으로 나가믄 안됨
+//      if (barrierFootClearance < -100) {
+//          std::cout << "barrierJointPos : " <<  barrierJointPos << std::endl;
+//          std::cout << "barrierBodyHeight : " <<  barrierBodyHeight << std::endl;
+//          std::cout << "barrierBaseMotion : " <<  barrierBaseMotion << std::endl;
+//          std::cout << "barrierJointVel : " <<  barrierJointVel << std::endl;
+//          std::cout << "barrierTargetVel : " <<  barrierTargetVel << std::endl;
+//          std::cout << "barrierFootContact : " <<  barrierFootContact << std::endl;
+//          std::cout << "barrierFootClearance : " <<   barrierFootClearance << std::endl;
+//      }
+
+      double logClip = -100.0;
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierBodyHeight = fmax(barrierBodyHeight,logClip);
       barrierBaseMotion = fmax(barrierBaseMotion,logClip);
@@ -452,15 +462,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierTargetVel", barrierTargetVel);
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
-//        if (barrierFootClearance < -100) {
-//            std::cout << "barrierJointPos : " <<  barrierJointPos << std::endl;
-//            std::cout << "barrierBodyHeight : " <<  barrierBodyHeight << std::endl;
-//            std::cout << "barrierBaseMotion : " <<  barrierBaseMotion << std::endl;
-//            std::cout << "barrierJointVel : " <<  barrierJointVel << std::endl;
-//            std::cout << "barrierTargetVel : " <<  barrierTargetVel << std::endl;
-//            std::cout << "barrierFootContact : " <<  barrierFootContact << std::endl;
-//            std::cout << "barrierFootClearance : " <<   barrierFootClearance << std::endl;
-//        }
+
 
       float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
