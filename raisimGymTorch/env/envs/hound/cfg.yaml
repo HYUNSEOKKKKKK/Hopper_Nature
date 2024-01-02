@@ -36,6 +36,7 @@ environment:
     barrierFootClearance: 1e-1
 
     # total sum
+    standingReward:     0.0
     negSumPos:          1.0 #1.0
     relaxedLog:         1.0
 
