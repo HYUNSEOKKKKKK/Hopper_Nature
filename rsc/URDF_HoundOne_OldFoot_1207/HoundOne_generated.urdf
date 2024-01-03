@@ -166,7 +166,7 @@
     <parent link="RR_thigh"/>
     <child link="RR_calf"/>
     <axis xyz="0 1 0"/>
-    <dynamics rotor_inertia="knee_rotor_inertia" damping="0" friction="0"/>
+    <dynamics rotor_inertia="0.05624622" damping="0" friction="0"/>
     <limit effort="400.00000000" lower="-2.79252680" upper="2.79252680" velocity="10.00000000"/>
   </joint>
   <link name="RR_calf">
@@ -278,7 +278,7 @@
     <parent link="RL_thigh"/>
     <child link="RL_calf"/>
     <axis xyz="0 1 0"/>
-    <dynamics rotor_inertia="knee_rotor_inertia" damping="0" friction="0"/>
+    <dynamics rotor_inertia="0.05624622" damping="0" friction="0"/>
     <limit effort="400.00000000" lower="-2.79252680" upper="2.79252680" velocity="10.00000000"/>
   </joint>
   <link name="RL_calf">
@@ -390,7 +390,7 @@
     <parent link="FR_thigh"/>
     <child link="FR_calf"/>
     <axis xyz="0 1 0"/>
-    <dynamics rotor_inertia="knee_rotor_inertia" damping="0" friction="0"/>
+    <dynamics rotor_inertia="0.05624622" damping="0" friction="0"/>
     <limit effort="400.00000000" lower="-2.79252680" upper="2.79252680" velocity="10.00000000"/>
   </joint>
   <link name="FR_calf">
@@ -502,7 +502,7 @@
     <parent link="FL_thigh"/>
     <child link="FL_calf"/>
     <axis xyz="0 1 0"/>
-    <dynamics rotor_inertia="knee_rotor_inertia" damping="0" friction="0"/>
+    <dynamics rotor_inertia="0.05624622" damping="0" friction="0"/>
     <limit effort="400.00000000" lower="-2.79252680" upper="2.79252680" velocity="10.00000000"/>
   </joint>
   <link name="FL_calf">
