@@ -313,7 +313,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           limitBaseMotion_ << -0.1,0.1;
           limitJointVel_ << -3,3;
           standingSmoothness_ = 1.4;
-          jointPosWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
+          jointPosWeight_ << 1.0, 0.7,0.7,1.,0.7,0.7,1.,0.7,0.7,1.,0.7,0.7;
       }
   }
 
