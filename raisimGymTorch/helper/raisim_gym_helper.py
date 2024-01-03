@@ -25,8 +25,8 @@ def tensorboard_launcher(directory_path):
     import webbrowser
     # learning visualizer
     tb = program.TensorBoard()
-    tb.configure(argv=[None, '--logdir', directory_path])
-    # tb.configure(argv=[None, '--logdir', directory_path,'--port',str(6008)])
+    # tb.configure(argv=[None, '--logdir', directory_path])
+    tb.configure(argv=[None, '--logdir', directory_path,'--port',str(6010)])
     url = tb.launch()
     print("[RAISIM_GYM] Tensorboard session created: "+url)
     webbrowser.open_new(url)
