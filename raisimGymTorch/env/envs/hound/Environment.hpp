@@ -75,6 +75,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     footFrames_.push_back("RL_foot_fixed");
     footFrames_.push_back("FR_foot_fixed");
     footFrames_.push_back("FL_foot_fixed");
+      rollJointFrames_.push_back("RR_roll_joint");
+      rollJointFrames_.push_back("RL_roll_joint");
+      rollJointFrames_.push_back("FR_roll_joint");
+      rollJointFrames_.push_back("FL_roll_joint");
 
        /// visualize if it is the first environment
     if (visualizable_) {
@@ -92,7 +96,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
                 limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
     }
-    limitBodyHeight_ << 0.52, 0.72;
+    limitBodyHeight_ << 0.48, 0.72;
     limitBaseMotion_ << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.4,0.4;
@@ -102,7 +106,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize
     command_.setZero();
     footContact_.setZero();
-    footVel_.resize(4); footPos_.resize(4);
+    footVel_.resize(4); footPos_.resize(4), rollJointPos_.resize(4);
     footContactPhase_.setZero();
     footClearance_.setZero();
     footSlip_.setZero();
@@ -304,11 +308,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
           standingSmoothness_ = 1.0;
-          jointPosWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
+          jointPosWeight_ << 1.0, 0.4,0.4,1.,0.4,0.4,1.,0.4,0.4,1.,0.4,0.4;
       } else {
           limitBaseMotion_ << -0.1,0.1;
           standingSmoothness_ = 1.6;
-          jointPosWeight_ << 1.0, 0.9,0.9,1.,0.9,0.9,1.,0.9,0.9,1.,0.9,0.9;
+          jointPosWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
       }
   }
 
@@ -386,20 +390,28 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// Log Barrier - limit_joint_pos
       for (int i=0;i<4;i++){
           for (int j=0;j<3;j++){
-              int index_leg = i*3+j;
+              int index_joint = i*3+j;
 //              relaxedLogBarrier(0.09,limitJointPos_(index_leg,0),limitJointPos_(index_leg,1),gc_(7+index_leg),tempReward);
-              relaxedLogBarrier(0.08,limitJointPos_(index_leg,0),limitJointPos_(index_leg,1),gc_(7+index_leg),tempReward);
+              relaxedLogBarrier(0.08,limitJointPos_(index_joint,0),limitJointPos_(index_joint,1),gc_(7+index_joint),tempReward);
               barrierJointPos += tempReward;
 //                              std::cout << index_leg<<" th joint : " << tempReward << std::endl;
           }
       }
       /// Log Barrier - limit_body_height
-      double tempHeight = 0.0;
-      for (int i=0; i<4; i++){
-          tempHeight += gc_(2) - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
+      for (int i=0; i<2; i++){
+          double tempHeight = 0.0;
+          for(int j=0; j<2; j++){
+              int index_leg = i*2+j;
+              tempHeight += rollJointPos_[index_leg](2) - heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1));
+//                    std::cout << index_leg << " th leg : " << rollJointPos_[index_leg](2) - heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1)) << std::endl;
+          }
+          tempHeight /= 2;
+//          std::cout << i << " tempHeight" << tempHeight << std::endl;
+          relaxedLogBarrier(0.05,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,tempReward);
+          barrierBodyHeight += tempReward;
       }
-      tempHeight /= 4;
-      relaxedLogBarrier(0.05,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,barrierBodyHeight);
+//      std::cout << "barrier body height : " << barrierBodyHeight << std::endl;
+
       /// Log Barrier - limit_base_motion
       relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
@@ -428,7 +440,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      std::cout << "---------------" << std::endl;
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.03,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
 //          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
 //                std::cout << i<<" th foot : " << tempReward << std::endl;
@@ -499,6 +511,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     for(int i = 0; i < 4; i++) {
       hound_->getFramePosition(footFrames_[i], footPos_[i]);
       hound_->getFrameVelocity(footFrames_[i], footVel_[i]);
+        hound_->getFramePosition(rollJointFrames_[i], rollJointPos_[i]);
     }
 
     /// foot contact update
@@ -730,8 +743,9 @@ class ENVIRONMENT : public RaisimGymEnv {
   /// additional
   Eigen::Vector3d command_;                     // vx, vy, w
   std::vector<std::string> footFrames_;
+    std::vector<std::string> rollJointFrames_;
   Eigen::Vector4i footContact_;
-  std::vector<raisim::Vec<3>> footPos_,footVel_;
+  std::vector<raisim::Vec<3>> footPos_,footVel_, rollJointPos_;
   double phase_;
   double gait_hz_;
   Eigen::Matrix<double,4,1> footContactDouble_; // gait
