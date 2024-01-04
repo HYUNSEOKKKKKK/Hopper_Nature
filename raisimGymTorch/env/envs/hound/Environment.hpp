@@ -428,7 +428,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      std::cout << "---------------" << std::endl;
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+//          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.03,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
 //                std::cout << i<<" th foot : " << tempReward << std::endl;
       }
@@ -443,14 +444,14 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          std::cout << "barrierFootClearance : " <<   barrierFootClearance << std::endl;
 //      }
 
-      double logClip = -200.0;
-      barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
-      barrierBodyHeight = fmax(barrierBodyHeight,logClip);
-      barrierBaseMotion = fmax(barrierBaseMotion,-1000);
-      barrierJointVel = fmax(barrierJointVel,logClip);
-      barrierTargetVel = fmax(barrierTargetVel,logClip);
-      barrierFootContact = fmax(barrierFootContact,logClip);
-      barrierFootClearance = fmax(barrierFootClearance,logClip);
+//      double logClip = -200.0;
+//      barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
+//      barrierBodyHeight = fmax(barrierBodyHeight,logClip);
+//      barrierBaseMotion = fmax(barrierBaseMotion,-1000);
+//      barrierJointVel = fmax(barrierJointVel,logClip);
+//      barrierTargetVel = fmax(barrierTargetVel,logClip);
+//      barrierFootContact = fmax(barrierFootContact,logClip);
+//      barrierFootClearance = fmax(barrierFootClearance,logClip);
       rewards_.record("barrierJointPos", barrierJointPos);
       rewards_.record("barrierBodyHeight", barrierBodyHeight);
       rewards_.record("barrierBaseMotion", barrierBaseMotion);
