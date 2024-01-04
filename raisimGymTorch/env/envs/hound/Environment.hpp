@@ -97,7 +97,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.4,0.4;
     limitFootContact_ << -0.6,2;
-            limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
+            limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -308,7 +308,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       } else {
           limitBaseMotion_ << -0.1,0.1;
           standingSmoothness_ = 1.6;
-          jointPosWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
+          jointPosWeight_ << 1.0, 0.9,0.9,1.,0.9,0.9,1.,0.9,0.9,1.,0.9,0.9;
       }
   }
 
@@ -428,20 +428,21 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      std::cout << "---------------" << std::endl;
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-//          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
-          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.03,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+//          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
 //                std::cout << i<<" th foot : " << tempReward << std::endl;
       }
 
-//      if (barrierJointPos < -100) {
-//          std::cout << "barrierJointPos : " <<  barrierJointPos << std::endl;
-//          std::cout << "barrierBodyHeight : " <<  barrierBodyHeight << std::endl;
-//          std::cout << "barrierBaseMotion : " <<  barrierBaseMotion << std::endl;
-//          std::cout << "barrierJointVel : " <<  barrierJointVel << std::endl;
-//          std::cout << "barrierTargetVel : " <<  barrierTargetVel << std::endl;
-//          std::cout << "barrierFootContact : " <<  barrierFootContact << std::endl;
+//      if (barrierFootClearance < -40) {
+////          std::cout << "barrierJointPos : " <<  barrierJointPos << std::endl;
+////          std::cout << "barrierBodyHeight : " <<  barrierBodyHeight << std::endl;
+////          std::cout << "barrierBaseMotion : " <<  barrierBaseMotion << std::endl;
+////          std::cout << "barrierJointVel : " <<  barrierJointVel << std::endl;
+////          std::cout << "barrierTargetVel : " <<  barrierTargetVel << std::endl;
+////          std::cout << "barrierFootContact : " <<  barrierFootContact << std::endl;
 //          std::cout << "barrierFootClearance : " <<   barrierFootClearance << std::endl;
+//                std::cout << "foot clearance : " << footClearance_.transpose() << std::endl;
 //      }
 
 //      double logClip = -200.0;
@@ -516,7 +517,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void updateFootToTerrain(){
     Eigen::Matrix<double, 3, 5> sample_point;
-    double point = 0.05;
+    double point = 0.05; /// foot size
     sample_point.col(0) << point, 0.0, 0.0;
     sample_point.col(1) << 0.0, point, 0.0;
     sample_point.col(2) << -point, 0.0, 0.0;
