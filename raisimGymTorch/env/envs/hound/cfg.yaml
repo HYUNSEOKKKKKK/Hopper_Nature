@@ -12,8 +12,8 @@ environment:
   max_time: 4.0
   reward:
     # pos reward
-    comAngularVel: 16
-    comLinearVel:  16
+    comAngularVel: 8
+    comLinearVel:  8
 
     # neg reward (not reward coefficient, about range)
     footSlip:    -0.75
