@@ -97,7 +97,7 @@ class ENVIRONMENT : public RaisimGymEnv {
                 limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
     }
 //    limitBodyHeight_ << 0.48, 0.72;
-    limitBodyHeight_ << 0.54, 0.66;
+    limitBodyHeight_ << 0.48, 0.68;
     limitBaseMotion_ << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.4,0.4;
@@ -372,7 +372,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
           double desiredFootZPosition = 0.15;
           for (int i=0; i<4; i++){
-              if (footContactPhase_(i) < -0.6) { /// during swing
+              if (footContactPhase_(i) < -0.5) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
@@ -399,17 +399,14 @@ class ENVIRONMENT : public RaisimGymEnv {
           }
       }
       /// Log Barrier - limit_body_height
-      for (int i=0; i<2; i++){
-          double tempHeight = 0.0;
-          for(int j=0; j<2; j++){
-              int index_leg = i*2+j;
-              tempHeight += rollJointPos_[index_leg](2) - heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1));
-//                    std::cout << index_leg << " th leg : " << rollJointPos_[index_leg](2) - heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1)) << std::endl;
-          }
-          tempHeight /= 2;
-          relaxedLogBarrier(0.03,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,tempReward);
+      Eigen::Vector3d tempVec;
+      for (int index_leg=0; index_leg<4; index_leg++){
+          tempVec = (rollJointPos_[index_leg].e() - footPos_[index_leg].e());
+          tempVec(2) = rollJointPos_[index_leg](2) - heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1));
+          relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),tempVec.norm(),tempReward);
           barrierBodyHeight += tempReward;
-//                    std::cout << i << " tempReward" << tempReward << std::endl;
+//                    std::cout << index_leg << " tempVec " << tempVec.norm() << std::endl;
+//                    std::cout << index_leg << " reward " << tempReward << std::endl;
       }
 //      std::cout << "barrier body height : " << barrierBodyHeight << std::endl;
 
@@ -437,14 +434,10 @@ class ENVIRONMENT : public RaisimGymEnv {
           relaxedLogBarrier(0.1,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
           barrierFootContact += tempReward;
       }
-
-//      std::cout << "---------------" << std::endl;
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
-//          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.016,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
-//                std::cout << i<<" th foot : " << tempReward << std::endl;
       }
 
 //      if (barrierFootClearance < -40) {
@@ -455,13 +448,13 @@ class ENVIRONMENT : public RaisimGymEnv {
 ////          std::cout << "barrierTargetVel : " <<  barrierTargetVel << std::endl;
 ////          std::cout << "barrierFootContact : " <<  barrierFootContact << std::endl;
 //          std::cout << "barrierFootClearance : " <<   barrierFootClearance << std::endl;
-//                std::cout << "foot clearance : " << footClearance_.transpose() << std::endl;
+////                std::cout << "foot clearance : " << footClearance_.transpose() << std::endl;
 //      }
 
 //      double logClip = -200.0;
 //      barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
 //      barrierBodyHeight = fmax(barrierBodyHeight,logClip);
-//      barrierBaseMotion = fmax(barrierBaseMotion,-1000);
+//      barrierBaseMotion = fmax(barrierBaseMotion,logClip);
 //      barrierJointVel = fmax(barrierJointVel,logClip);
 //      barrierTargetVel = fmax(barrierTargetVel,logClip);
 //      barrierFootContact = fmax(barrierFootContact,logClip);
