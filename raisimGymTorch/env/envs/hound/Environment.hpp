@@ -429,7 +429,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
 //          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
-          relaxedLogBarrier(0.03,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.015,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
 //                std::cout << i<<" th foot : " << tempReward << std::endl;
       }
