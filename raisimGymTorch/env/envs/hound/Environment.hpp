@@ -388,7 +388,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           for (int j=0;j<3;j++){
               int index_leg = i*3+j;
 //              relaxedLogBarrier(0.09,limitJointPos_(index_leg,0),limitJointPos_(index_leg,1),gc_(7+index_leg),tempReward);
-              relaxedLogBarrier(0.06,limitJointPos_(index_leg,0),limitJointPos_(index_leg,1),gc_(7+index_leg),tempReward);
+              relaxedLogBarrier(0.08,limitJointPos_(index_leg,0),limitJointPos_(index_leg,1),gc_(7+index_leg),tempReward);
               barrierJointPos += tempReward;
 //                              std::cout << index_leg<<" th joint : " << tempReward << std::endl;
           }
@@ -429,7 +429,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
 //          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
-          relaxedLogBarrier(0.015,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
 //                std::cout << i<<" th foot : " << tempReward << std::endl;
       }
