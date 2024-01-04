@@ -401,12 +401,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// Log Barrier - limit_body_height
       Eigen::Vector3d tempVec;
       for (int index_leg=0; index_leg<4; index_leg++){
-          tempVec = (rollJointPos_[index_leg].e() - footPos_[index_leg].e());
-          tempVec(2) = rollJointPos_[index_leg](2) - heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1));
-          relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),tempVec.norm(),tempReward);
+          tempVec = (footPos_[index_leg].e() - rollJointPos_[index_leg].e());
+          tempVec(2) = heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1)) - rollJointPos_[index_leg](2);
+          tempVec = rot_.e().transpose() *  tempVec.eval();
+          relaxedLogBarrier(0.05,limitBodyHeight_(0),limitBodyHeight_(1),-tempVec(2),tempReward);
           barrierBodyHeight += tempReward;
-//                    std::cout << index_leg << " tempVec " << tempVec.norm() << std::endl;
-//                    std::cout << index_leg << " reward " << tempReward << std::endl;
+//          std::cout << index_leg << " th leg : " << tempReward << std::endl;
       }
 //      std::cout << "barrier body height : " << barrierBodyHeight << std::endl;
 
@@ -436,7 +436,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.016,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
