@@ -92,10 +92,10 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
                 limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
     }
-    limitBodyHeight_ << 0.54, 0.72;
+    limitBodyHeight_ << 0.52, 0.72;
     limitBaseMotion_ << -0.3,0.3;
     limitJointVel_ << -8,8;
-    limitTargetVel_ << -0.2,0.2;
+    limitTargetVel_ << -0.4,0.4;
     limitFootContact_ << -0.6,2;
             limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
 
@@ -387,8 +387,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       for (int i=0;i<4;i++){
           for (int j=0;j<3;j++){
               int index_leg = i*3+j;
-              relaxedLogBarrier(0.09,limitJointPos_(index_leg,0),limitJointPos_(index_leg,1),gc_(7+index_leg),tempReward);
+//              relaxedLogBarrier(0.09,limitJointPos_(index_leg,0),limitJointPos_(index_leg,1),gc_(7+index_leg),tempReward);
+              relaxedLogBarrier(0.06,limitJointPos_(index_leg,0),limitJointPos_(index_leg,1),gc_(7+index_leg),tempReward);
               barrierJointPos += tempReward;
+//                              std::cout << index_leg<<" th joint : " << tempReward << std::endl;
           }
       }
       /// Log Barrier - limit_body_height
@@ -407,7 +409,6 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_joint_vel
       for (int i=0;i<12;i++){
-//          relaxedLogBarrier(3.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
           relaxedLogBarrier(2.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
           barrierJointVel += tempReward;
       }
@@ -443,9 +444,9 @@ class ENVIRONMENT : public RaisimGymEnv {
 //      }
 
       double logClip = -200.0;
-      barrierJointPos = fmax(barrierJointPos,-1000);           /// 여기 밖 부분은 gradient 안 받겠다
+      barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierBodyHeight = fmax(barrierBodyHeight,logClip);
-      barrierBaseMotion = fmax(barrierBaseMotion,logClip);
+      barrierBaseMotion = fmax(barrierBaseMotion,-1000);
       barrierJointVel = fmax(barrierJointVel,logClip);
       barrierTargetVel = fmax(barrierTargetVel,logClip);
       barrierFootContact = fmax(barrierFootContact,logClip);
