@@ -102,7 +102,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.4,0.4;
     limitFootContact_ << -0.6,2;
-            limitFootClearance_ << -0.10,1.0; // 어차피 desired_foot_clearance 를
+            limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
@@ -309,7 +309,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
           standingSmoothness_ = 1.0;
-          jointPosWeight_ << 1.0, 0.2,0.2,1.,0.2,0.2,1.,0.2,0.2,1.,0.2,0.2;
+          jointPosWeight_ << 1.0, 0.0,0.0,1.,0.0,0.0,1.,0.0,0.0,1.,0.0,0.0;
       } else {
           limitBaseMotion_ << -0.1,0.1;
           standingSmoothness_ = 1.6;
@@ -372,7 +372,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
           double desiredFootZPosition = 0.15;
           for (int i=0; i<4; i++){
-              if (footContactPhase_(i) < -0.5) { /// during swing, 전체시간의 33 %
+              if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
