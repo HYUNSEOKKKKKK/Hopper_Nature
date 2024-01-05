@@ -309,11 +309,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
           standingSmoothness_ = 1.0;
-          jointPosWeight_ << 1.0, 0.4,0.4,1.,0.4,0.4,1.,0.4,0.4,1.,0.4,0.4;
+          jointPosWeight_ << 1.0, 0.2,0.2,1.,0.2,0.2,1.,0.2,0.2,1.,0.2,0.2;
       } else {
           limitBaseMotion_ << -0.1,0.1;
           standingSmoothness_ = 1.6;
-          jointPosWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
+          jointPosWeight_ << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
       }
   }
 
