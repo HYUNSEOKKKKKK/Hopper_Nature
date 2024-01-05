@@ -96,8 +96,8 @@ class ENVIRONMENT : public RaisimGymEnv {
         limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
                 limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
     }
-//    limitBodyHeight_ << 0.48, 0.72;
-    limitBodyHeight_ << 0.48, 0.68;
+//    limitBodyHeight_ << 0.48, 0.68;
+    limitBodyHeight_ << 0.50, 0.66;
     limitBaseMotion_ << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.4,0.4;
@@ -404,7 +404,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           tempVec = (footPos_[index_leg].e() - rollJointPos_[index_leg].e());
           tempVec(2) = heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1)) - rollJointPos_[index_leg](2);
           tempVec = rot_.e().transpose() *  tempVec.eval();
-          relaxedLogBarrier(0.05,limitBodyHeight_(0),limitBodyHeight_(1),-tempVec(2),tempReward);
+          relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),-tempVec(2),tempReward);
           barrierBodyHeight += tempReward;
 //          std::cout << index_leg << " th leg : " << tempReward << std::endl;
       }
