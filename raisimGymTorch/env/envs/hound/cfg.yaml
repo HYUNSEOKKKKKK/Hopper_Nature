@@ -22,8 +22,8 @@ environment:
     torque:      -1e-4 #-5e-5
 
     jointPos:   0.0
-    bodyHeightDifference : -5.0
-    footPos:  -5.0
+    bodyHeightDifference : -10.0
+    footPos:  -6.0
     jointVel:    -1e-2 #-1e-4 #-1e-3 # -5e-3
     jointAcc:    -1e-1 # -1e-3 #-1e-2 # -4e-2
 
