@@ -320,12 +320,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
           standingSmoothness_ = 1.0;
-          jointPosWeight_ << 1.0, 0.4,0.4,1.,0.4,0.4,1.,0.4,0.4,1.,0.4,0.4;
+          jointPosWeight_ << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
           footPosWeight_ << 0.6,1.0,0.4;
       } else {
           limitBaseMotion_ << -0.1,0.1;
-          standingSmoothness_ = 1.6;
-          jointPosWeight_ << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
+          standingSmoothness_ = 2.0;
+          jointPosWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
           footPosWeight_ << 1.0,1.0,1.0;
       }
   }
@@ -345,14 +345,14 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       rewards_.record("footSlip", footSlip_.sum());
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
-      jointPosWeight_ << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
+//      jointPosWeight_ << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
       rewards_.record("smoothness2", ((pTarget_ - 2 * prevTarget_ + prevPrevTarget_).cwiseProduct(jointPosWeight_)).squaredNorm()  * standingSmoothness_);
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
             /// joint pos regulation -> not used
-      Eigen::VectorXd jointPosTemp(12);
-      jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
-      jointPosTemp = jointPosWeight_.cwiseProduct(jointPosTemp.eval());
+      Eigen::VectorXd jointPosTemp(12); jointPosTemp.setZero();
+//      jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
+//      jointPosTemp = jointPosWeight_.cwiseProduct(jointPosTemp.eval());
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
 
       /// task space foot pos regulation -> used
