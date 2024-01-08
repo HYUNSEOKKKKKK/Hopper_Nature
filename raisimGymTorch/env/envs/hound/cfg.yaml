@@ -18,11 +18,12 @@ environment:
     # neg reward (not reward coefficient, about range)
     footSlip:    -0.75
     smoothness2: -2.5 #-2.5
-    bodyOri:     -0.5 #-0.5
+    bodyOri:     -0.0 #-0.5
     torque:      -1e-4 #-5e-5
 
     jointPos:   0.0
-    footPos:  -8.0
+    bodyHeightDifference : -5.0
+    footPos:  -5.0
     jointVel:    -1e-2 #-1e-4 #-1e-3 # -5e-3
     jointAcc:    -1e-1 # -1e-3 #-1e-2 # -4e-2
 

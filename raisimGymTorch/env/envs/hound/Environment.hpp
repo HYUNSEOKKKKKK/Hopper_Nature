@@ -118,6 +118,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     standingSmoothness_ = 1.0;
       jointPosWeight_.setZero(12);
       footPosWeight_.setZero();
+      bodyFrameHeight_.setZero();
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
@@ -320,12 +321,12 @@ class ENVIRONMENT : public RaisimGymEnv {
           limitBaseMotion_ << -0.3,0.3;
           standingSmoothness_ = 1.0;
           jointPosWeight_ << 1.0, 0.4,0.4,1.,0.4,0.4,1.,0.4,0.4,1.,0.4,0.4;
-          footPosWeight_ << 0.8,1.0,0.4;
+          footPosWeight_ << 0.6,1.0,0.4;
       } else {
           limitBaseMotion_ << -0.1,0.1;
           standingSmoothness_ = 1.6;
           jointPosWeight_ << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
-          footPosWeight_ << 1.0,1.0,0.8;
+          footPosWeight_ << 1.0,1.0,1.0;
       }
   }
 
@@ -348,12 +349,13 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("smoothness2", ((pTarget_ - 2 * prevTarget_ + prevPrevTarget_).cwiseProduct(jointPosWeight_)).squaredNorm()  * standingSmoothness_);
       rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
 
-
+            /// joint pos regulation -> not used
       Eigen::VectorXd jointPosTemp(12);
       jointPosTemp = gc_.tail(12) - gcInit_.tail(12);
       jointPosTemp = jointPosWeight_.cwiseProduct(jointPosTemp.eval());
       rewards_.record("jointPos", jointPosTemp.squaredNorm());
 
+      /// task space foot pos regulation -> used
                         Eigen::Vector3d  tempVec;
                         double tempReward = 0.0;
                         for(int index_leg = 0; index_leg < 4; index_leg++){
@@ -363,6 +365,21 @@ class ENVIRONMENT : public RaisimGymEnv {
                         }
       rewards_.record("footPos", tempReward);
 
+                        /// body height difference -> used
+      bodyFrameHeight_.setZero();
+      for (int i=0; i<2; i++) {
+          for (int j = 0; j < 2; j++) {
+              int index_leg = i * 2 + j;
+              tempVec = (footPos_[index_leg].e() - rollJointPos_[index_leg].e());
+              tempVec(2) = heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1)) -
+                           rollJointPos_[index_leg](2);
+              tempVec = rot_.e().transpose() * tempVec.eval();
+              bodyFrameHeight_(i) -= tempVec(2);
+          }
+      }
+      bodyFrameHeight_ = bodyFrameHeight_.eval()/2.0;
+      rewards_.record("bodyHeightDifference", pow(bodyFrameHeight_(0)-bodyFrameHeight_(1),2.0));
+//            std::cout << "bodyHeightDifference : " << rewards_.getReward("bodyHeightDifference") << std::endl;
 
       rewards_.record("jointVel", gv_.tail(12).squaredNorm()  * (double)(standingMode_));                 /// only for standingMode_
       rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm() * (double)(standingMode_)); /// only for standingMode_
@@ -370,7 +387,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("footPos")+rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness2"));
+      negReward = (float)(rewards_.getReward("bodyHeightDifference")+ rewards_.getReward("footPos")+rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("bodyOri") + rewards_.getReward("smoothness2"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -423,20 +440,9 @@ class ENVIRONMENT : public RaisimGymEnv {
           }
       }
       /// Log Barrier - limit_body_height
-      Eigen::Vector3d tempVec;
       for (int i=0; i<2; i++){
-          double tempHeight = 0.0;
-          for(int j=0; j<2; j++){
-              int index_leg = i*2 + j;
-              tempVec = (footPos_[index_leg].e() - rollJointPos_[index_leg].e());
-              tempVec(2) = heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1)) - rollJointPos_[index_leg](2);
-              tempVec = rot_.e().transpose() *  tempVec.eval();
-              tempHeight -= tempVec(2);
-          }
-          relaxedLogBarrier(0.03,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight/2.0,tempReward);
+          relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),bodyFrameHeight_(i),tempReward);
           barrierBodyHeight += tempReward;
-//          std::cout << i << " th leg pair : " << tempHeight/2.0 << std::endl;
-//          std::cout << i << " th leg pair reward : " << tempReward<< std::endl;
       }
 
       /// Log Barrier - limit_base_motion
@@ -778,6 +784,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,20,1> footToTerrain_; // 5 sample point for each foot
   Eigen::Matrix<double,2,1> phaseSin_;  // sin cos representation of phase
   Eigen::Matrix<double,12,1> footObsNoise_;
+  Eigen::Matrix<double,2,1> bodyFrameHeight_; // for front legs and hind legs
   bool standingMode_;
   double standingRegulation_;
     Eigen::VectorXd jointPosWeight_;
