@@ -351,7 +351,7 @@ genForceTargetHist_.push_back(tempGenForce);
           footPosWeight_ << 0.6,1.0,0.4;
       } else {
           limitBaseMotion_ << -0.1,0.1;
-          standingSmoothness_ = 2.5;
+          standingSmoothness_ = 2.8;
           jointPosWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
           footPosWeight_ << 1.0,1.0,1.0;
       }
