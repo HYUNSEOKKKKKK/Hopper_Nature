@@ -236,14 +236,13 @@ class ENVIRONMENT : public RaisimGymEnv {
     hound_->setState(gcNoise_, gvNoise_);
     updateObservation();
 
-
+            for (auto& vec : genForceTargetHist_) { vec.setZero(); }
     /// reset (except the standingMode_ -> which preserves previous state for sudden command stop)
     if (reset){
         pTarget_ = gc_.tail(12);
         gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
         for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
         for (auto& vec : jointVelHist_) { vec.setZero(); }
-        for (auto& vec : genForceTargetHist_) { vec.setZero(); }
 
         if (uniDist_(gen_)<=0.0){
             phase_ = 0.0;
