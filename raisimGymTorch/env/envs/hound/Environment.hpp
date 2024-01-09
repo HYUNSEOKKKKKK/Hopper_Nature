@@ -42,7 +42,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// set pd gains
     Eigen::Vector<double,18> jointPgain, jointDgain;
-    jointPgain.setZero(); jointPgain.tail(12).setConstant(40.0);
+    jointPgain.setZero(); jointPgain.tail(12).setConstant(30.0);
     jointDgain.setZero(); jointDgain.tail(12).setConstant(1.0);
     hound_->setPdGains(jointPgain, jointDgain);
     hound_->setGeneralizedForce(Eigen::VectorXd::Zero(18));
@@ -150,7 +150,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   void reset() final {
     /// pd gain randomization
     Eigen::Vector<double,18> jointPgain, jointDgain;
-    jointPgain.setZero(); jointPgain.tail(12).setConstant(40.0 + 2.5*uniDist_(gen_));
+    jointPgain.setZero(); jointPgain.tail(12).setConstant(30.0 + 2.5*uniDist_(gen_));
     jointDgain.setZero(); jointDgain.tail(12).setConstant(1.0 + 0.1*uniDist_(gen_));
     hound_->setPdGains(jointPgain, jointDgain);
     /// foot obs noise
@@ -324,7 +324,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           footPosWeight_ << 0.6,1.0,0.4;
       } else {
           limitBaseMotion_ << -0.1,0.1;
-          standingSmoothness_ = 2.0;
+          standingSmoothness_ = 2.5;
           jointPosWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
           footPosWeight_ << 1.0,1.0,1.0;
       }
