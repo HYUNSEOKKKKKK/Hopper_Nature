@@ -33,6 +33,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     gv_.setZero(18); gvInit_.setZero(); gvNoise_.setZero();
     gcDes_.setZero(); gvDes_.setZero();
     pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero(); preJointVel_.setZero();
+    jointFrictions_.setZero();
 
     /// this is nominal configuration of anymal
     double hip = 0.62;
@@ -41,10 +42,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     gc_ = gcInit_;
 
     /// set pd gains
-    Eigen::Vector<double,18> jointPgain, jointDgain;
-    jointPgain.setZero(); jointPgain.tail(12).setConstant(30.0);
-    jointDgain.setZero(); jointDgain.tail(12).setConstant(1.0);
-    hound_->setPdGains(jointPgain, jointDgain);
+    jointPgain_.setZero(); jointPgain_.tail(12).setConstant(40.0);
+    jointDgain_.setZero(); jointDgain_.tail(12).setConstant(1.0);
+//    hound_->setPdGains(jointPgain_, jointDgain_);
+    hound_->setPdGains(Eigen::Vector<double,18>::Zero(), Eigen::Vector<double,18>::Zero());
     hound_->setGeneralizedForce(Eigen::VectorXd::Zero(18));
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
@@ -123,7 +124,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
     jointVelHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
-
+      genForceTargetHist_ = std::vector<Eigen::Vector<double,18>>(3,Eigen::Vector<double,18>::Zero());
     /// initialize gait
     phase_ = 0.0;
     gait_hz_ = 0.72;
@@ -148,11 +149,10 @@ class ENVIRONMENT : public RaisimGymEnv {
   void init() final { }
 
   void reset() final {
-    /// pd gain randomization
-    Eigen::Vector<double,18> jointPgain, jointDgain;
-    jointPgain.setZero(); jointPgain.tail(12).setConstant(30.0 + 2.5*uniDist_(gen_));
-    jointDgain.setZero(); jointDgain.tail(12).setConstant(1.0 + 0.1*uniDist_(gen_));
-    hound_->setPdGains(jointPgain, jointDgain);
+
+    jointPgain_.setZero(); jointPgain_.tail(12).setConstant(40.0 + 2.5*uniDist_(gen_));
+    jointDgain_.setZero(); jointDgain_.tail(12).setConstant(1.0 + 0.1*uniDist_(gen_));
+//    hound_->setPdGains(jointPgain_, jointDgain_);
     /// foot obs noise
     for (int i=0;i<12;i++){
       footObsNoise_(i) = 0.02 * uniDist_(gen_);
@@ -243,6 +243,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
         for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
         for (auto& vec : jointVelHist_) { vec.setZero(); }
+        for (auto& vec : genForceTargetHist_) { vec.setZero(); }
 
         if (uniDist_(gen_)<=0.0){
             phase_ = 0.0;
@@ -252,16 +253,25 @@ class ENVIRONMENT : public RaisimGymEnv {
         footContactPhase_.setZero();
         footClearance_.setZero();
     }
+
+    /// random joint friction
+      double jFrictionHAA_1 = 0.86 + 0.15 * uniDist_(gen_);
+      double jFrictionHFE_1 = 0.86 + 0.15 * uniDist_(gen_);
+      double jFrictionKFE_1 = 0.93 + 0.3 * (uniDist_(gen_) + 0.5);
+      double jFrictionHAA_2 = 2.24 + 0.15 * uniDist_(gen_);
+      double jFrictionHFE_2 = 1.37 + 0.15 * uniDist_(gen_);
+      double jFrictionKFE_2 = 1.16 + 0.3 * (uniDist_(gen_) + 0.5);
+      double jFrictionHAA_3 = 0.90 + 0.15 * uniDist_(gen_);
+      double jFrictionHFE_3 = 3.47 + 0.15 * uniDist_(gen_);
+      double jFrictionKFE_3 = 3.03 + 0.3 * (uniDist_(gen_) + 0.5);
+      double jFrictionHAA_4 = 0.98 + 0.15 * uniDist_(gen_);
+      double jFrictionHFE_4 = 1.26 + 0.15 * uniDist_(gen_);
+      double jFrictionKFE_4 = 1.35 + 0.3 * (uniDist_(gen_) + 0.5);
+      jointFrictions_ << jFrictionHAA_1, jFrictionHFE_1, jFrictionKFE_1, jFrictionHAA_2, jFrictionHFE_2, jFrictionKFE_2,
+              jFrictionHAA_3, jFrictionHFE_3, jFrictionKFE_3, jFrictionHAA_4, jFrictionHFE_4, jFrictionKFE_4;
   }
 
   float step(const Eigen::Ref<EigenVec>& action) final {
-    /// delay
-    int delayIdx = 0;
-    if (uniDist_(gen_)<0.0){
-        delayIdx= int((0.002 / simulation_dt_ + 1e-10)); // 2ms delay
-    }else{
-        delayIdx = int((0.003 / simulation_dt_ + 1e-10)); // 3ms delay
-    }
     /// action scaling
     pTarget_ = action.cast<double>();
     pTarget_ = pTarget_.cwiseProduct(actionStd_);
@@ -271,10 +281,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     double avgReward = 0.0;
     barrierReward_ = 0.0;
     for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
-      if (i == delayIdx){
-          gcDes_.tail(12) = pTarget_;
-          hound_->setPdTarget(gcDes_, gvDes_);
-      }
+                /// compute target torque
+        computeTorque();
+        hound_->setGeneralizedForce(genForceTargetHist_[0]); /// 2ms delay (torque command in PC -> actual torque in real robot)
+                /// simpulation
       if(server_) server_->lockVisualizationServerMutex();
       world_->integrate();
       if(server_) server_->unlockVisualizationServerMutex();
@@ -292,6 +302,23 @@ class ENVIRONMENT : public RaisimGymEnv {
     updateHistory();
 
     return avgReward;
+  }
+
+        void computeTorque(){
+      genForceTargetHist_.erase(genForceTargetHist_.begin());
+      Eigen::Vector<double,18> tempGenForce; tempGenForce.head(6).setZero();
+      tempGenForce.tail(12) = jointPgain_.tail(12).cwiseProduct(pTarget_-gc_.tail(12))
+                                + jointDgain_.tail(12).cwiseProduct(-gv_.tail(12));
+
+//            std::cout << "tempGenForce : " << tempGenForce.transpose() << std::endl;
+            /// joint friction (static friction, torque 잡아먹는 효과)
+            for (int i = 0; i < 12; i++){
+                double jTorque = tempGenForce.tail(12)(i);
+                jTorque = (jTorque>0) ? std::min(jointFrictions_(i), jTorque) : std::max(-jointFrictions_(i), jTorque);
+                tempGenForce.tail(12)(i) -= jTorque;
+            }
+//            std::cout << "afterenForce : " << tempGenForce.transpose() << std::endl;
+genForceTargetHist_.push_back(tempGenForce);
   }
 
   float getBarrierReward() final {
@@ -764,8 +791,10 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::VectorXd gc_, gv_;
   Eigen::Vector<double,19> gcInit_, gcNoise_, gcDes_;
   Eigen::Vector<double,18> gvInit_, gvNoise_, gvDes_;
-  Eigen::Vector<double,12> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_;
-  raisim::Mat<3,3> rot_;
+  Eigen::Vector<double,12> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_, jointFrictions_;
+    Eigen::Vector<double,18> jointPgain_, jointDgain_;
+
+    raisim::Mat<3,3> rot_;
   Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_, estDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
   std::vector<size_t> footIndices_;
@@ -799,6 +828,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
   ///
   std::vector<Eigen::Vector<double,12>> jointPosErrorHist_, jointVelHist_;
+  std::vector<Eigen::Vector<double,18>> genForceTargetHist_;
   double standingSmoothness_;
 
   /// initialize
