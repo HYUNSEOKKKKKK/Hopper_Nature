@@ -179,7 +179,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// initialize the pose
     bool reset = !standingMode_;
-    if (standingMode_){ reset = uniDist_(gen_) > -0.5;}
+    if (standingMode_){ reset = uniDist_(gen_) > 0.0;}
 
     if(!reset){ /// command -> sudden stop
         gcNoise_ = gc_;
