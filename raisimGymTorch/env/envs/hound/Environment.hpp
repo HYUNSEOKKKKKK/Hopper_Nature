@@ -42,7 +42,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     gc_ = gcInit_;
 
     /// set pd gains
-    jointPgain_.setZero(); jointPgain_.tail(12).setConstant(40.0);
+    jointPgain_.setZero(); jointPgain_.tail(12).setConstant(30.0);
     jointDgain_.setZero(); jointDgain_.tail(12).setConstant(1.0);
 //    hound_->setPdGains(jointPgain_, jointDgain_);
     hound_->setPdGains(Eigen::Vector<double,18>::Zero(), Eigen::Vector<double,18>::Zero());
@@ -150,7 +150,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void reset() final {
 
-    jointPgain_.setZero(); jointPgain_.tail(12).setConstant(40.0 + 2.5*uniDist_(gen_));
+    jointPgain_.setZero(); jointPgain_.tail(12).setConstant(30.0 + 2.5*uniDist_(gen_));
     jointDgain_.setZero(); jointDgain_.tail(12).setConstant(1.0 + 0.1*uniDist_(gen_));
 //    hound_->setPdGains(jointPgain_, jointDgain_);
     /// foot obs noise
