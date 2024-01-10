@@ -311,11 +311,11 @@ class ENVIRONMENT : public RaisimGymEnv {
 
 //            std::cout << "tempGenForce : " << tempGenForce.transpose() << std::endl;
             /// joint friction (static friction, torque 잡아먹는 효과)
-            for (int i = 0; i < 12; i++){
-                double jTorque = tempGenForce.tail(12)(i);
-                jTorque = (jTorque>0) ? std::min(jointFrictions_(i), jTorque) : std::max(-jointFrictions_(i), jTorque);
-                tempGenForce.tail(12)(i) -= jTorque;
-            }
+//            for (int i = 0; i < 12; i++){
+//                double jTorque = tempGenForce.tail(12)(i);
+//                jTorque = (jTorque>0) ? std::min(jointFrictions_(i), jTorque) : std::max(-jointFrictions_(i), jTorque);
+//                tempGenForce.tail(12)(i) -= jTorque;
+//            }
 //            std::cout << "afterenForce : " << tempGenForce.transpose() << std::endl;
 genForceTargetHist_.push_back(tempGenForce);
   }
