@@ -726,6 +726,8 @@ class ENVIRONMENT : public RaisimGymEnv {
           curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
       }
 
+      curriculum_ = 0.0;
+
       world_->removeObject(heightMap_);
 //      heightMap_ = HeightMapSample(world_.get(),iter_%4,curriculum_,gen_,uniDist_);
       heightMap_ = HeightMapSample(world_.get(),0,curriculum_,gen_,uniDist_);
