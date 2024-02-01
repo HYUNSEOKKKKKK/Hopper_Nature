@@ -106,7 +106,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     Eigen::Matrix<double,11,1> tempJointPos = limitJointPos_.topRows(11).col(1)-limitJointPos_.topRows(11).col(0);
     limitJointPos_.topRows(11).col(0) += tempJointPos*0.05;
     limitJointPos_.topRows(11).col(1) -= tempJointPos*0.05;
-    limitJointPos_.bottomRows(11) = -limitJointPos_.topRows(11);
+    limitJointPos_.bottomRows(11).col(0) = -limitJointPos_.topRows(11).col(1);
+    limitJointPos_.bottomRows(11).col(1) = -limitJointPos_.topRows(11).col(0);
+//    std::cout << "limit joint pos for left \n" << limitJointPos_.topRows(11) << std::endl;
+//    std::cout << "limit joint pos for right \n" << limitJointPos_.bottomRows(11) << std::endl;
 
     limitBodyHeight_ << 0.6, 1.2;
     limitBaseMotion_ << -0.3,0.3;
@@ -443,6 +446,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       for (int index_joint=0;index_joint<actionDim_;index_joint++){
           relaxedLogBarrier(0.08,limitJointPos_(index_joint,0),limitJointPos_(index_joint,1),gc_(7+index_joint),tempReward);
           barrierJointPos += tempReward;
+//          if (tempReward < -100.0){
+//              std::cout << index_joint << " th joint limit : " << limitJointPos_.row(index_joint) << " , and real : " << gc_(7+index_joint) << std::endl;
+//          }
       }
       /// Log Barrier - limit_body_height
       relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),gc_(2),tempReward);
