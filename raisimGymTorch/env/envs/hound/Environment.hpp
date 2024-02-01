@@ -398,6 +398,13 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// vel acc regulation
       rewards_.record("jointVel", gv_.tail(actionDim_).squaredNorm());                 /// only for standingMode_
       rewards_.record("jointAcc", (gv_.tail(actionDim_) - preJointVel_).squaredNorm()); /// only for standingMode_
+//      std::cout << "smoothness2 : " << rewards_.getReward("smoothness2") << std::endl;
+//      if (rewards_.getReward("smoothness2") < -2e3){
+//          std::cout << "smoothness is too big here "<< (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm() <<"\n" << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).transpose() << std::endl;
+//          std::cout << "pTarget_ \n " << pTarget_.transpose() << std::endl;
+//          std::cout << "prevTarget_ \n " << prevTarget_.transpose() << std::endl;
+//          std::cout << "prevPrevTarget_ \n " << prevPrevTarget_.transpose() << std::endl;
+//      }
 
       /// sum
       float posReward, negReward;
