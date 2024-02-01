@@ -45,8 +45,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointFrictions_.setZero();
 
     /// this is nominal configuration of anymal
-    gcInit_.segment(0,7) << 0.0,0.0,1.0,   1.0,0.0,0.0,0.0;
-    gcInit_.segment(7,7) << 0.337,0.0,   0.0,0.0,0.0,   -0.126,-0.05;
+    gcInit_.segment(0,7) << 0.0,0.0,0.942,   1.0,0.0,0.0,0.0;
+    gcInit_.segment(7,7) << 0.337,0.0,   0.0,0.1,-0.1,   -0.126,-0.05;
     gcInit_.segment(14,4) << 0.0,0.863,0.0,0.0;
     gcInit_.segment(18,11) = -gcInit_.segment(7,11);
     gcInit_.segment(3,4).normalize();
@@ -74,6 +74,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// indices of links that should not make contact with ground
     footIndices_.push_back(digit_->getBodyIdx("left_toe_roll"));
     footIndices_.push_back(digit_->getBodyIdx("right_toe_roll"));
+    tarsusIndices_.push_back(digit_->getBodyIdx("left_tarsus"));
+    tarsusIndices_.push_back(digit_->getBodyIdx("right_tarsus"));
     footJointFrames_.push_back("toe_roll_joint_left");  /// joint
     footJointFrames_.push_back("toe_roll_joint_right");
     hipJointFrames_.push_back("hip_abduction_left");
@@ -111,7 +113,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    std::cout << "limit joint pos for left \n" << limitJointPos_.topRows(11) << std::endl;
 //    std::cout << "limit joint pos for right \n" << limitJointPos_.bottomRows(11) << std::endl;
 
-    limitBodyHeight_ << 0.6, 1.2;
+    limitBodyHeight_ << 0.7, 1.1;
     limitBaseMotion_ << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.4,0.4;
@@ -178,9 +180,10 @@ class ENVIRONMENT : public RaisimGymEnv {
         double comCurriculum = (double)iter_ * 1.0/3000;
         comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
         do {
-            double maxCommand = (iter_ % 4 == 0) ? (1.0 + comCurriculum * 1.0) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.0, other 1.5
+//            double maxCommand = (iter_ % 4 == 0) ? (0.8 + comCurriculum * 1.2) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.0, other 1.5
+            double maxCommand = 0.8 + comCurriculum * 1.2; // 평지 lin x max 2.0, other 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
-                    command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
+            command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
         } while (command_.norm() < 0.2);
     }
 
@@ -427,11 +430,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (!standingMode_){ /// walking
           /// footContactDouble_ -> limit_foot_contact 에 있도록 (-0.3,3) -> Gait Enforcing (요 -0.3 이 벗어나도 되는 범위)
           for(int i=0; i<numLegs_; i++) {
-              if (footContact_(i) > 2) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
+              if (footContact_(i) > 1) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.15;
+          double desiredFootZPosition = 0.21;
           for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
@@ -458,8 +461,12 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          }
       }
       /// Log Barrier - limit_body_height
-      relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),gc_(2),tempReward);
-      barrierBodyHeight += tempReward;
+      double tempHeight = 0.0;
+      for (int i=0; i<numLegs_; i++){
+          tempHeight += gc_(2) - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
+      }
+      tempHeight /= static_cast<double>(numLegs_);
+      relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,barrierBodyHeight);
 
       /// Log Barrier - limit_base_motion
       relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
@@ -701,7 +708,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     terminalReward = float(terminalRewardCoeff_);
     /// if the contact body is not feet
     for(auto& contact: digit_->getContacts())
-        if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
+        if ((std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end())
+                and (std::find(tarsusIndices_.begin(), tarsusIndices_.end(), contact.getlocalBodyIndex()) == tarsusIndices_.end())) {
             return true;
         }
     terminalReward = -0.f;
@@ -773,7 +781,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   raisim::Mat<3,3> rot_;
   Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_, estDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
-  std::vector<size_t> footIndices_;
+  std::vector<size_t> footIndices_, tarsusIndices_;
   /// additional
   Eigen::Vector3d command_;                     // vx, vy, w
   std::vector<std::string> footJointFrames_;
