@@ -6,7 +6,7 @@ import shutil
 import torch
 
 # weight path
-full_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2024-01-11-16-17-39/full_10000.pt"
+full_path = "/home/gijeong/Downloads/6000iter_hound2/full_6000.pt"
 full = torch.load(full_path)
 iteration = full_path.rsplit('/')[-1].rsplit('_')[-1].rsplit('.')[0]
 scale_path = '/'.join(full_path.rsplit('/')[:-1])

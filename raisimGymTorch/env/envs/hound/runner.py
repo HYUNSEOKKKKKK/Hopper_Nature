@@ -17,7 +17,7 @@ import argparse
 
 
 # task specification
-task_name = "hound"
+task_name = "digit"
 
 # configuration
 parser = argparse.ArgumentParser()
@@ -83,7 +83,7 @@ ppo = PPO.PPO(actor=actor,
               num_learning_epochs=4,
               gamma=0.99,
               lam=0.95,
-              learning_rate = 2.5e-4,
+              learning_rate = 2.0e-4,
               num_mini_batches=8,
               entropy_coef=0.01,
               device=device,
@@ -168,14 +168,14 @@ for update in range(16002):
     avg_rewards.append(average_ll_performance)
 
     actor.update()
-    if update<3000:
-        actor.distribution.enforce_minimum_std((torch.ones(12) * 1.2).to(device))
+    if update<4000:
+        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 1.2).to(device))
     elif update<10000:
-        actor.distribution.enforce_minimum_std((torch.ones(12) * 0.7).to(device))
+        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 0.7).to(device))
     else:
-        actor.distribution.enforce_minimum_std((torch.ones(12) * 0.6).to(device))
+        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 0.6).to(device))
 
-    actor.distribution.enforce_maximum_std((torch.ones(12)*1.5).to(device))
+    actor.distribution.enforce_maximum_std((torch.ones(act_dim)*1.5).to(device))
 
     # curriculum update. Implement it in Environment.hpp
     env.curriculum_callback()

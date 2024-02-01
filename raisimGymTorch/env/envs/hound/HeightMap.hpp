@@ -64,7 +64,7 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
     else if (heightMapType == 1){
         /// slope
         double roughness = abs(uniDist(gen));
-        double heightMax = 0.17 * hardness * 20;
+        double heightMax = 0.13 * hardness * 20;
         int xSampleNum = 50;
         int ySampleNum = 50;
         std::vector<double> heightVec;
@@ -76,8 +76,7 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
             }
         }
 
-        double ySize = 20;
-        return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
+        return world->addHeightMap(xSampleNum, ySampleNum, 20.0, 20.0, 0., 0., heightVec);
     }
 
 

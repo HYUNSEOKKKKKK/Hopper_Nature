@@ -23,92 +23,102 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    hound_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/URDF_HoundOne_OldFoot_1207/HoundOne_generated.urdf");
-    hound_->setName("hound");
-    hound_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
+    digit_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/digit/urdf/digit_model_revised7DOFleg_collision.urdf");
+    digit_->setName("digit");
+    digit_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
 
-    /// initialize containers
-    gc_.setZero(19); gcInit_.setZero(); gcNoise_.setZero();
-    gv_.setZero(18); gvInit_.setZero(); gvNoise_.setZero();
+    /// Dim
+    gcDim_ = 29;
+    gvDim_ = 28;
+    numLegs_ = 2;
+    actionDim_ = 22;
+    obDim_ = 238;
+    estDim_ = 7;
+    valueObDim_ = obDim_ + estDim_;
+
+    /// initialize
+    gc_.setZero(gcDim_); gcInit_.setZero(); gcNoise_.setZero();
+    gv_.setZero(gvDim_); gvInit_.setZero(); gvNoise_.setZero();
     gcDes_.setZero(); gvDes_.setZero();
     pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero(); preJointVel_.setZero();
     jointFrictions_.setZero();
 
     /// this is nominal configuration of anymal
-    double hip = 0.62;
-    gcInit_ << 0, 0, 0.59, 1.0, 0.0, 0.0, 0.0, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip, 0.0, hip, -2*hip;
+    gcInit_.segment(0,7) << 0.0,0.0,1.0,   1.0,0.0,0.0,0.0;
+    gcInit_.segment(7,7) << 0.337,0.0,   0.0,0.0,0.0,   -0.126,-0.05;
+    gcInit_.segment(14,4) << 0.0,0.863,0.0,0.0;
+    gcInit_.segment(18,11) = -gcInit_.segment(7,11);
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
     /// set pd gains
-    jointPgain_.setZero(); jointPgain_.tail(12).setConstant(30.0);
-    jointDgain_.setZero(); jointDgain_.tail(12).setConstant(1.0);
-//    hound_->setPdGains(jointPgain_, jointDgain_);
-    hound_->setPdGains(Eigen::Vector<double,18>::Zero(), Eigen::Vector<double,18>::Zero());
-    hound_->setGeneralizedForce(Eigen::VectorXd::Zero(18));
+    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(30.0);
+    jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(1.0);
+    digit_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
+    digit_->setGeneralizedForce(Eigen::VectorXd::Zero(gvDim_));
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
-    obDim_ = 144;
-    estDim_ = 11; // 27 -> 11
-    valueObDim_ = obDim_ + estDim_;
-    actionDim_ = 12;
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
     obDouble_.setZero(obDim_);
     valueObDouble_.setZero(valueObDim_);
             estDouble_.setZero(estDim_);
 
     /// action scaling
-    actionMean_ = gcInit_.tail(12);
-    for (int i=0; i<4; i++){
-      actionStd_.segment(i*3,3) << 0.3, 0.3, 0.3;
-    }
+    actionMean_ = gcInit_.tail(actionDim_);
+    actionStd_.setConstant(0.3);
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
 
     /// indices of links that should not make contact with ground
-    footIndices_.push_back(hound_->getBodyIdx("RR_calf"));
-    footIndices_.push_back(hound_->getBodyIdx("RL_calf"));
-    footIndices_.push_back(hound_->getBodyIdx("FR_calf"));
-    footIndices_.push_back(hound_->getBodyIdx("FL_calf"));
-    footFrames_.push_back("RR_foot_fixed");
-    footFrames_.push_back("RL_foot_fixed");
-    footFrames_.push_back("FR_foot_fixed");
-    footFrames_.push_back("FL_foot_fixed");
-      rollJointFrames_.push_back("RR_roll_joint");
-      rollJointFrames_.push_back("RL_roll_joint");
-      rollJointFrames_.push_back("FR_roll_joint");
-      rollJointFrames_.push_back("FL_roll_joint");
+    footIndices_.push_back(digit_->getBodyIdx("left_toe_roll"));
+    footIndices_.push_back(digit_->getBodyIdx("right_toe_roll"));
+    footJointFrames_.push_back("toe_roll_joint_left");  /// joint
+    footJointFrames_.push_back("toe_roll_joint_right");
+    hipJointFrames_.push_back("hip_abduction_left");
+    hipJointFrames_.push_back("hip_abduction_right");
 
        /// visualize if it is the first environment
     if (visualizable_) {
       server_ = std::make_unique<raisim::RaisimServer>(world_.get());
       server_->launchServer();
-      server_->focusOn(hound_);
+      server_->focusOn(digit_);
       arrows_.push_back(server_->addVisualArrow("command_xy",0.1,0.05,0,1,0,1));
       arrows_.push_back(server_->addVisualArrow("command_yaw",0.1,0.05,1,0,0,1));
     }
     visualizationOn_ = false;
 
     /// set limit for log barrier function
-    for (int i=0;i<4;i++){
-        limitJointPos_.row(i*3+0) << -0.523599,0.523599; // roll : (-pi/6, pi/6)
-        limitJointPos_.row(i*3+1) << hip-0.785398,hip+0.785398; // hip
-                limitJointPos_.row(i*3+2) << -2.6,-0.52; // knee
-    }
-//    limitBodyHeight_ << 0.48, 0.68;
-    limitBodyHeight_ << 0.52, 0.66;
+    limitJointPos_.row(0) << -1.0472, 1.0472; // hip_abduction_left
+    limitJointPos_.row(1) << -0.6981, 0.6981; // hip_rotation_left
+    limitJointPos_.row(2) << -1.0472, 1.5707; // hip_flexion_left
+    limitJointPos_.row(3) << -1.2392, 0.8727; // knee_joint_left
+    limitJointPos_.row(4) << -0.8779, 1.2497; // shin_to_tarsus_left
+    limitJointPos_.row(5) << -0.7853, 0.7853; // toe_pitch_joint_left
+    limitJointPos_.row(6) << -0.6109, 0.6109; // toe_roll_joint_left
+
+    limitJointPos_.row(7) << -1.309, 0.4; // shoulder_roll_joint_left
+    limitJointPos_.row(8) << -2.5307, 2.5307; // shoulder_pitch_joint_left
+    limitJointPos_.row(9) << -1.7453, 1.7453; // shoulder_yaw_joint_left
+    limitJointPos_.row(10) << -1.3526, 1.3526; // elbow_joint_left
+
+    Eigen::Matrix<double,11,1> tempJointPos = limitJointPos_.topRows(11).col(1)-limitJointPos_.topRows(11).col(0);
+    limitJointPos_.topRows(11).col(0) += tempJointPos*0.05;
+    limitJointPos_.topRows(11).col(1) -= tempJointPos*0.05;
+    limitJointPos_.bottomRows(11) = -limitJointPos_.topRows(11);
+
+    limitBodyHeight_ << 0.6, 1.2;
     limitBaseMotion_ << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.4,0.4;
     limitFootContact_ << -0.6,2;
-            limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
+    limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
     command_.setZero();
     footContact_.setZero();
-    footVel_.resize(4); footPos_.resize(4), rollJointPos_.resize(4), refBodyToFoot_.resize(4);
+    footVel_.resize(numLegs_); footPos_.resize(numLegs_), hipJointPos_.resize(numLegs_), refBodyToFoot_.resize(numLegs_);
     footContactPhase_.setZero();
     footClearance_.setZero();
     footSlip_.setZero();
@@ -117,17 +127,16 @@ class ENVIRONMENT : public RaisimGymEnv {
     phaseSin_.setZero();
     footObsNoise_.setZero();
     standingSmoothness_ = 1.0;
-      smoothnessWeight_.setZero(12);
-      footPosWeight_.setZero();
-      bodyFrameHeight_.setZero();
+    smoothnessWeight_.setZero(actionDim_);
+    footPosWeight_.setZero();
 
     /// initialize history
-    jointPosErrorHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
-    jointVelHist_ = std::vector<Eigen::Vector<double,12>>(18,Eigen::Vector<double,12>::Zero());
-      genForceTargetHist_ = std::vector<Eigen::Vector<double,18>>(3,Eigen::Vector<double,18>::Zero());
+    jointPosErrorHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
+    jointVelHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
+    genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
     /// initialize gait
     phase_ = 0.0;
-    gait_hz_ = 0.72;
+    gait_hz_ = 0.82;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -137,24 +146,22 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_->setDefaultMaterial(mu_, 0, 0);
 
     /// initial body to foot pos
-      hound_->setState(gcInit_,gvInit_);
-      for(int i = 0; i < 4; i++) {
-          hound_->getFramePosition(footFrames_[i], footPos_[i]);
-          hound_->getFramePosition(rollJointFrames_[i], rollJointPos_[i]);
-          refBodyToFoot_[i] =   footPos_[i] - rollJointPos_[i];
-//          std::cout << i<<"th initial body to foot pos : " << refBodyToFoot_[i].e().transpose() << std::endl;
+      digit_->setState(gcInit_,gvInit_);
+      for(int i = 0; i < numLegs_; i++) {
+          digit_->getFramePosition(footJointFrames_[i], footPos_[i]);
+          digit_->getFramePosition(hipJointFrames_[i], hipJointPos_[i]);
+          refBodyToFoot_[i] =   footPos_[i] - hipJointPos_[i];
       }
   }
 
   void init() final { }
 
   void reset() final {
-
-    jointPgain_.setZero(); jointPgain_.tail(12).setConstant(30.0 + 2.5*uniDist_(gen_));
-    jointDgain_.setZero(); jointDgain_.tail(12).setConstant(1.0 + 0.1*uniDist_(gen_));
-//    hound_->setPdGains(jointPgain_, jointDgain_);
+    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(30.0 + 2.5*uniDist_(gen_));
+    jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(1.0 + 0.1*uniDist_(gen_));
+//    digit_->setPdGains(jointPgain_, jointDgain_);
     /// foot obs noise
-    for (int i=0;i<12;i++){
+    for (int i=0;i<(3*numLegs_);i++){
       footObsNoise_(i) = 0.02 * uniDist_(gen_);
     }
 
@@ -205,42 +212,49 @@ class ENVIRONMENT : public RaisimGymEnv {
         quat_.normalize();
         gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
         /// joint noise
-        for (int i = 7; i < 19; i++){
-            gcNoise_(i) += uniDist_(gen_) * 0.2 * ((standingMode_)? 2.0 : 1.0);
+        for (int j =0; j<2; j++){
+            for (int i = 0; i < 11; i++){
+                if (i!=4){ /// four bar linkage coupling issue
+                    gcNoise_(7 + 11*j + i) += uniDist_(gen_) * 0.3 * ((standingMode_)? 2.0 : 1.0);
+                }else{
+                    gcNoise_(7 + 11*j + i) = -gcNoise_(7 + 11*j + i - 1);
+                }
+            }
         }
         /// Generalized Velocities randomization.
         gvNoise_.setZero();
-        for (int i = 0; i < 18; i++) {
+        for (int i = 0; i < gvDim_; i++) {
             if (i < 3) {
                 gvNoise_(i) = uniDist_(gen_) * 0.5;
             } else if (i < 6) {
                 gvNoise_(i) = uniDist_(gen_) * 0.5;
             } else {
-                gvNoise_(i) = uniDist_(gen_) * 2.0;
+                gvNoise_(i) = uniDist_(gen_) * 1.5;
             }
             if (standingMode_) {gvNoise_(i) *= 2.0;}
         }
+        gvNoise_(7 + 4) = -gvNoise_(7 + 3);          /// four bar linkage
+        gvNoise_(7 + 11 + 4) = -gvNoise_(7 + 11+ 3); /// four bar linkage
     }
 
     /// preventing foot penetration
-    hound_->setState(gcNoise_,gvNoise_);
+    digit_->setState(gcNoise_,gvNoise_);
     double heightShift = 1e3;  /// -> 공중에 있는 것도 데리고 옴
     double temp = 0.0;
-    for (int i = 0; i < 4; i++){
-        hound_->getFramePosition(footFrames_[i], footPos_[i]);
-//        temp = footPos_[i](2) - 0.025 - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
-        temp = footPos_[i](2) - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
+    for (int i = 0; i < numLegs_; i++){
+        digit_->getFramePosition(footJointFrames_[i], footPos_[i]);
+        temp = footPos_[i](2) - 0.065 - heightMap_->getHeight(footPos_[i](0), footPos_[i](1)); /// but, 돌아가면 땅에 푹 파일겨
         if (temp < heightShift){heightShift = temp;}
     }
     gcNoise_(2) -= heightShift;
-    hound_->setState(gcNoise_, gvNoise_);
+    digit_->setState(gcNoise_, gvNoise_);
     updateObservation();
 
-            for (auto& vec : genForceTargetHist_) { vec.setZero(); }
+    for (auto& vec : genForceTargetHist_) { vec.setZero(); }
     /// reset (except the standingMode_ -> which preserves previous state for sudden command stop)
     if (reset){
-        pTarget_ = gc_.tail(12);
-        gcDes_.tail(12) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
+        pTarget_ = gc_.tail(actionDim_);
+        gcDes_.tail(actionDim_) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
         for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
         for (auto& vec : jointVelHist_) { vec.setZero(); }
 
@@ -254,21 +268,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     }
 
     /// random joint friction
-    for (int i=0;i<12;i++){
-        jointFrictions_(i) = 0.3 + 0.3 * uniDist_(gen_); // small friction
+    for (int i=0;i<actionDim_;i++){
+        jointFrictions_(i) = 0.2 + 0.2 * uniDist_(gen_); // small friction
     }
-//      double jFrictionHAA_1 = 0.86 + 0.15 * uniDist_(gen_);
-//      double jFrictionHFE_1 = 0.86 + 0.15 * uniDist_(gen_);
-//      double jFrictionKFE_1 = 0.93 + 0.3 * (uniDist_(gen_) + 0.5);
-//      double jFrictionHAA_2 = 2.24 + 0.15 * uniDist_(gen_);
-//      double jFrictionHFE_2 = 1.37 + 0.15 * uniDist_(gen_);
-//      double jFrictionKFE_2 = 1.16 + 0.3 * (uniDist_(gen_) + 0.5);
-//      double jFrictionHAA_3 = 0.90 + 0.15 * uniDist_(gen_);
-//      double jFrictionHFE_3 = 3.47 + 0.15 * uniDist_(gen_);
-//      double jFrictionKFE_3 = 3.03 + 0.3 * (uniDist_(gen_) + 0.5);
-//      double jFrictionHAA_4 = 0.98 + 0.15 * uniDist_(gen_);
-//      double jFrictionHFE_4 = 1.26 + 0.15 * uniDist_(gen_);
-//      double jFrictionKFE_4 = 1.35 + 0.3 * (uniDist_(gen_) + 0.5);
   }
 
   float step(const Eigen::Ref<EigenVec>& action) final {
@@ -283,7 +285,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
                 /// compute target torque
         computeTorque();
-        hound_->setGeneralizedForce(genForceTargetHist_[0]); /// 2ms delay (torque command in PC -> actual torque in real robot)
+        digit_->setGeneralizedForce(genForceTargetHist_[0]); /// 2ms delay (torque command in PC -> actual torque in real robot)
                 /// simpulation
       if(server_) server_->lockVisualizationServerMutex();
       world_->integrate();
@@ -304,21 +306,20 @@ class ENVIRONMENT : public RaisimGymEnv {
     return avgReward;
   }
 
-        void computeTorque(){
-      genForceTargetHist_.erase(genForceTargetHist_.begin());
-      Eigen::Vector<double,18> tempGenForce; tempGenForce.head(6).setZero();
-      tempGenForce.tail(12) = jointPgain_.tail(12).cwiseProduct(pTarget_-gc_.tail(12))
-                                + jointDgain_.tail(12).cwiseProduct(-gv_.tail(12));
+  void computeTorque(){
+        genForceTargetHist_.erase(genForceTargetHist_.begin());
+        Eigen::VectorXd tempGenForce(gvDim_); tempGenForce.head(6).setZero();
+        tempGenForce.tail(actionDim_) = jointPgain_.tail(actionDim_).cwiseProduct(pTarget_-gc_.tail(actionDim_))
+                              + jointDgain_.tail(actionDim_).cwiseProduct(-gv_.tail(actionDim_));
 
-//            std::cout << "tempGenForce : " << tempGenForce.transpose() << std::endl;
-            /// joint friction (static friction, torque 잡아먹는 효과)
-            for (int i = 0; i < 12; i++){
-                double jTorque = tempGenForce.tail(12)(i);
-                jTorque = (jTorque>0) ? std::min(jointFrictions_(i), jTorque) : std::max(-jointFrictions_(i), jTorque);
-                tempGenForce.tail(12)(i) -= jTorque;
-            }
-//            std::cout << "afterenForce : " << tempGenForce.transpose() << std::endl;
-genForceTargetHist_.push_back(tempGenForce);
+        /// joint friction (static friction, torque 잡아먹는 효과)
+        for (int i = 0; i < actionDim_; i++){
+          double jTorque = tempGenForce.tail(actionDim_)(i);
+          jTorque = (jTorque>0) ? std::min(jointFrictions_(i), jTorque) : std::max(-jointFrictions_(i), jTorque);
+          tempGenForce.tail(actionDim_)(i) -= jTorque;
+        }
+        //            std::cout << "afterenForce : " << tempGenForce.transpose() << std::endl;
+        genForceTargetHist_.push_back(tempGenForce);
   }
 
   float getBarrierReward() final {
@@ -330,10 +331,10 @@ genForceTargetHist_.push_back(tempGenForce);
       prevTarget_ = pTarget_;
 
       jointVelHist_.erase(jointVelHist_.begin());
-      jointVelHist_.push_back(gv_.tail(12));
+      jointVelHist_.push_back(gv_.tail(actionDim_));
 
       jointPosErrorHist_.erase(jointPosErrorHist_.begin());
-      jointPosErrorHist_.push_back(pTarget_ - gc_.tail(12));
+      jointPosErrorHist_.push_back(pTarget_ - gc_.tail(actionDim_));
   }
 
   double getReward(){
@@ -347,12 +348,12 @@ genForceTargetHist_.push_back(tempGenForce);
       if (!standingMode_){
           limitBaseMotion_ << -0.3,0.3;
           standingSmoothness_ = 1.0;
-          smoothnessWeight_ << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
+//          smoothnessWeight_ << 1.0, 0.6,0.6,1.,0.6,0.6,1.,0.6,0.6,1.,0.6,0.6;
           footPosWeight_ << 0.6,1.0,0.4;
       } else {
           limitBaseMotion_ << -0.1,0.1;
-          standingSmoothness_ = 2.8;
-          smoothnessWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
+          standingSmoothness_ = 2.0;
+//          smoothnessWeight_ << 1.0, 0.8,0.8,1.,0.8,0.8,1.,0.8,0.8,1.,0.8,0.8;
           footPosWeight_ << 1.0,1.0,1.0;
       }
   }
@@ -364,49 +365,41 @@ genForceTargetHist_.push_back(tempGenForce);
 
       /// neg reward
       footSlip_.setZero();
-      for (int i=0; i<4; i++){
-          if (footContact_(i)){
+      for (int i=0; i<numLegs_; i++){
+          if (footContact_(i) > 1){
               footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
           }
       }
 
       rewards_.record("footSlip", footSlip_.sum());
-//      rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
-      rewards_.record("smoothness2", ((pTarget_ - 2 * prevTarget_ + prevPrevTarget_).cwiseProduct(smoothnessWeight_)).squaredNorm()  * standingSmoothness_);
-      rewards_.record("torque", hound_->getGeneralizedForce().squaredNorm());
+      rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
+      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
+      rewards_.record("torque", digit_->getGeneralizedForce().squaredNorm());
 
       /// task space foot pos regulation -> used
-                        Eigen::Vector3d  tempVec;
-                        double tempReward = 0.0;
-                        for(int index_leg = 0; index_leg < 4; index_leg++){
-                            tempVec = (footPos_[index_leg].e() - rollJointPos_[index_leg].e());
-                            tempVec = rot_.e().transpose() *  tempVec.eval();
-                            tempReward += footPosWeight_.cwiseProduct(tempVec-refBodyToFoot_[index_leg].e()).squaredNorm();
-                        }
-      rewards_.record("footPos", tempReward);
-
-                        /// body height difference -> used
-      bodyFrameHeight_.setZero();
-      for (int i=0; i<2; i++) {
-          for (int j = 0; j < 2; j++) {
-              int index_leg = i * 2 + j;
-              tempVec = (footPos_[index_leg].e() - rollJointPos_[index_leg].e());
-              tempVec(2) = heightMap_->getHeight(footPos_[index_leg](0), footPos_[index_leg](1)) -
-                           rollJointPos_[index_leg](2);
-              tempVec = rot_.e().transpose() * tempVec.eval();
-              bodyFrameHeight_(i) -= tempVec(2);
-          }
+      Eigen::Vector3d  tempVec;
+      double tempReward = 0.0;
+      for(int index_leg = 0; index_leg < numLegs_; index_leg++){
+          tempVec = (footPos_[index_leg].e() - hipJointPos_[index_leg].e());
+          tempVec = rot_.e().transpose() *  tempVec.eval();
+          tempReward += footPosWeight_.cwiseProduct(tempVec-refBodyToFoot_[index_leg].e()).squaredNorm();
       }
-      bodyFrameHeight_ = bodyFrameHeight_.eval()/2.0;
-      rewards_.record("bodyHeightDifference", pow(bodyFrameHeight_(0)-bodyFrameHeight_(1),2.0));
-
-      rewards_.record("jointVel", gv_.tail(12).squaredNorm()  * (double)(standingMode_));                 /// only for standingMode_
-      rewards_.record("jointAcc", (gv_.tail(12) - preJointVel_).squaredNorm() * (double)(standingMode_)); /// only for standingMode_
+      rewards_.record("footPos", tempReward);
+      /// arm regulation
+      tempReward = 0.0;
+      Eigen::Matrix<double,4,1> tempArmWeigth; tempArmWeigth << 1.0,0.5,1.0,1.0; /// arm pitch motion low regulation
+      for(int index_arm = 0; index_arm < 2; index_arm++){
+          tempReward += tempArmWeigth.cwiseProduct(gc_.segment(14 + index_arm * 11,4) - gcInit_.segment(14 + index_arm * 11,4)).squaredNorm();
+      }
+      rewards_.record("armPos", tempReward);
+      /// vel acc regulation
+      rewards_.record("jointVel", gv_.tail(actionDim_).squaredNorm());                 /// only for standingMode_
+      rewards_.record("jointAcc", (gv_.tail(actionDim_) - preJointVel_).squaredNorm()); /// only for standingMode_
 
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("bodyHeightDifference")+ rewards_.getReward("footPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("smoothness2"));
+      negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("armPos") + rewards_.getReward("footPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("smoothness2"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -415,23 +408,21 @@ genForceTargetHist_.push_back(tempGenForce);
   float getLogBarReward(){
       /// for gait enforcing & foot clearance
       phase_ += simulation_dt_;
-      footContactPhase_(0) = sin(phase_/gait_hz_ * 2*3.141592); // RR
-      footContactPhase_(1) = -footContactPhase_(0); // RL
-      footContactPhase_(2) = -footContactPhase_(0); // FR
-      footContactPhase_(3) = footContactPhase_(0); // FL
+      footContactPhase_(0) = sin(phase_/gait_hz_ * 2*3.141592); // left
+      footContactPhase_(1) = -footContactPhase_(0); // right
 
       phaseSin_(0) = sin(phase_/gait_hz_ * 2*3.141592); // for observation
       phaseSin_(1) = cos(phase_/gait_hz_ * 2*3.141592); // for observation
 //
       if (!standingMode_){ /// walking
           /// footContactDouble_ -> limit_foot_contact 에 있도록 (-0.3,3) -> Gait Enforcing (요 -0.3 이 벗어나도 되는 범위)
-          for(int i=0; i<4; i++) {
-              if (footContact_(i)) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
+          for(int i=0; i<numLegs_; i++) {
+              if (footContact_(i) > 2) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
           double desiredFootZPosition = 0.15;
-          for (int i=0; i<4; i++){
+          for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
@@ -439,7 +430,7 @@ genForceTargetHist_.push_back(tempGenForce);
           }
       } else { /// under standingMode_
           /// standingMode_ 는 zero command 로 부터 유추 가능, command 는 obs 이기 때문에, robot 은 standingMode_인지 아닌지 충분히 알 수 있음
-          for (int i=0; i<4; i++){
+          for (int i=0; i<numLegs_; i++){
               footContactDouble_(i) = 1.0; // around max reward, where this value should go under (-0.3,3)
               footClearance_(i) = 0.0; // max reward (not enforcing clearance)
           }
@@ -449,18 +440,13 @@ genForceTargetHist_.push_back(tempGenForce);
       double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0;
       double tempReward = 0.0;
       /// Log Barrier - limit_joint_pos
-      for (int i=0;i<4;i++){
-          for (int j=0;j<3;j++){
-              int index_joint = i*3+j;
-              relaxedLogBarrier(0.08,limitJointPos_(index_joint,0),limitJointPos_(index_joint,1),gc_(7+index_joint),tempReward);
-              barrierJointPos += tempReward;
-          }
+      for (int index_joint=0;index_joint<actionDim_;index_joint++){
+          relaxedLogBarrier(0.08,limitJointPos_(index_joint,0),limitJointPos_(index_joint,1),gc_(7+index_joint),tempReward);
+          barrierJointPos += tempReward;
       }
       /// Log Barrier - limit_body_height
-      for (int i=0; i<2; i++){
-          relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),bodyFrameHeight_(i),tempReward);
-          barrierBodyHeight += tempReward;
-      }
+      relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),gc_(2),tempReward);
+      barrierBodyHeight += tempReward;
 
       /// Log Barrier - limit_base_motion
       relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
@@ -470,7 +456,7 @@ genForceTargetHist_.push_back(tempGenForce);
           barrierBaseMotion += tempReward;
       }
       /// Log Barrier - limit_joint_vel
-      for (int i=0;i<12;i++){
+      for (int i=0;i<actionDim_;i++){
           relaxedLogBarrier(2.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
           barrierJointVel += tempReward;
       }
@@ -482,13 +468,13 @@ genForceTargetHist_.push_back(tempGenForce);
       relaxedLogBarrier(0.2,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
       barrierTargetVel += tempReward;
       /// Log Barrier - limit_foot_contact
-      for (int i=0;i<4;i++){
+      for (int i=0;i<numLegs_;i++){
           relaxedLogBarrier(0.1,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
           barrierFootContact += tempReward;
       }
       /// Log Barrier - limit_foot_clearance
-      for (int i=0;i<4;i++){
-          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+      for (int i=0;i<numLegs_;i++){
+          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
@@ -546,26 +532,26 @@ genForceTargetHist_.push_back(tempGenForce);
 
   void updateObservation() {
     /// update previous footVel
-    preJointVel_ = gv_.tail(12);
+    preJointVel_ = gv_.tail(actionDim_);
     /// update state
-    hound_->getState(gc_, gv_);
+    digit_->getState(gc_, gv_);
     raisim::Vec<4> quat;
     quat[0] = gc_[3]; quat[1] = gc_[4]; quat[2] = gc_[5]; quat[3] = gc_[6];
     raisim::quatToRotMat(quat, rot_);
     bodyLinearVel_ = rot_.e().transpose() * gv_.segment(0, 3);
     bodyAngularVel_ = rot_.e().transpose() * gv_.segment(3, 3);
-    for(int i = 0; i < 4; i++) {
-      hound_->getFramePosition(footFrames_[i], footPos_[i]);
-      hound_->getFrameVelocity(footFrames_[i], footVel_[i]);
-        hound_->getFramePosition(rollJointFrames_[i], rollJointPos_[i]);
+    for(int i = 0; i < numLegs_; i++) {
+      digit_->getFramePosition(footJointFrames_[i], footPos_[i]);
+      digit_->getFrameVelocity(footJointFrames_[i], footVel_[i]);
+      digit_->getFramePosition(hipJointFrames_[i], hipJointPos_[i]);
     }
 
     /// foot contact update
     footContact_.setZero();
-    for(auto& contact: hound_->getContacts()){
-        for (size_t i=0; i<4; i++){
+    for(auto& contact: digit_->getContacts()){
+        for (size_t i=0; i<numLegs_; i++){
             if(contact.getlocalBodyIndex() == footIndices_[i]){
-                footContact_(i) = 1;
+                footContact_(i) += 1;
             }
         }
     }
@@ -576,18 +562,18 @@ genForceTargetHist_.push_back(tempGenForce);
 
   void updateFootToTerrain(){
     Eigen::Matrix<double, 3, 5> sample_point;
-    double point = 0.05; /// foot size
+    double point = 0.12; /// foot size
     sample_point.col(0) << point, 0.0, 0.0;
-    sample_point.col(1) << 0.0, point, 0.0;
+    sample_point.col(1) << 0.0, point/2.0, 0.0;
     sample_point.col(2) << -point, 0.0, 0.0;
-    sample_point.col(3) << 0.0, -point, 0.0;
+    sample_point.col(3) << 0.0, -point/2.0, 0.0;
     sample_point.col(4).setZero();
     for (int i = 0; i < 4; i++) {
         sample_point.col(i) = rot_.e().transpose() * sample_point.col(i).eval();
     }
     Eigen::Matrix<double, 5, 1> temp_foot;
     Eigen::Matrix<double, 3, 1> temp3;
-    for (int k = 0; k < 4; k++) {
+    for (int k = 0; k < numLegs_; k++) {
         for (int i = 0; i < 5; i++) {
             temp3 = footPos_[k].e() + sample_point.col(i);
             footToTerrain_(5 * k + i) = footPos_[k].e()(2) - heightMap_->getHeight(temp3(0), temp3(1));
@@ -618,7 +604,7 @@ genForceTargetHist_.push_back(tempGenForce);
       theta_command = -atan2(command(1),command(0));
       rot_command << 1,0,0,0,cos(theta_command),-sin(theta_command),0,sin(theta_command),cos(theta_command);
 
-      arrow_pos_offset << 0,0,0.15;
+      arrow_pos_offset << 0,0,0.50;
       arrow_pos_offset = rot_robot * arrow_pos_offset.eval();
       quaternion = rot_robot.eval() * rot_pitch_90 * rot_command;
 
@@ -638,16 +624,15 @@ genForceTargetHist_.push_back(tempGenForce);
       }
       obDouble_ << rot_.e().row(2).transpose(),                               /// body orientation. 3
           bodyAngularVel_,                                                      /// body angular velocity. 3
-          gc_.tail(12),                                                      /// joint pos 12
-          gv_.tail(12),                                                      /// joint velocity 12
+          gc_.tail(actionDim_),                                                      /// joint pos 22
+          gv_.tail(actionDim_),                                                      /// joint velocity 22
 
-          prevTarget_,                                                          /// previous action 12
-          prevPrevTarget_,                                                      /// preprevious action 12
-          jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 36 (0.18, 0.12, 0.6)
-          jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 36 (0.18, 0.12, 0.6)
+          prevTarget_,                                                          /// previous action 22
+          prevPrevTarget_,                                                      /// preprevious action 22
+          jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 66 (0.18, 0.12, 0.6)
+          jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 66 (0.18, 0.12, 0.6)
           rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[1].e() - gc_.head(3)),
-          rot_.e().transpose() * (footPos_[2].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[3].e() - gc_.head(3)),
-          /// relative foot position with respect to the body COM, expressed in the body frame 12
+          /// relative foot position with respect to the body COM, expressed in the body frame 6
           command_,                                                             /// command 3
 //          footContactPhase_.head(2), /// footContactPhase 2
           phaseSin_, /// phase encoding 2
@@ -657,13 +642,12 @@ genForceTargetHist_.push_back(tempGenForce);
       for (int i=0; i<obDim_; i++){
           if (i<3)       {noise = 0.03;}  /// body orientation
           else if(i<6)   {noise = 0.1;}   /// body angular velocity (rad/sec)
-          else if(i<18)  {noise = 0.05;}  /// joint pos             (rad)
-          else if(i<30)  {noise = 0.5;}   /// joint vel             (rad/sec)
-          else if(i<54)  {noise = 0.01;}  /// action related
-          else if(i<90)  {noise = 0.0;}   /// action related
-          else if(i<126) {noise = 0.1;}  /// vel history
-//          else if(i<138) {noise = 0.02;} /// relative foot pos (2 cm)
-          else if(i<138) {noise = footObsNoise_(i-126);} /// relative foot pos (2 cm)
+          else if(i<28)  {noise = 0.05;}  /// joint pos             (rad)
+          else if(i<50)  {noise = 0.5;}   /// joint vel             (rad/sec)
+          else if(i<94)  {noise = 0.0;}  /// action related
+          else if(i<160) {noise = 0.0;}   /// action related
+          else if(i<226) {noise = 0.1;}  /// vel history
+          else if(i<232) {noise = footObsNoise_(i-226);} /// relative foot pos (2 cm)
           else           {noise = 0.0;}
 
           obDouble_(i) += uniDist_(gen_) * noise;
@@ -679,16 +663,15 @@ genForceTargetHist_.push_back(tempGenForce);
       }
       valueObDouble_ << rot_.e().row(2).transpose(),                               /// body orientation. 3
               bodyAngularVel_,                                                      /// body angular velocity. 3
-              gc_.tail(12),                                                      /// joint pos 12
-              gv_.tail(12),                                                      /// joint velocity 12
+              gc_.tail(actionDim_),                                                      /// joint pos 22
+              gv_.tail(actionDim_),                                                      /// joint velocity 22
 
-              prevTarget_,                                                          /// previous action 12
-              prevPrevTarget_,                                                      /// preprevious action 12
-              jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 36 (0.18, 0.12, 0.6)
-              jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 36 (0.18, 0.12, 0.6)
+              prevTarget_,                                                          /// previous action 22
+              prevPrevTarget_,                                                      /// preprevious action 22
+              jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 66 (0.18, 0.12, 0.6)
+              jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 66 (0.18, 0.12, 0.6)
               rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[1].e() - gc_.head(3)),
-              rot_.e().transpose() * (footPos_[2].e() - gc_.head(3)), rot_.e().transpose() * (footPos_[3].e() - gc_.head(3)),
-              /// relative foot position with respect to the body COM, expressed in the body frame 12
+              /// relative foot position with respect to the body COM, expressed in the body frame 6
               command_,                                                             /// command 3
               phaseSin_, /// phase sin cos 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
@@ -704,7 +687,7 @@ genForceTargetHist_.push_back(tempGenForce);
   bool isTerminalState(float& terminalReward) final {
     terminalReward = float(terminalRewardCoeff_);
     /// if the contact body is not feet
-    for(auto& contact: hound_->getContacts())
+    for(auto& contact: digit_->getContacts())
         if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()) {
             return true;
         }
@@ -716,9 +699,9 @@ genForceTargetHist_.push_back(tempGenForce);
       /// for each iteration
       iter_ ++;
       if (curriculum_<2.0){
-          curriculum_ = (double)iter_ * (1.0/500.0); /// 500 iter -> 1.0
+          curriculum_ = (double)iter_ * (1.0/1000.0); /// 1000 iter -> 1.0
       }else{
-          curriculum_ = (double)(iter_-1000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
+          curriculum_ = (double)(iter_-2000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
           curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
       }
 
@@ -746,59 +729,59 @@ genForceTargetHist_.push_back(tempGenForce);
   }
   void setInitial(int type){
       if (type == 0){
-          hound_->setState(gcInit_,gvInit_);
+          digit_->setState(gcInit_,gvInit_);
           double heightShift = 1e2, temp = 0.0;
-          for (int i = 0; i < 4; i++){
-              hound_->getFramePosition(footFrames_[i], footPos_[i]);
-              temp = footPos_[i](2) - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
+          for (int i = 0; i < numLegs_; i++){
+              digit_->getFramePosition(footJointFrames_[i], footPos_[i]);
+              temp = footPos_[i](2) - 0.065- heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
               if (temp < heightShift){heightShift = temp;}
           }
           gcNoise_(2) -= heightShift;
 
           /// reset
-          hound_->setState(gcNoise_, gvInit_);
+          digit_->setState(gcNoise_, gvInit_);
           updateObservation();
       }
   }
 
  private:
-  int gcDim_, gvDim_;
+  int gcDim_, gvDim_, numLegs_;
   bool visualizable_ = false;
   double terminalRewardCoeff_ = -10.0;
-  raisim::ArticulatedSystem* hound_;
+  raisim::ArticulatedSystem* digit_;
 
   Eigen::VectorXd gc_, gv_;
-  Eigen::Vector<double,19> gcInit_, gcNoise_, gcDes_;
-  Eigen::Vector<double,18> gvInit_, gvNoise_, gvDes_;
-  Eigen::Vector<double,12> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_, jointFrictions_;
-    Eigen::Vector<double,18> jointPgain_, jointDgain_;
+  Eigen::Vector<double,29> gcInit_, gcNoise_, gcDes_;
+  Eigen::Vector<double,28> gvInit_, gvNoise_, gvDes_;
+  Eigen::Vector<double,22> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_, jointFrictions_;
+  Eigen::Vector<double,28> jointPgain_, jointDgain_;
 
-    raisim::Mat<3,3> rot_;
+  raisim::Mat<3,3> rot_;
   Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_, estDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
   std::vector<size_t> footIndices_;
   /// additional
   Eigen::Vector3d command_;                     // vx, vy, w
-  std::vector<std::string> footFrames_;
-    std::vector<std::string> rollJointFrames_;
-  Eigen::Vector4i footContact_;
-  std::vector<raisim::Vec<3>> footPos_,footVel_, rollJointPos_, refBodyToFoot_;
+  std::vector<std::string> footJointFrames_;
+  std::vector<std::string> hipJointFrames_;
+  Eigen::Vector2i footContact_;
+  std::vector<raisim::Vec<3>> footPos_,footVel_, hipJointPos_, refBodyToFoot_;
   double phase_;
   double gait_hz_;
-  Eigen::Matrix<double,4,1> footContactDouble_; // gait
-  Eigen::Matrix<double,4,1> footContactPhase_;  // gait hz
-  Eigen::Matrix<double,4,1> footClearance_;     // foot clearance
-  Eigen::Matrix<double,4,1> footSlip_;     // foot clearance
-  Eigen::Matrix<double,20,1> footToTerrain_; // 5 sample point for each foot
+  Eigen::Matrix<double,2,1> footContactDouble_; // gait
+  Eigen::Matrix<double,2,1> footContactPhase_;  // gait hz
+  Eigen::Matrix<double,2,1> footClearance_;     // foot clearance
+  Eigen::Matrix<double,2,1> footSlip_;     // foot clearance
+  Eigen::Matrix<double,10,1> footToTerrain_; // 10 sample point for each foot
   Eigen::Matrix<double,2,1> phaseSin_;  // sin cos representation of phase
-  Eigen::Matrix<double,12,1> footObsNoise_;
-  Eigen::Matrix<double,2,1> bodyFrameHeight_; // for front legs and hind legs
+  Eigen::Matrix<double,6,1> footObsNoise_;
   bool standingMode_;
   double standingRegulation_;
-    Eigen::VectorXd smoothnessWeight_;
-    Eigen::Vector3d footPosWeight_;
+  Eigen::VectorXd smoothnessWeight_;
+  Eigen::Vector3d footPosWeight_;
+
   /// log barrier function
-  Eigen::Matrix<double,12,2> limitJointPos_;
+  Eigen::Matrix<double,22,2> limitJointPos_;
   Eigen::Matrix<double,1,2> limitBodyHeight_;
   Eigen::Matrix<double,1,2> limitBaseMotion_; // z vel, roll,pitch vel
   Eigen::Matrix<double,1,2> limitJointVel_;
@@ -806,8 +789,8 @@ genForceTargetHist_.push_back(tempGenForce);
   Eigen::Matrix<double,1,2> limitFootClearance_;
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
   ///
-  std::vector<Eigen::Vector<double,12>> jointPosErrorHist_, jointVelHist_;
-  std::vector<Eigen::Vector<double,18>> genForceTargetHist_;
+  std::vector<Eigen::VectorXd> jointPosErrorHist_, jointVelHist_;
+  std::vector<Eigen::VectorXd> genForceTargetHist_;
   double standingSmoothness_;
 
   /// initialize
