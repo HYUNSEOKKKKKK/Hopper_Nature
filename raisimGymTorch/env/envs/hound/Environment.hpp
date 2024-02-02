@@ -383,6 +383,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
 
       rewards_.record("footSlip", footSlip_.sum());
+      if (rot_(8)>1.0){ rot_(8) = 1.0; } /// preventing acos nan
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("torque", digit_->getGeneralizedForce().squaredNorm());
