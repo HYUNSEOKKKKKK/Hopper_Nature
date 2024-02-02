@@ -170,15 +170,20 @@ class ENVIRONMENT : public RaisimGymEnv {
       footObsNoise_(i) = 0.02 * uniDist_(gen_);
     }
 
+
+
+    /// curriculum factor
+    double comCurriculum = (double)iter_ * 1.0/3000; /// command curriculum
+    comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
+    double initializeCurriculum = (double)iter_ * 1.0/2000; /// initialize curriculum
+    initializeCurriculum = (initializeCurriculum > 1.0) ? 1.0 : initializeCurriculum;
+
     /// with standing mode
     if (uniDist_(gen_) > 0.8) { // 10 %
         standingMode_ = true;
         command_.setZero();
     }else{
         standingMode_ = false;
-
-        double comCurriculum = (double)iter_ * 1.0/3000;
-        comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
         do {
 //            double maxCommand = (iter_ % 4 == 0) ? (0.8 + comCurriculum * 1.2) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.0, other 1.5
             double maxCommand = 0.8 + comCurriculum * 1.2; // 평지 lin x max 2.0, other 1.5
@@ -202,15 +207,15 @@ class ENVIRONMENT : public RaisimGymEnv {
         /// initialize with noise
         gcNoise_ = gcInit_;
         /// rot noise
-        if (uniDist_(gen_)>0.2 and !standingMode_){ // 40 % -> 올라가는 거 고정
-            yawNoise_ = 3.141592/2.0;
-            command_.tail(2).setZero();
-            command_(0) = abs(command_(0));
-        }else{
-            yawNoise_ = uniDist_(gen_) * 3.141592;
-        }
+//        if (uniDist_(gen_)>0.2 and !standingMode_){ // 40 % -> 올라가는 거 고정
+//            yawNoise_ = 3.141592/2.0;
+//            command_.tail(2).setZero();
+//            command_(0) = abs(command_(0));
+//        }else{
+        yawNoise_ = uniDist_(gen_) * 3.141592;
+//        }
         rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
-        quat_.coeffs() << uniDist_(gen_)*0.2, uniDist_(gen_)*0.2, 0.0, 1.0; // xyz w
+        quat_.coeffs() << uniDist_(gen_)*0.2*initializeCurriculum, uniDist_(gen_)*0.2*initializeCurriculum, 0.0, 1.0; // xyz w
         quat_.normalize();
         rotTotalNoise_ = quat_;
         rotTotalNoise_ = rotTotalNoise_.eval() * rotYawNoise_;
@@ -231,9 +236,9 @@ class ENVIRONMENT : public RaisimGymEnv {
         gvNoise_.setZero();
         for (int i = 0; i < gvDim_; i++) {
             if (i < 3) {
-                gvNoise_(i) = uniDist_(gen_) * 0.5;
+                gvNoise_(i) = uniDist_(gen_) * 0.5 * initializeCurriculum;
             } else if (i < 6) {
-                gvNoise_(i) = uniDist_(gen_) * 0.5;
+                gvNoise_(i) = uniDist_(gen_) * 0.5 * initializeCurriculum;
             } else {
                 gvNoise_(i) = uniDist_(gen_) * 1.5;
             }
@@ -391,13 +396,14 @@ class ENVIRONMENT : public RaisimGymEnv {
           tempReward += footPosWeight_.cwiseProduct(tempVec-refBodyToFoot_[index_leg].e()).squaredNorm();
       }
       rewards_.record("footPos", tempReward);
-      /// arm regulation
+      /// arm regulation + hip_rotation regulation
       tempReward = 0.0;
       Eigen::Matrix<double,4,1> tempArmWeigth; tempArmWeigth << 1.0,0.5,1.0,1.0; /// arm pitch motion low regulation
-      for(int index_arm = 0; index_arm < 2; index_arm++){
-          tempReward += tempArmWeigth.cwiseProduct(gc_.segment(14 + index_arm * 11,4) - gcInit_.segment(14 + index_arm * 11,4)).squaredNorm();
+      for(int i = 0; i < 2; i++){
+          tempReward += tempArmWeigth.cwiseProduct(gc_.segment(14 + i * 11,4) - gcInit_.segment(14 + i * 11,4)).squaredNorm();
+          tempReward += pow(gc_(8 + i*11) - gcInit_(8 + i*11),2.0); /// hip rotation
       }
-      rewards_.record("armPos", tempReward);
+      rewards_.record("jointPos", tempReward);
       /// vel acc regulation
       rewards_.record("jointVel", gv_.tail(actionDim_).squaredNorm());                 /// only for standingMode_
       rewards_.record("jointAcc", (gv_.tail(actionDim_) - preJointVel_).squaredNorm()); /// only for standingMode_
@@ -412,7 +418,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("armPos") + rewards_.getReward("footPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("smoothness2"));
+      negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("jointPos") + rewards_.getReward("footPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("smoothness2"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -466,7 +472,8 @@ class ENVIRONMENT : public RaisimGymEnv {
           tempHeight += gc_(2) - heightMap_->getHeight(footPos_[i](0), footPos_[i](1));
       }
       tempHeight /= static_cast<double>(numLegs_);
-      relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,barrierBodyHeight);
+//      relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,barrierBodyHeight);
+      relaxedLogBarrier(0.03,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,barrierBodyHeight);
 
       /// Log Barrier - limit_base_motion
       relaxedLogBarrier(0.2,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
@@ -624,7 +631,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       theta_command = -atan2(command(1),command(0));
       rot_command << 1,0,0,0,cos(theta_command),-sin(theta_command),0,sin(theta_command),cos(theta_command);
 
-      arrow_pos_offset << 0,0,0.50;
+      arrow_pos_offset << 0,0,0.60;
       arrow_pos_offset = rot_robot * arrow_pos_offset.eval();
       quaternion = rot_robot.eval() * rot_pitch_90 * rot_command;
 
@@ -719,12 +726,12 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      if (curriculum_<2.0){
-          curriculum_ = (double)iter_ * (1.0/1000.0); /// 1000 iter -> 1.0
-      }else{
-          curriculum_ = (double)(iter_-2000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
-          curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
-      }
+//      if (curriculum_<2.0){
+//          curriculum_ = (double)iter_ * (1.0/1000.0); /// 1000 iter -> 1.0
+//      }else{
+//          curriculum_ = (double)(iter_-2000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
+//          curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
+//      }
 
       curriculum_ = 0.0;
 

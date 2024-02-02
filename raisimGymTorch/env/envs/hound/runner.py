@@ -171,9 +171,9 @@ for update in range(16002):
     if update<4000:
         actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 1.2).to(device))
     elif update<10000:
-        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 0.7).to(device))
+        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 0.8).to(device))
     else:
-        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 0.6).to(device))
+        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 0.7).to(device))
 
     actor.distribution.enforce_maximum_std((torch.ones(act_dim)*1.5).to(device))
 
