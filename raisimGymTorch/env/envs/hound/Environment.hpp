@@ -115,7 +115,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    std::cout << "limit joint pos for left \n" << limitJointPos_.topRows(11) << std::endl;
 //    std::cout << "limit joint pos for right \n" << limitJointPos_.bottomRows(11) << std::endl;
 
-    limitBodyHeight_ << 0.7, 1.1;
+    limitBodyHeight_ << 0.8, 1.0;
     limitBaseMotion_ << -0.3,0.3;
     limitJointVel_ << -8,8;
     limitTargetVel_ << -0.4,0.4;
