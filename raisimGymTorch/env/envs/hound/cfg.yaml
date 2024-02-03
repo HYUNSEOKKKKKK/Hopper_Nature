@@ -4,7 +4,7 @@ record_video: no
 environment:
   render: True
 # just testing commenting
-  num_envs: 400
+  num_envs: 10
   eval_every_n: 500
   num_threads: 60
   simulation_dt: 0.001
@@ -34,6 +34,7 @@ environment:
     barrierTargetVel:     1e-1
     barrierFootContact:   1e-1
     barrierFootClearance: 1e-1
+    barrierArmLegCoupling: 1e-1
 
     # total sum
     negSumPos:          1.0 #1.0

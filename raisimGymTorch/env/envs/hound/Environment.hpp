@@ -67,6 +67,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(actionDim_);
     actionStd_.setConstant(0.3);
+    actionStd_.segment(7,4).setConstant(0.1);
+    actionStd_.segment(18,4).setConstant(0.1);
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
@@ -119,6 +121,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitTargetVel_ << -0.4,0.4;
     limitFootContact_ << -0.6,2;
     limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
+      limitArmLegCoupling_ << -0.4, 0.4;
 
     /// initialize
     command_.setZero();
@@ -134,6 +137,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     standingSmoothness_ = 1.0;
     smoothnessWeight_.setZero(actionDim_);
     footPosWeight_.setZero();
+      armLegCoupling_.setZero(); // left hip flexion == right shoulder pitch
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
@@ -175,8 +179,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// curriculum factor
     double comCurriculum = (double)iter_ * 1.0/3000; /// command curriculum
     comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
-    double initializeCurriculum = (double)iter_ * 1.0/2000; /// initialize curriculum
-    initializeCurriculum = (initializeCurriculum > 1.0) ? 1.0 : initializeCurriculum;
+//    double initializeCurriculum = (double)iter_ * 1.0/2000; /// initialize curriculum
+//    initializeCurriculum = (initializeCurriculum > 1.0) ? 1.0 : initializeCurriculum;
+            double initializeCurriculum = 1.0; /// no curriculum
 
     /// with standing mode
     if (uniDist_(gen_) > 0.8) { // 10 %
@@ -448,16 +453,20 @@ class ENVIRONMENT : public RaisimGymEnv {
                           footToTerrain_.segment(i * 5, 5).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
           }
+
+                armLegCoupling_(0) = 2*(gc_(7+2)-gcInit_(7+2)) - (gc_(7+11+8)-gcInit_(7+11+8));
+                armLegCoupling_(1) = 2*(gc_(7+11+2)-gcInit_(7+11+2)) - (gc_(7+8)-gcInit_(7+8));
       } else { /// under standingMode_
           /// standingMode_ 는 zero command 로 부터 유추 가능, command 는 obs 이기 때문에, robot 은 standingMode_인지 아닌지 충분히 알 수 있음
           for (int i=0; i<numLegs_; i++){
               footContactDouble_(i) = 1.0; // around max reward, where this value should go under (-0.3,3)
               footClearance_(i) = 0.0; // max reward (not enforcing clearance)
           }
+          armLegCoupling_.setZero();
       }
 
       /// compute barrier reward
-      double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0;
+      double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0, barrierArmLegCoupling = 0.0;
       double tempReward = 0.0;
       /// Log Barrier - limit_joint_pos
       for (int index_joint=0;index_joint<actionDim_;index_joint++){
@@ -505,6 +514,11 @@ class ENVIRONMENT : public RaisimGymEnv {
           relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
+      /// Log Barrier - limitArmLegCoupling
+      for (int i =0; i< numLegs_; i++){
+          relaxedLogBarrier(0.08,limitArmLegCoupling_(0),limitArmLegCoupling_(1),armLegCoupling_(i),tempReward);
+          barrierArmLegCoupling += tempReward;
+      }
 
 //      if (barrierFootClearance < -40) {
 ////          std::cout << "barrierJointPos : " <<  barrierJointPos << std::endl;
@@ -532,9 +546,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierTargetVel", barrierTargetVel);
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
+      rewards_.record("barrierArmLegCoupling", barrierArmLegCoupling);
 
 
-      float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
+      float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance + barrierArmLegCoupling));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
@@ -807,6 +822,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,10,1> footToTerrain_; // 10 sample point for each foot
   Eigen::Matrix<double,2,1> phaseSin_;  // sin cos representation of phase
   Eigen::Matrix<double,6,1> footObsNoise_;
+        Eigen::Matrix<double,2,1> armLegCoupling_;
   bool standingMode_;
   double standingRegulation_;
   Eigen::VectorXd smoothnessWeight_;
@@ -820,6 +836,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,1,2> limitTargetVel_;
   Eigen::Matrix<double,1,2> limitFootClearance_;
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
+        Eigen::Matrix<double,1,2> limitArmLegCoupling_; // for natural arm motion, in pitch
   ///
   std::vector<Eigen::VectorXd> jointPosErrorHist_, jointVelHist_;
   std::vector<Eigen::VectorXd> genForceTargetHist_;

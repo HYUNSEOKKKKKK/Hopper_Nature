@@ -113,8 +113,8 @@ class RolloutStorage:
                 next_values = self.barrier_values[step + 1]
                 # next_is_not_terminal = 1.0 - self.dones[step+1].float()
 
-            # next_is_not_terminal = 1.0 - self.dones[step]
-            next_is_not_terminal = 1.0
+            next_is_not_terminal = 1.0 - self.dones[step]
+            # next_is_not_terminal = 1.0
             delta = self.barrier_rewards[step] + next_is_not_terminal * gamma * next_values - self.barrier_values[step]
             advantage = delta + next_is_not_terminal * gamma * lam * advantage
             self.barrier_returns[step] = advantage + self.barrier_values[step]
