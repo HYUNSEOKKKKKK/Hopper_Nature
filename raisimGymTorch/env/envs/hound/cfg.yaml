@@ -4,7 +4,7 @@ record_video: no
 environment:
   render: True
 # just testing commenting
-  num_envs: 10
+  num_envs: 400
   eval_every_n: 500
   num_threads: 60
   simulation_dt: 0.001
