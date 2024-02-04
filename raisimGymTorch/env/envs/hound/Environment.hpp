@@ -67,8 +67,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(actionDim_);
     actionStd_.setConstant(0.3);
-    actionStd_.segment(7,4).setConstant(0.1);
-    actionStd_.segment(18,4).setConstant(0.1);
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
@@ -103,7 +101,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointPos_.row(6) << -0.6109, 0.6109; // toe_roll_joint_left
 
     limitJointPos_.row(7) << -1.309, 0.4; // shoulder_roll_joint_left
-    limitJointPos_.row(8) << -2.5307, 2.5307; // shoulder_pitch_joint_left
+//    limitJointPos_.row(8) << -2.5307, 2.5307; // shoulder_pitch_joint_left
+            limitJointPos_.row(8) << -0.237, 1.863; // shoulder_pitch_joint_left
     limitJointPos_.row(9) << -1.7453, 1.7453; // shoulder_yaw_joint_left
     limitJointPos_.row(10) << -1.3526, 1.3526; // elbow_joint_left
 
@@ -404,7 +403,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("footPos", tempReward);
       /// arm regulation + hip_rotation regulation
       tempReward = 0.0;
-      Eigen::Matrix<double,4,1> tempArmWeigth; tempArmWeigth << 1.0,0.5,1.0,1.0; /// arm pitch motion low regulation
+      Eigen::Matrix<double,4,1> tempArmWeigth; tempArmWeigth << 1.0,0.7,1.0,1.0; /// arm pitch motion low regulation
       for(int i = 0; i < 2; i++){
           tempReward += tempArmWeigth.cwiseProduct(gc_.segment(14 + i * 11,4) - gcInit_.segment(14 + i * 11,4)).squaredNorm();
           tempReward += pow(gc_(8 + i*11) - gcInit_(8 + i*11),2.0); /// hip rotation
@@ -454,8 +453,12 @@ class ENVIRONMENT : public RaisimGymEnv {
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
           }
 
-                armLegCoupling_(0) = 2*(gc_(7+2)-gcInit_(7+2)) - (gc_(7+11+8)-gcInit_(7+11+8));
-                armLegCoupling_(1) = 2*(gc_(7+11+2)-gcInit_(7+11+2)) - (gc_(7+8)-gcInit_(7+8));
+                armLegCoupling_.setZero();
+//                armLegCoupling_(0) = (gc_(7+3)-gcInit_(7+3)) - (gc_(7+11+8)-gcInit_(7+11+8));
+//                armLegCoupling_(1) = (gc_(7+11+3)-gcInit_(7+11+3)) - (gc_(7+8)-gcInit_(7+8));
+//
+//                std::cout << "left knee : " << (gc_(7+3)-gcInit_(7+3)) << " , shoulder : " <<  (gc_(7+11+8)-gcInit_(7+11+8)) << std::endl;
+//                std::cout << "right knee : " << (gc_(7+11+3)-gcInit_(7+11+3)) << " , shoulder : " <<  (gc_(7+8)-gcInit_(7+8)) << std::endl;
       } else { /// under standingMode_
           /// standingMode_ 는 zero command 로 부터 유추 가능, command 는 obs 이기 때문에, robot 은 standingMode_인지 아닌지 충분히 알 수 있음
           for (int i=0; i<numLegs_; i++){

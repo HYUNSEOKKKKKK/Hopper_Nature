@@ -168,13 +168,21 @@ for update in range(16002):
     avg_rewards.append(average_ll_performance)
 
     actor.update()
-    if update<4000:
-        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 1.2).to(device))
-    elif update<10000:
-        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 0.8).to(device))
-    else:
-        actor.distribution.enforce_minimum_std((torch.ones(act_dim) * 0.7).to(device))
 
+    min_std = torch.ones(act_dim)
+    min_std[7:11] = 0.2  # Indices 7 to 10, arm
+    min_std[18:] = 0.2   # Indices 18 to 21, arm
+    if update<2000:
+        min_std[:7] = 1.2   # Indices 0 to 6, leg
+        min_std[11:18] = 1.2  # Indices 11 to 17, leg
+    elif update<10000:
+        min_std[:7] = 0.8  # Indices 0 to 6, leg
+        min_std[11:18] = 0.8  # Indices 11 to 17, leg
+    else:
+        min_std[:7] = 0.7  # Indices 0 to 6, leg
+        min_std[11:18] = 0.7  # Indices 11 to 17, leg
+
+    actor.distribution.enforce_minimum_std((min_std).to(device))
     actor.distribution.enforce_maximum_std((torch.ones(act_dim)*1.5).to(device))
 
     # curriculum update. Implement it in Environment.hpp
