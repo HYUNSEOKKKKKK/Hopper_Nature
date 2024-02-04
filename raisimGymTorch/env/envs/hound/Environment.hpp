@@ -100,7 +100,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointPos_.row(5) << -0.7853, 0.7853; // toe_pitch_joint_left
     limitJointPos_.row(6) << -0.6109, 0.6109; // toe_roll_joint_left
 
-    limitJointPos_.row(7) << -1.309, 0.4; // shoulder_roll_joint_left
+//    limitJointPos_.row(7) << -1.309, 0.4; // shoulder_roll_joint_left
+            limitJointPos_.row(7) << -0.8, 0.4; // shoulder_roll_joint_left
 //    limitJointPos_.row(8) << -2.5307, 2.5307; // shoulder_pitch_joint_left
             limitJointPos_.row(8) << -0.237, 1.863; // shoulder_pitch_joint_left
     limitJointPos_.row(9) << -1.7453, 1.7453; // shoulder_yaw_joint_left
@@ -178,9 +179,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// curriculum factor
     double comCurriculum = (double)iter_ * 1.0/3000; /// command curriculum
     comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
-//    double initializeCurriculum = (double)iter_ * 1.0/2000; /// initialize curriculum
-//    initializeCurriculum = (initializeCurriculum > 1.0) ? 1.0 : initializeCurriculum;
-            double initializeCurriculum = 1.0; /// no curriculum
+            double initializeCurriculum = (double)iter_ * 1.0/4000; /// initialize curriculum
+            initializeCurriculum = (initializeCurriculum > 1.0) ? 1.0 : initializeCurriculum;
+//            double initializeCurriculum = 1.0; /// no curriculum
 
     /// with standing mode
     if (uniDist_(gen_) > 0.8) { // 10 %

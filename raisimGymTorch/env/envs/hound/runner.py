@@ -170,8 +170,8 @@ for update in range(16002):
     actor.update()
 
     min_std = torch.ones(act_dim)
-    min_std[7:11] = 0.2  # Indices 7 to 10, arm
-    min_std[18:] = 0.2   # Indices 18 to 21, arm
+    min_std[7:11] = 0.6  # Indices 7 to 10, arm
+    min_std[18:] = 0.6  # Indices 18 to 21, arm
     if update<2000:
         min_std[:7] = 1.2   # Indices 0 to 6, leg
         min_std[11:18] = 1.2  # Indices 11 to 17, leg
