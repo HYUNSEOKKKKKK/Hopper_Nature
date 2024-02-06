@@ -21,7 +21,7 @@ environment:
     bodyOri:     -2.0 #-0.5
     torque:      -1e-4 #-5e-5
 
-    jointPos:   -4e-1 # arm, hip_rotation
+    jointPos:   -8e-1 # arm, hip_rotation
     footPos:  -6.0
     jointVel:    -5e-4
     jointAcc:    -5e-3

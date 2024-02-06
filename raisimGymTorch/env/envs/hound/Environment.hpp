@@ -103,7 +103,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    limitJointPos_.row(7) << -1.309, 0.4; // shoulder_roll_joint_left
             limitJointPos_.row(7) << -0.8, 0.4; // shoulder_roll_joint_left
 //    limitJointPos_.row(8) << -2.5307, 2.5307; // shoulder_pitch_joint_left
-            limitJointPos_.row(8) << -0.237, 1.863; // shoulder_pitch_joint_left
+//            limitJointPos_.row(8) << -0.237, 1.863; // shoulder_pitch_joint_left
+            limitJointPos_.row(8) << -0.237, 1.263; // shoulder_pitch_joint_left
     limitJointPos_.row(9) << -1.7453, 1.7453; // shoulder_yaw_joint_left
     limitJointPos_.row(10) << -1.3526, 1.3526; // elbow_joint_left
 
