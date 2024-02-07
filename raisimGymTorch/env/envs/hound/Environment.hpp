@@ -242,11 +242,11 @@ class ENVIRONMENT : public RaisimGymEnv {
         gvNoise_.setZero();
         for (int i = 0; i < gvDim_; i++) {
             if (i < 3) {
-                gvNoise_(i) = uniDist_(gen_) * 0.3 * initializeCurriculum;
+                gvNoise_(i) = uniDist_(gen_) * 0.5 * initializeCurriculum;
             } else if (i < 6) {
-                gvNoise_(i) = uniDist_(gen_) * 0.3 * initializeCurriculum;
+                gvNoise_(i) = uniDist_(gen_) * 0.5 * initializeCurriculum;
             } else {
-                gvNoise_(i) = uniDist_(gen_) * 1.0;
+                gvNoise_(i) = uniDist_(gen_) * 1.5;
             }
             if (standingMode_) {gvNoise_(i) *= 2.0;}
         }
