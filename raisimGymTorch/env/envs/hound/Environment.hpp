@@ -221,7 +221,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         yawNoise_ = uniDist_(gen_) * 3.141592;
 //        }
         rotYawNoise_ << cos(yawNoise_),-sin(yawNoise_),0,sin(yawNoise_),cos(yawNoise_),0,0,0,1;
-        quat_.coeffs() << uniDist_(gen_)*0.2*initializeCurriculum, uniDist_(gen_)*0.2*initializeCurriculum, 0.0, 1.0; // xyz w
+        quat_.coeffs() << uniDist_(gen_)*0.1*initializeCurriculum, uniDist_(gen_)*0.1*initializeCurriculum, 0.0, 1.0; // xyz w
         quat_.normalize();
         rotTotalNoise_ = quat_;
         rotTotalNoise_ = rotTotalNoise_.eval() * rotYawNoise_;
@@ -242,11 +242,11 @@ class ENVIRONMENT : public RaisimGymEnv {
         gvNoise_.setZero();
         for (int i = 0; i < gvDim_; i++) {
             if (i < 3) {
-                gvNoise_(i) = uniDist_(gen_) * 0.5 * initializeCurriculum;
+                gvNoise_(i) = uniDist_(gen_) * 0.3 * initializeCurriculum;
             } else if (i < 6) {
-                gvNoise_(i) = uniDist_(gen_) * 0.5 * initializeCurriculum;
+                gvNoise_(i) = uniDist_(gen_) * 0.3 * initializeCurriculum;
             } else {
-                gvNoise_(i) = uniDist_(gen_) * 1.5;
+                gvNoise_(i) = uniDist_(gen_) * 1.0;
             }
             if (standingMode_) {gvNoise_(i) *= 2.0;}
         }

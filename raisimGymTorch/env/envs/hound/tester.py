@@ -10,7 +10,7 @@ import argparse
 import numpy as np
 import pygame
 
-joystick = 1
+joystick = 0
 if (joystick == 1) :
     pygame.display.init()
     pygame.joystick.init()
@@ -38,7 +38,7 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/digit/2024-02-04-22-51-08/full_12000.pt"
+weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/digit/2024-02-06-23-01-08/full_4000.pt"
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/hound/2023-12-08-11-12-57_hiking/full_10000.pt"
 # weight_path = args.weight
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
@@ -56,7 +56,7 @@ else:
 
     env.reset()
     # env.set_terrain(4,4.7,1.0)
-    env.set_command(0.0,0.0,0.0)
+    env.set_command(0.6,0.0,0.0)
 
     reward_ll_sum = 0
     done_sum = 0
