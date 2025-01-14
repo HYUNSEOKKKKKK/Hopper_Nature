@@ -98,7 +98,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     limitBodyHeight_ << 0.50, 0.90;
     limitBaseMotion_.row(0) << -0.8,0.8; // z
-      limitBaseMotion_.row(1) << -0.3,0.3; // roll, pitch
+      limitBaseMotion_.row(1) << -0.6,0.6; // roll, pitch
     limitJointVel_ << -6,6; // max vel limit is 9
     limitTargetVel_ << -0.8,0.8;
     limitFootContact_ << -0.6,2;
@@ -364,7 +364,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for standingMode
       if (!standingMode_){
           limitBaseMotion_.row(0) << -0.8,0.8;
-          limitBaseMotion_.row(1) << -0.3,0.3;
+          limitBaseMotion_.row(1) << -0.6,0.6;
           standingSmoothness_ = 1.0;
           footPosWeight_ << 0.6,1.0,0.4;
       } else {
@@ -464,10 +464,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       relaxedLogBarrier(0.04,limitBodyHeight_(0),limitBodyHeight_(1),tempHeight,barrierBodyHeight);
 
       /// Log Barrier - limit_base_motion
-      relaxedLogBarrier(0.5,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
+      relaxedLogBarrier(1.0,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
       for (int i=0;i<2;i++){
-          relaxedLogBarrier(0.3,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
+          relaxedLogBarrier(0.6,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
           barrierBaseMotion += tempReward;
       }
       /// Log Barrier - limit_joint_vel
@@ -476,11 +476,11 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierJointVel += tempReward;
       }
       /// Log Barrier - limit_target_vel
-      relaxedLogBarrier(0.4,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
+      relaxedLogBarrier(0.8,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
       barrierTargetVel += tempReward;
-      relaxedLogBarrier(0.4,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
+      relaxedLogBarrier(0.8,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
       barrierTargetVel += tempReward;
-      relaxedLogBarrier(0.4,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
+      relaxedLogBarrier(0.8,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
       barrierTargetVel += tempReward;
       /// Log Barrier - limit_foot_contact
       for (int i=0;i<numLegs_;i++){
