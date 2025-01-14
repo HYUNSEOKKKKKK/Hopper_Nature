@@ -17,7 +17,7 @@ import argparse
 
 
 # task specification
-task_name = "digit"
+task_name = "dhal_one_leg"
 
 # configuration
 parser = argparse.ArgumentParser()
@@ -99,7 +99,7 @@ scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000
 # if mode == 'retrain':
 #     load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
 
-for update in range(16002):
+for update in range(8001):
     start = time.time()
     env.reset()
     reward_sum = 0
@@ -150,18 +150,19 @@ for update in range(16002):
         value_obs = env.value_observe(False) # obs + true state
         action = ppo.act(np.hstack((obs,est_out)))
         reward, dones, barrier_reward = env.step(action)
-        ppo.step(value_obs=value_obs, est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones, bar_rews=barrier_reward)
+        # ppo.step(value_obs=value_obs, est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones, bar_rews=barrier_reward)
+        ppo.step(value_obs=np.hstack((obs,value_obs[:,-est_dim:])), est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones, bar_rews=barrier_reward)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
-        if (update % 200 == 0): # 평지, stair
-        # if (update % 200 == 0): # 평지, stair
+        if (update % 100 == 0): # 평지, stair
             reward_analyzer.add_reward_info(env.get_reward_info())
 
     # take st step to get value obs
     obs = env.observe()
     est_out = estimator.predict(torch.from_numpy(obs).to(device)).cpu().numpy()
     value_obs = env.value_observe(False)
-    ppo.update(actor_obs=np.hstack((obs,est_out)), value_obs=value_obs,log_this_iteration=update % 10 == 0, update=update)
+    # ppo.update(actor_obs=np.hstack((obs,est_out)), value_obs=value_obs,log_this_iteration=update % 10 == 0, update=update)
+    ppo.update(actor_obs=np.hstack((obs,est_out)), value_obs=np.hstack((obs,value_obs[:,-est_dim:])),log_this_iteration=update % 10 == 0, update=update)
     average_ll_performance = reward_sum / total_steps
     average_dones = done_sum / total_steps
     avg_rewards.append(average_ll_performance)
@@ -169,17 +170,12 @@ for update in range(16002):
     actor.update()
 
     min_std = torch.ones(act_dim)
-    min_std[7:11] = 0.6  # Indices 7 to 10, arm
-    min_std[18:] = 0.6  # Indices 18 to 21, arm
     if update<2000:
-        min_std[:7] = 1.2   # Indices 0 to 6, leg
-        min_std[11:18] = 1.2  # Indices 11 to 17, leg
+        min_std = torch.ones(act_dim)
     elif update<10000:
-        min_std[:7] = 0.8  # Indices 0 to 6, leg
-        min_std[11:18] = 0.8  # Indices 11 to 17, leg
+        min_std = torch.ones(act_dim) * 0.5
     else:
-        min_std[:7] = 0.7  # Indices 0 to 6, leg
-        min_std[11:18] = 0.7  # Indices 11 to 17, leg
+        min_std = torch.ones(act_dim) * 0.3
 
     actor.distribution.enforce_minimum_std((min_std).to(device))
     actor.distribution.enforce_maximum_std((torch.ones(act_dim)*1.5).to(device))
@@ -190,8 +186,7 @@ for update in range(16002):
     end = time.time()
     scheduler.step()
 
-    if (update % 200 == 0): # 평지, stair
-    # if (update % 200 == 0): # 평지, stair
+    if (update % 100 == 0): # 평지, stair
         reward_analyzer.analyze_and_plot(update)
 
     print('----------------------------------------------------')
