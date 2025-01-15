@@ -196,8 +196,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //            double initializeCurriculum = 1.0; /// no curriculum
 
     /// with standing mode
-//    if (uniDist_(gen_) > 0.8) { // 10 %
-    if (uniDist_(gen_) > 1.0) { // 0 %
+    if (uniDist_(gen_) > 0.8) { // 10 %
         standingMode_ = true;
         command_.setZero();
     }else{
