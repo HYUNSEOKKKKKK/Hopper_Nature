@@ -719,7 +719,7 @@ class ENVIRONMENT : public RaisimGymEnv {
                 and (std::find(calfIndices_.begin(), calfIndices_.end(), contact.getlocalBodyIndex()) == calfIndices_.end())) {
             terminalStack_ += 1;
         }
-    if (terminalStack_ > 50){
+    if (terminalStack_ > 20){
         return true;
     }
     terminalReward = -0.f;
