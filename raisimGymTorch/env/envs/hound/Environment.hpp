@@ -412,7 +412,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// pos vel acc regulation
       jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
       rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.tail(actionDim_)-gcInit_.tail(actionDim_))).squaredNorm());
-            jointRegulatingWeight_ << 0.5, 2.0, 2.0; // knee, ankle pitch, ankle roll
+            jointRegulatingWeight_ << 0.5, 1.5, 1.5; // knee, ankle pitch, ankle roll
       rewards_.record("jointVel", (jointRegulatingWeight_.cwiseProduct(gv_.tail(actionDim_))).squaredNorm());
       rewards_.record("jointAcc", (jointRegulatingWeight_.cwiseProduct((gv_.tail(actionDim_) - preJointVel_))).squaredNorm());
       jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
@@ -446,7 +446,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.16;
+          double desiredFootZPosition = 0.20;
           for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
