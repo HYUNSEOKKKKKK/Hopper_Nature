@@ -35,7 +35,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     numEdges_ = 4;
     actionDim_ = 3;
     obDim_ = 45;
-    estDim_ = 5;
+    estDim_ = 7;
     valueObDim_ = obDim_ + estDim_;
 
     /// initialize
@@ -76,6 +76,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     footJointFrames_.push_back("02_ankle_roll_joint");  /// joint
 //    hipJointFrames_.push_back("hip_abduction_left");
 
+      bodyIndices_.push_back(dhal_->getBodyIdx("Thigh"));
+      bodyIndices_.push_back(dhal_->getBodyIdx("Temp_Weight"));
+
        /// visualize if it is the first environment
     if (visualizable_) {
       server_ = std::make_unique<raisim::RaisimServer>(world_.get());
@@ -107,6 +110,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize
     command_.setZero();
     footContact_ = 0;
+    bodyContact_.setZero();
     footVel_.resize(numLegs_); footPos_.resize(numLegs_), hipJointPos_.resize(numLegs_), refBodyToFoot_.resize(numLegs_), footOrientation_.resize(numLegs_);
     footContactPhase_.setZero();
     footClearance_.setZero();
@@ -118,8 +122,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     standingSmoothness_ = 1.0;
     smoothnessWeight_.setZero(actionDim_);
     footPosWeight_.setZero();
+            terminalStack_ = 0;
 
-    /// initialize history
+      /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
     jointVelHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
     genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
@@ -184,9 +189,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// curriculum factor
     double comCurriculum = (double)iter_ * 1.0/1500; /// command curriculum
     comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
-//            double initializeCurriculum = (double)iter_ * 1.0/4000; /// initialize curriculum
-//            initializeCurriculum = (initializeCurriculum > 1.0) ? 1.0 : initializeCurriculum;
-            double initializeCurriculum = 1.0; /// no curriculum
+            double initializeCurriculum = (double)iter_ * 1.0/1000; /// initialize curriculum
+            initializeCurriculum = (initializeCurriculum > 1.0) ? 1.0 : initializeCurriculum;
+//            double initializeCurriculum = 1.0; /// no curriculum
 
     /// with standing mode
     if (uniDist_(gen_) > 0.8) { // 10 %
@@ -196,8 +201,8 @@ class ENVIRONMENT : public RaisimGymEnv {
         standingMode_ = false;
         do {
                     //            double maxCommand = (iter_ % 4 == 0) ? (0.8 + comCurriculum * 1.2) : (1.0 + comCurriculum * 0.5); // 평지 lin x max 2.0, other 1.5
-            double maxCommand = 0.8 + comCurriculum * 0.7; // 평지 lin x max 1.5
-            command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
+            command_ << maxCommand * uniDist_(gen_), 0.4 * uniDist_(gen_), 0.4 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
             command_(0) = (command_(0) < -1.0) ? command_(0)+1.2 : command_(0);           // 뒤로가는 건 max -1.0
         } while (command_.norm() < 0.2);
     }
@@ -285,6 +290,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         footClearance_.setZero();
     }
 
+    terminalStack_ = 0;
     /// random joint friction
 //    for (int i=0;i<actionDim_;i++){
 //        jointFrictions_(i) = 0.2 + 0.2 * uniDist_(gen_); // small friction
@@ -393,6 +399,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("torque", dhal_->getGeneralizedForce().squaredNorm());
+      rewards_.record("baseMotion", 0.8*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
 
       /// task space foot pos regulation -> used
       Eigen::Vector3d  tempVec;
@@ -406,11 +413,14 @@ class ENVIRONMENT : public RaisimGymEnv {
             rewards_.record("jointPos", jointRegulatingWeight_.cwiseProduct(gc_.tail(actionDim_)-gcInit_.tail(actionDim_)).squaredNorm());
       rewards_.record("jointVel", jointRegulatingWeight_.cwiseProduct(gv_.tail(actionDim_)).squaredNorm());
       rewards_.record("jointAcc", jointRegulatingWeight_.cwiseProduct((gv_.tail(actionDim_) - preJointVel_)).squaredNorm());
+/// body contact reward
+      rewards_.record("bodyContact",(double) bodyContact_.sum());
 
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("jointPos") + rewards_.getReward("footPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque") + rewards_.getReward("footSlip") + rewards_.getReward("smoothness2"));
+      negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("jointPos") + rewards_.getReward("footPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque")
+              + rewards_.getReward("footSlip") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -556,6 +566,16 @@ class ENVIRONMENT : public RaisimGymEnv {
         }
     }
 
+            /// body contact update (only used for true state)
+            bodyContact_.setZero();
+      for(auto& contact: dhal_->getContacts()){
+          for (size_t i=0; i<2; i++){
+              if(contact.getlocalBodyIndex() == bodyIndices_[i]){
+                  bodyContact_(i) = 1;
+              }
+          }
+      }
+
     /// update foot terrain
     updateFootToTerrain();
   }
@@ -665,8 +685,9 @@ class ENVIRONMENT : public RaisimGymEnv {
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
               bodyLinearVel_,                                                       /// body linear velocity. 3
-              footClearance_ * 5.0,                                                       /// min foot z
-              static_cast<double>(footContact_);
+              footClearance_ * 4.0,                                                       /// min foot z
+              static_cast<double>(footContact_)/4.0,
+              bodyContact_.cast<double>()/4.0;
 
       /// convert it to float
       ob = valueObDouble_.cast<float>();
@@ -678,8 +699,11 @@ class ENVIRONMENT : public RaisimGymEnv {
     for(auto& contact: dhal_->getContacts())
         if ((std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end())
                 and (std::find(calfIndices_.begin(), calfIndices_.end(), contact.getlocalBodyIndex()) == calfIndices_.end())) {
-            return true;
+            terminalStack_ += 1;
         }
+    if (terminalStack_ > 50){
+        return true;
+    }
     terminalReward = -0.f;
     return false;
   }
@@ -752,12 +776,16 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_, estDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
   std::vector<size_t> footIndices_, calfIndices_;
+    /// collision reward
+    std::vector<size_t> bodyIndices_;
+
   /// additional
   Eigen::Vector3d command_;                     // vx, vy, w
   std::vector<std::string> footJointFrames_;
   std::vector<std::string> hipJointFrames_;
   int footContact_;
-  std::vector<raisim::Vec<3>> footPos_,footVel_, hipJointPos_, refBodyToFoot_;
+    Eigen::Vector2i bodyContact_; // 2
+    std::vector<raisim::Vec<3>> footPos_,footVel_, hipJointPos_, refBodyToFoot_;
         std::vector <raisim::Mat<3,3>> footOrientation_;
   double phase_;
   double gait_hz_;
@@ -801,6 +829,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   double mu_;
   /// for barrier
   float barrierReward_;
+        int terminalStack_;
 
   thread_local static std::mt19937 gen_;
   thread_local static std::normal_distribution<double> normDist_;
