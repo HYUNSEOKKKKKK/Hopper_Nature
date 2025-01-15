@@ -132,7 +132,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
     /// initialize gait
     phase_ = 0.0;
-    gait_hz_ = 1.2;
+    gait_hz_ = 1.0;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -287,8 +287,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        }else{
 //            phase_ = gait_hz_/2.0;
 //        }
-//                phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
-                phase_ = uniDist_(gen_) * gait_hz_;
+                phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
         footContactPhase_.setZero();
         footClearance_.setZero();
     }
@@ -412,8 +411,9 @@ class ENVIRONMENT : public RaisimGymEnv {
           tempReward += footPosWeight_.cwiseProduct(tempVec-refBodyToFoot_[index_leg].e()).squaredNorm();
       }
       /// pos vel acc regulation
-      jointRegulatingWeight_ << 0.5, 2.0, 2.0; // knee, ankle pitch, ankle roll
+      jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
       rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.tail(actionDim_)-gcInit_.tail(actionDim_))).squaredNorm());
+            jointRegulatingWeight_ << 0.5, 2.0, 2.0; // knee, ankle pitch, ankle roll
       rewards_.record("jointVel", (jointRegulatingWeight_.cwiseProduct(gv_.tail(actionDim_))).squaredNorm());
       rewards_.record("jointAcc", (jointRegulatingWeight_.cwiseProduct((gv_.tail(actionDim_) - preJointVel_))).squaredNorm());
       jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
