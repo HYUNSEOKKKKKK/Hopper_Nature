@@ -25,7 +25,7 @@ environment:
     footPos:  -6.0
     jointVel:    -2e-3
     jointAcc:    -8e-3
-    baseMotion: -4.0
+    baseMotion: -2.0
     bodyContact: -10.0
 
     # relaxed

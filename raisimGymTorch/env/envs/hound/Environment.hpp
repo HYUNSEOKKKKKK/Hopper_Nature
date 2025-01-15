@@ -99,8 +99,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointPos_.col(1) -= tempJointPos*0.05;
 
     limitBodyHeight_ << 0.50, 0.90;
-    limitBaseMotion_.row(0) << -0.8,0.8; // z
-      limitBaseMotion_.row(1) << -0.6,0.6; // roll, pitch
+    limitBaseMotion_.row(0) << -1.0,1.0; // z, pitch
+      limitBaseMotion_.row(1) << -0.6,0.6; // roll
     limitJointVel_ << -6,6; // max vel limit is 9
     limitTargetVel_ << -0.6,0.6;
     limitFootContact_ << -0.6,2;
@@ -367,7 +367,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   void standingReward(){
       /// for standingMode
       if (!standingMode_){
-          limitBaseMotion_.row(0) << -0.8,0.8;
+          limitBaseMotion_.row(0) << -1.0,1.0;
           limitBaseMotion_.row(1) << -0.6,0.6;
           standingSmoothness_ = 1.0;
           footPosWeight_ << 0.6,1.0,0.4;
@@ -474,10 +474,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// Log Barrier - limit_base_motion
       relaxedLogBarrier(1.0,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
-      for (int i=0;i<2;i++){
-          relaxedLogBarrier(0.6,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(i),tempReward);
-          barrierBaseMotion += tempReward;
-      }
+              relaxedLogBarrier(1.0,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyAngularVel_(0),tempReward);
+              barrierBaseMotion += tempReward;
+              relaxedLogBarrier(0.6,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(1),tempReward);
+              barrierBaseMotion += tempReward;
       /// Log Barrier - limit_joint_vel
       for (int i=0;i<actionDim_;i++){
           relaxedLogBarrier(2.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
