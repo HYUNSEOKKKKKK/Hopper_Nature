@@ -132,7 +132,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
     /// initialize gait
     phase_ = 0.0;
-    gait_hz_ = 1.0;
+    gait_hz_ = 0.80;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
