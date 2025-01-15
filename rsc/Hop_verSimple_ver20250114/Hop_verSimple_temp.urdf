@@ -88,6 +88,7 @@
         <child link="Universal"/>
         <axis xyz="0 1 0"/>
         <limit effort="200.0" velocity="9.0" lower="-0.872665" upper="0.698132"/>
+        <dynamics damping="0.1"/>
     </joint>
     <link name="Universal">
         <visual>
@@ -110,6 +111,7 @@
         <child link="Foot"/>
         <axis xyz="1 0 0"/>
         <limit effort="200.0" velocity="9.0" lower="-0.523599" upper="0.523599"/>
+        <dynamics damping="0.1"/>
     </joint>
     <link name="Foot">
 <!--        <visual>-->

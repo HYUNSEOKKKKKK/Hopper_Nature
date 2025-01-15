@@ -23,7 +23,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    dhal_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hop_verSimple_ver20250114/Hop_verSimple.urdf");
+    dhal_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hop_verSimple_ver20250114/Hop_verSimple_temp.urdf");
     dhal_->setName("dhal");
     dhal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -150,10 +150,10 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          refBodyToFoot_[i] =   footPos_[i] - hipJointPos_[i];
       }
 
-      edgePosLocal_.col(0) << -0.12, -0.04, -0.015-0.065;
-      edgePosLocal_.col(1) << -0.12, 0.04, -0.015-0.065;
-      edgePosLocal_.col(2) << 0.12, -0.04, -0.015-0.065;
-      edgePosLocal_.col(3) << 0.12, 0.04, -0.015-0.065;
+      edgePosLocal_.col(0) << -0.12, -0.05, -0.015-0.065;
+      edgePosLocal_.col(1) << -0.12, 0.05, -0.015-0.065;
+      edgePosLocal_.col(2) << 0.12, -0.05, -0.015-0.065;
+      edgePosLocal_.col(3) << 0.12, 0.05, -0.015-0.065;
 
       for (int i=0; i<4; i++){
           for (int j= 0; j<2; j++){
@@ -503,7 +503,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.015,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
