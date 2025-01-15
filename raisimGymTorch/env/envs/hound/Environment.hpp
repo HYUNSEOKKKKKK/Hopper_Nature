@@ -34,8 +34,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     numLegs_ = 1;
     numEdges_ = 4;
     actionDim_ = 3;
-    obDim_ = 57;
-    estDim_ = 9;
+    obDim_ = 48;
+    estDim_ = 7;
     valueObDim_ = obDim_ + estDim_;
 
     /// initialize
@@ -652,10 +652,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
           jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
           rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),               /// relative foot position with respect to the body COM, expressed in the body frame 3
-                    rot_.e().transpose() * (edgePosWorld_.col(0) - gc_.head(3)),
-                    rot_.e().transpose() * (edgePosWorld_.col(1) - gc_.head(3)),
-              rot_.e().transpose() * (edgePosWorld_.col(2) - gc_.head(3)),
-              rot_.e().transpose() * (edgePosWorld_.col(3) - gc_.head(3)),          /// relative edge pos 3*4
+              footOrientation_[0].e().row(2).transpose(),                           /// ankle rot 3
           command_,                                                             /// command 3
           phaseSin_, /// phase encoding 2
           static_cast<double>(standingMode_);  /// standingMode 1
@@ -693,20 +690,15 @@ class ENVIRONMENT : public RaisimGymEnv {
               jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
               jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
               rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),        /// relative foot position with respect to the body COM, expressed in the body frame 3
-              rot_.e().transpose() * (edgePosWorld_.col(0) - gc_.head(3)),
-              rot_.e().transpose() * (edgePosWorld_.col(1) - gc_.head(3)),
-              rot_.e().transpose() * (edgePosWorld_.col(2) - gc_.head(3)),
-              rot_.e().transpose() * (edgePosWorld_.col(3) - gc_.head(3)),          /// relative edge pos 3*4
+              footOrientation_[0].e().row(2).transpose(),                           /// ankle rot 3
               command_,                                                             /// command 3
               phaseSin_, /// phase sin cos 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
               bodyLinearVel_,                                                       /// body linear velocity. 3
 //              footClearance_ * 4.0,                                                       /// min foot z
-footToTerrain_(0) * 4.0,
-footToTerrain_(2) * 4.0,
-footToTerrain_(4) * 4.0,
-footToTerrain_(6) * 4.0,                                                /// 4 foot to ground for sampling point
+              (footToTerrain_(0) + footToTerrain_(2)) * 2.0,
+              (footToTerrain_(4) + footToTerrain_(6)) * 2.0,                         /// heel & toe height
               static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
               static_cast<double>(bodyContact_)/4.0;                                /// 1 body contact num
 
