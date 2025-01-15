@@ -446,7 +446,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.20;
+          double desiredFootZPosition = 0.16;
           for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
@@ -503,7 +503,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.015,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
@@ -720,7 +720,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //                and (std::find(calfIndices_.begin(), calfIndices_.end(), contact.getlocalBodyIndex()) == calfIndices_.end())) {
             terminalStack_ += 1;
         }
-    if (terminalStack_ > 20){
+    if (terminalStack_ > 50){
         return true;
     }
     terminalReward = -0.f;
