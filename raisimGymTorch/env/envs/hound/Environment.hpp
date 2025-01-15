@@ -399,7 +399,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (rot_(8)>1.0){ rot_(8) = 1.0; } /// preventing acos nan
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
-      rewards_.record("baseMotion", 0.2*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
+      rewards_.record("baseMotion", 0.4*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
 
       /// task space foot pos regulation -> not used
       Eigen::Vector3d  tempVec;
