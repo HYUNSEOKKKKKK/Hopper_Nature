@@ -715,9 +715,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     terminalReward = float(terminalRewardCoeff_);
     /// if the contact body is not feet
     for(auto& contact: dhal_->getContacts())
-        if (std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end()){
-//        if ((std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end())
-//                and (std::find(calfIndices_.begin(), calfIndices_.end(), contact.getlocalBodyIndex()) == calfIndices_.end())) {
+        if ((std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end())
+                and (std::find(calfIndices_.begin(), calfIndices_.end(), contact.getlocalBodyIndex()) == calfIndices_.end())) {
             terminalStack_ += 1;
         }
     if (terminalStack_ > 50){
