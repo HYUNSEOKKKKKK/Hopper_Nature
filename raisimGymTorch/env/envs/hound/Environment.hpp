@@ -196,7 +196,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //            double initializeCurriculum = 1.0; /// no curriculum
 
     /// with standing mode
-    if (uniDist_(gen_) > 0.8) { // 10 %
+//    if (uniDist_(gen_) > 0.8) { // 10 %
+    if (uniDist_(gen_) > 1.0) { // 0 %
         standingMode_ = true;
         command_.setZero();
     }else{
@@ -286,7 +287,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        }else{
 //            phase_ = gait_hz_/2.0;
 //        }
-                phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
+//                phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
+                phase_ = uniDist_(gen_) * gait_hz_;
         footContactPhase_.setZero();
         footClearance_.setZero();
     }
