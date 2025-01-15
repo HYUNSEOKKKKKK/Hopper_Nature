@@ -647,8 +647,8 @@ class ENVIRONMENT : public RaisimGymEnv {
           gc_.tail(actionDim_),                                                      /// joint pos 3
           gv_.tail(actionDim_),                                                      /// joint velocity 3
 
-          prevTarget_,                                                          /// previous action 3
-          prevPrevTarget_,                                                      /// preprevious action 3
+          prevTarget_ - actionMean_,                                                          /// previous action 3
+          prevPrevTarget_ - actionMean_,                                                      /// preprevious action 3
           jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
           jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
           rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),               /// relative foot position with respect to the body COM, expressed in the body frame 3
@@ -686,8 +686,8 @@ class ENVIRONMENT : public RaisimGymEnv {
               gc_.tail(actionDim_),                                                      /// joint pos 3
               gv_.tail(actionDim_),                                                      /// joint velocity 3
 
-              prevTarget_,                                                          /// previous action 3
-              prevPrevTarget_,                                                      /// preprevious action 3
+              prevTarget_- actionMean_,                                                          /// previous action 3
+              prevPrevTarget_- actionMean_,                                                      /// preprevious action 3
               jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
               jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
               rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),        /// relative foot position with respect to the body COM, expressed in the body frame 3
