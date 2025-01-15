@@ -65,7 +65,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// action scaling
     actionMean_ = gcInit_.tail(actionDim_);
-    actionStd_.setConstant(0.3);
+//    actionStd_.setConstant(0.3);
+      actionStd_ << 0.4, 0.2, 0.2;
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
@@ -202,7 +203,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     }else{
         standingMode_ = false;
         do {
-            double maxCommand = 0.4 + comCurriculum * 0.8; // 평지 lin x max 1.5
+            double maxCommand = 0.4 + comCurriculum * 0.6; // 평지 lin x max 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
             command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
         } while (command_.norm() < 0.2);
@@ -238,9 +239,9 @@ class ENVIRONMENT : public RaisimGymEnv {
         quat_ = rotTotalNoise_;
         quat_.normalize();
         gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
-        for (int j=0; j<3; j++){
-            gcNoise_(7+j) += uniDist_(gen_) * 0.3 * ((standingMode_)? 2.0 : 1.0);
-        }
+        gcNoise_(7) += uniDist_(gen_) * 0.5 * ((standingMode_)? 1.2 : 1.0);
+        gcNoise_(8) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0);
+        gcNoise_(9) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0);
         /// Generalized Velocities randomization.
         gvNoise_.setZero();
         for (int i = 0; i < gvDim_; i++) {
@@ -251,7 +252,7 @@ class ENVIRONMENT : public RaisimGymEnv {
             } else {
                 gvNoise_(i) = uniDist_(gen_) * 1.0;
             }
-            if (standingMode_) {gvNoise_(i) *= 2.0;}
+            if (standingMode_) {gvNoise_(i) *= 1.5;}
         }
     }
 
@@ -446,7 +447,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.20;
+          double desiredFootZPosition = 0.16;
           for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =

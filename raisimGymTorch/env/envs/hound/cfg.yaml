@@ -19,7 +19,7 @@ environment:
     footSlip:    -2.0
     smoothness2: -1.8 #-2.5
     bodyOri:     -2.0 #-0.5
-    torque:      -1e-4 #-5e-5
+    torque:      -5e-5 #-5e-5
 
     jointPos:   -8e-1 # arm, hip_rotation
     footPos:  -6.0
