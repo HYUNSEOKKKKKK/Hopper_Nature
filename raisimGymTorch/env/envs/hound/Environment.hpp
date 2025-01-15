@@ -85,6 +85,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       server_->focusOn(dhal_);
       arrows_.push_back(server_->addVisualArrow("command_xy",0.1,0.05,0,1,0,1));
       arrows_.push_back(server_->addVisualArrow("command_yaw",0.1,0.05,1,0,0,1));
+        for (int i=0; i<8; i++){
+            visualEdge_.push_back(server_->addVisualSphere(std::to_string(i),0.01,0.0,1.0,0.0,1));
+        }
     }
     visualizationOn_ = false;
 
@@ -168,8 +171,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       sampleEdgePosLocal_.col(7)(1) += sampling_point;
 
       /// rot conversion to initial base pos
-//      rotConversion_ << 0.9393727,  0.0000000,  0.3428978, 0.0000000,  1.0000000,  0.0000000, -0.3428978,  0.0000000,  0.9393727; // 0.35 rad pitch rot
-      rotConversion_ << 0.8775826,  0.0000000,  0.4794255, 0.0000000,  1.0000000,  0.0000000, -0.4794255,  0.0000000,  0.8775826; // 0.50 rad pitch rot
+      rotConversion_ << 0.9393727,  0.0000000,  0.3428978, 0.0000000,  1.0000000,  0.0000000, -0.3428978,  0.0000000,  0.9393727; // 0.35 rad pitch rot
 
       /// joint regulating weight
       jointRegulatingWeight_.setZero(actionDim_);
@@ -628,6 +630,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       quaternion = rot_robot.eval();
 //      arrows_[1]->setOrientation(gc_head_7.segment(3,4));
       arrows_[1]->setOrientation(quaternion.w(),quaternion.x(),quaternion.y(),quaternion.z());
+
+            /// visualize foot edges
+                        for (int j=0; j<8; j++){
+                            visualEdge_[j] ->setPosition(sampleEdgePosWorld_.col(j));
+                        }
   }
 
   void observe(Eigen::Ref<EigenVec> ob) final {
@@ -836,7 +843,8 @@ footToTerrain_(6) * 4.0,                                                /// 4 fo
   double yawNoise_;
   ///
   std::vector<raisim::Visuals*> arrows_;
-  raisim::HeightMap* heightMap_;
+    std::vector<raisim::Visuals*> visualEdge_;
+    raisim::HeightMap* heightMap_;
   /// curriculum
   double curriculum_;
   int iter_;
