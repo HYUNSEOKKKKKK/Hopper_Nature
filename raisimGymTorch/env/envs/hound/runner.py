@@ -92,8 +92,8 @@ ppo = PPO.PPO(actor=actor,
               )
 
 reward_analyzer = RewardAnalyzer(env, ppo.writer)
-# scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000], gamma=0.333333)
-scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000], gamma=0.5)
+# scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000], gamma=0.5)
+scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[1000], gamma=0.75)
 
 
 # if mode == 'retrain':

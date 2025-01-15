@@ -34,8 +34,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     numLegs_ = 1;
     numEdges_ = 4;
     actionDim_ = 3;
-    obDim_ = 45;
-    estDim_ = 7;
+    obDim_ = 57;
+    estDim_ = 9;
     valueObDim_ = obDim_ + estDim_;
 
     /// initialize
@@ -168,7 +168,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       sampleEdgePosLocal_.col(7)(1) += sampling_point;
 
       /// rot conversion to initial base pos
-      rotConversion_ << 0.9393727,  0.0000000,  0.3428978, 0.0000000,  1.0000000,  0.0000000, -0.3428978,  0.0000000,  0.9393727; // 0.35 rad pitch rot
+//      rotConversion_ << 0.9393727,  0.0000000,  0.3428978, 0.0000000,  1.0000000,  0.0000000, -0.3428978,  0.0000000,  0.9393727; // 0.35 rad pitch rot
+      rotConversion_ << 0.8775826,  0.0000000,  0.4794255, 0.0000000,  1.0000000,  0.0000000, -0.4794255,  0.0000000,  0.8775826; // 0.50 rad pitch rot
 
       /// joint regulating weight
       jointRegulatingWeight_.setZero(actionDim_);
@@ -398,7 +399,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("baseMotion", 0.2*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
 
-      /// task space foot pos regulation -> used
+      /// task space foot pos regulation -> not used
       Eigen::Vector3d  tempVec;
       double tempReward = 0.0;
       for(int index_leg = 0; index_leg < numLegs_; index_leg++){
@@ -440,7 +441,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.12;
+          double desiredFootZPosition = 0.20;
           for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
@@ -551,6 +552,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       dhal_->getFramePosition(footJointFrames_[i], footPos_[i]);
       dhal_->getFrameVelocity(footJointFrames_[i], footVel_[i]);
                 dhal_->getFrameOrientation(footJointFrames_[i], footOrientation_[i]);
+                /// currently, works for one leg
+        edgePosWorld_ = footOrientation_[i].e() * edgePosLocal_;
+        for (int j=0; j<numEdges_; j++) {
+            edgePosWorld_.col(j) += footPos_[i].e();
+        }
 //      dhal_->getFramePosition(hipJointFrames_[i], hipJointPos_[i]);
     }
 
@@ -638,8 +644,11 @@ class ENVIRONMENT : public RaisimGymEnv {
           prevPrevTarget_,                                                      /// preprevious action 3
           jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
           jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
-          rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),
-          /// relative foot position with respect to the body COM, expressed in the body frame 3
+          rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),               /// relative foot position with respect to the body COM, expressed in the body frame 3
+                    rot_.e().transpose() * (edgePosWorld_.col(0) - gc_.head(3)),
+                    rot_.e().transpose() * (edgePosWorld_.col(1) - gc_.head(3)),
+              rot_.e().transpose() * (edgePosWorld_.col(2) - gc_.head(3)),
+              rot_.e().transpose() * (edgePosWorld_.col(3) - gc_.head(3)),          /// relative edge pos 3*4
           command_,                                                             /// command 3
           phaseSin_, /// phase encoding 2
           static_cast<double>(standingMode_);  /// standingMode 1
@@ -676,16 +685,23 @@ class ENVIRONMENT : public RaisimGymEnv {
               prevPrevTarget_,                                                      /// preprevious action 3
               jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
               jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
-              rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),
-              /// relative foot position with respect to the body COM, expressed in the body frame 3
+              rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),        /// relative foot position with respect to the body COM, expressed in the body frame 3
+              rot_.e().transpose() * (edgePosWorld_.col(0) - gc_.head(3)),
+              rot_.e().transpose() * (edgePosWorld_.col(1) - gc_.head(3)),
+              rot_.e().transpose() * (edgePosWorld_.col(2) - gc_.head(3)),
+              rot_.e().transpose() * (edgePosWorld_.col(3) - gc_.head(3)),          /// relative edge pos 3*4
               command_,                                                             /// command 3
               phaseSin_, /// phase sin cos 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
               bodyLinearVel_,                                                       /// body linear velocity. 3
-              footClearance_ * 4.0,                                                       /// min foot z
-              static_cast<double>(footContact_)/4.0,
-              static_cast<double>(bodyContact_)/4.0;
+//              footClearance_ * 4.0,                                                       /// min foot z
+footToTerrain_(0) * 4.0,
+footToTerrain_(2) * 4.0,
+footToTerrain_(4) * 4.0,
+footToTerrain_(6) * 4.0,                                                /// 4 foot to ground for sampling point
+              static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
+              static_cast<double>(bodyContact_)/4.0;                                /// 1 body contact num
 
       /// convert it to float
       ob = valueObDouble_.cast<float>();
