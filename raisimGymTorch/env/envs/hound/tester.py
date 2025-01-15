@@ -38,7 +38,7 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-weight_path = "/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-01-15-10-32-10/full_4000.pt"
+weight_path = "/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-01-15-11-57-18/full_3000.pt"
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -78,9 +78,9 @@ else:
     for step in range(max_steps):
         if joystick == 1 :
             if (step % 10 == 0):
-                command_x = max(-0.8, min(-pygame.joystick.Joystick(0).get_axis(4), 0.8))
-                command_y = max(-0.4, min(-pygame.joystick.Joystick(0).get_axis(3), 0.4))
-                command_yaw = max(-0.4, min(-pygame.joystick.Joystick(0).get_axis(1), 0.4))
+                command_x = max(-0.8, min(-pygame.joystick.Joystick(0).get_axis(4)*1.5, 1.2))
+                command_y = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(3), 0.6))
+                command_yaw = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(1), 0.6))
                 env.set_command(command_x,command_y,command_yaw)
             else:
                 if step % 400 == 0:

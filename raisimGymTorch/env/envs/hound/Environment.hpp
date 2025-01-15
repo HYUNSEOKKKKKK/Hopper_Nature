@@ -98,12 +98,12 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointPos_.col(0) += tempJointPos*0.05;
     limitJointPos_.col(1) -= tempJointPos*0.05;
 
-    limitBodyHeight_ << 0.50, 0.90;
+    limitBodyHeight_ << 0.30, 1.10;
     limitBaseMotion_.row(0) << -1.0,1.0; // z, pitch
       limitBaseMotion_.row(1) << -0.6,0.6; // roll
     limitJointVel_ << -6,6; // max vel limit is 9
     limitTargetVel_ << -0.6,0.6;
-    limitFootContact_ << -0.6,2;
+    limitFootContact_ << -0.3,2;
     limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
 
     /// initialize
@@ -129,7 +129,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
     /// initialize gait
     phase_ = 0.0;
-    gait_hz_ = 0.90;
+    gait_hz_ = 0.80;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -172,7 +172,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// joint regulating weight
       jointRegulatingWeight_.setZero(actionDim_);
-      jointRegulatingWeight_ << 0.5, 1.0, 2.0; // knee, ankle pitch, ankle roll
+      jointRegulatingWeight_ << 0.5, 1.0, 1.5; // knee, ankle pitch, ankle roll
   }
 
   void init() final { }
@@ -283,7 +283,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        }else{
 //            phase_ = gait_hz_/2.0;
 //        }
-                phase_ = uniDist_(gen_) * gait_hz_;
+                phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
         footContactPhase_.setZero();
         footClearance_.setZero();
     }
@@ -396,8 +396,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (rot_(8)>1.0){ rot_(8) = 1.0; } /// preventing acos nan
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
-      rewards_.record("torque", dhal_->getGeneralizedForce().squaredNorm());
-      rewards_.record("baseMotion", 0.8*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
+      rewards_.record("baseMotion", 0.2*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
 
       /// task space foot pos regulation -> used
       Eigen::Vector3d  tempVec;
@@ -408,9 +407,10 @@ class ENVIRONMENT : public RaisimGymEnv {
           tempReward += footPosWeight_.cwiseProduct(tempVec-refBodyToFoot_[index_leg].e()).squaredNorm();
       }
       /// pos vel acc regulation
-            rewards_.record("jointPos", jointRegulatingWeight_.cwiseProduct(gc_.tail(actionDim_)-gcInit_.tail(actionDim_)).squaredNorm());
-      rewards_.record("jointVel", jointRegulatingWeight_.cwiseProduct(gv_.tail(actionDim_)).squaredNorm());
-      rewards_.record("jointAcc", jointRegulatingWeight_.cwiseProduct((gv_.tail(actionDim_) - preJointVel_)).squaredNorm());
+            rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.tail(actionDim_)-gcInit_.tail(actionDim_))).squaredNorm());
+      rewards_.record("jointVel", (jointRegulatingWeight_.cwiseProduct(gv_.tail(actionDim_))).squaredNorm());
+      rewards_.record("jointAcc", (jointRegulatingWeight_.cwiseProduct((gv_.tail(actionDim_) - preJointVel_))).squaredNorm());
+      rewards_.record("torque", (jointRegulatingWeight_.cwiseProduct(dhal_->getGeneralizedForce().e().tail(actionDim_))).squaredNorm());
 /// body contact reward
       rewards_.record("bodyContact",(double) bodyContact_);
 
@@ -428,7 +428,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// for gait enforcing & foot clearance
       phase_ += simulation_dt_;
       footContactPhase_(0) = sin(phase_/gait_hz_ * 2*3.141592); // left
-      footContactPhase_(1) = -footContactPhase_(0); // right
+//      footContactPhase_(1) = -footContactPhase_(0); // right
 
       phaseSin_(0) = sin(phase_/gait_hz_ * 2*3.141592); // for observation
       phaseSin_(1) = cos(phase_/gait_hz_ * 2*3.141592); // for observation
