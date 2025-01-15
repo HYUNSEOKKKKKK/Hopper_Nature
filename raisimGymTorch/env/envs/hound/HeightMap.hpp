@@ -244,6 +244,7 @@ raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, doub
         double ySize = (2.0) * (double)stairNum; // 폭 [120,150]
         return world->addHeightMap(xSampleNum, ySampleNum, 20.0, ySize, 0., 0., heightVec);
     }
+            return nullptr;
 }
 
 #endif //_RAISIM_GYM_TORCH_HEIGHTMAP_HPP
