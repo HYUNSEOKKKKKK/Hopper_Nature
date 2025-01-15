@@ -132,7 +132,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
     /// initialize gait
     phase_ = 0.0;
-    gait_hz_ = 0.80;
+    gait_hz_ = 1.2;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -175,7 +175,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       /// joint regulating weight
       jointRegulatingWeight_.setZero(actionDim_);
-      jointRegulatingWeight_ << 0.5, 1.0, 1.5; // knee, ankle pitch, ankle roll
+      jointRegulatingWeight_ << 0.5, 2.0, 2.0; // knee, ankle pitch, ankle roll
   }
 
   void init() final { }
@@ -412,9 +412,11 @@ class ENVIRONMENT : public RaisimGymEnv {
           tempReward += footPosWeight_.cwiseProduct(tempVec-refBodyToFoot_[index_leg].e()).squaredNorm();
       }
       /// pos vel acc regulation
-            rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.tail(actionDim_)-gcInit_.tail(actionDim_))).squaredNorm());
+      jointRegulatingWeight_ << 0.5, 2.0, 2.0; // knee, ankle pitch, ankle roll
+      rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.tail(actionDim_)-gcInit_.tail(actionDim_))).squaredNorm());
       rewards_.record("jointVel", (jointRegulatingWeight_.cwiseProduct(gv_.tail(actionDim_))).squaredNorm());
       rewards_.record("jointAcc", (jointRegulatingWeight_.cwiseProduct((gv_.tail(actionDim_) - preJointVel_))).squaredNorm());
+      jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
       rewards_.record("torque", (jointRegulatingWeight_.cwiseProduct(dhal_->getGeneralizedForce().e().tail(actionDim_))).squaredNorm());
 /// body contact reward
       rewards_.record("bodyContact",(double) bodyContact_);
@@ -502,7 +504,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
