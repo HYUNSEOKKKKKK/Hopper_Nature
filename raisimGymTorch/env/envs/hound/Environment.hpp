@@ -77,7 +77,6 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    hipJointFrames_.push_back("hip_abduction_left");
 
       bodyIndices_.push_back(dhal_->getBodyIdx("Thigh"));
-      bodyIndices_.push_back(dhal_->getBodyIdx("Temp_Weight"));
 
        /// visualize if it is the first environment
     if (visualizable_) {
@@ -110,7 +109,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize
     command_.setZero();
     footContact_ = 0;
-    bodyContact_.setZero();
+    bodyContact_ = 0;
     footVel_.resize(numLegs_); footPos_.resize(numLegs_), hipJointPos_.resize(numLegs_), refBodyToFoot_.resize(numLegs_), footOrientation_.resize(numLegs_);
     footContactPhase_.setZero();
     footClearance_.setZero();
@@ -414,7 +413,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("jointVel", jointRegulatingWeight_.cwiseProduct(gv_.tail(actionDim_)).squaredNorm());
       rewards_.record("jointAcc", jointRegulatingWeight_.cwiseProduct((gv_.tail(actionDim_) - preJointVel_)).squaredNorm());
 /// body contact reward
-      rewards_.record("bodyContact",(double) bodyContact_.sum());
+      rewards_.record("bodyContact",(double) bodyContact_);
 
       /// sum
       float posReward, negReward;
@@ -567,11 +566,11 @@ class ENVIRONMENT : public RaisimGymEnv {
     }
 
             /// body contact update (only used for true state)
-            bodyContact_.setZero();
+            bodyContact_ = 0;
       for(auto& contact: dhal_->getContacts()){
-          for (size_t i=0; i<2; i++){
+          for (size_t i=0; i<1; i++){
               if(contact.getlocalBodyIndex() == bodyIndices_[i]){
-                  bodyContact_(i) = 1;
+                  bodyContact_ += 1;
               }
           }
       }
@@ -687,7 +686,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               bodyLinearVel_,                                                       /// body linear velocity. 3
               footClearance_ * 4.0,                                                       /// min foot z
               static_cast<double>(footContact_)/4.0,
-              bodyContact_.cast<double>()/4.0;
+              static_cast<double>(bodyContact_)/4.0;
 
       /// convert it to float
       ob = valueObDouble_.cast<float>();
@@ -784,7 +783,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   std::vector<std::string> footJointFrames_;
   std::vector<std::string> hipJointFrames_;
   int footContact_;
-    Eigen::Vector2i bodyContact_; // 2
+    int bodyContact_; // 1
     std::vector<raisim::Vec<3>> footPos_,footVel_, hipJointPos_, refBodyToFoot_;
         std::vector <raisim::Mat<3,3>> footOrientation_;
   double phase_;
