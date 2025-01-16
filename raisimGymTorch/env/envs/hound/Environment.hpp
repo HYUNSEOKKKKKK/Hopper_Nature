@@ -65,8 +65,9 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// action scaling
     actionMean_ = gcInit_.tail(actionDim_);
-//    actionStd_.setConstant(0.3);
-      actionStd_ << 0.4, 0.2, 0.2;
+//            actionStd_.setConstant(0.3);
+            actionStd_.setConstant(0.4);
+//      actionStd_ << 0.4, 0.2, 0.2;
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
