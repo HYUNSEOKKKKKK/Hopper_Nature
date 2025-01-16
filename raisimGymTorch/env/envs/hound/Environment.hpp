@@ -293,7 +293,11 @@ class ENVIRONMENT : public RaisimGymEnv {
         footClearance_.setZero();
     }
 
-    terminalStack_ = 0;
+    /// even though not reset, these values should be reset -> empirical result
+      for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
+      for (auto& vec : jointVelHist_) { vec.setZero(); }
+
+      terminalStack_ = 0;
     /// random joint friction
 //    for (int i=0;i<actionDim_;i++){
 //        jointFrictions_(i) = 0.2 + 0.2 * uniDist_(gen_); // small friction
