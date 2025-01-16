@@ -253,7 +253,7 @@ class ENVIRONMENT : public RaisimGymEnv {
             } else {
                 gvNoise_(i) = uniDist_(gen_) * 1.0;
             }
-            if (standingMode_) {gvNoise_(i) *= 1.5;}
+            if (standingMode_) {gvNoise_(i) *= 1.2;}
         }
     }
 
