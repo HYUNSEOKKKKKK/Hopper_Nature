@@ -172,7 +172,7 @@ barrier_critic,
                 # Gradient step
                 self.optimizer.zero_grad()
                 loss.backward()
-                nn.utils.clip_grad_norm_([*self.actor.parameters(), *self.critic.parameters()], self.max_grad_norm)
+                nn.utils.clip_grad_norm_([*self.actor.parameters(), *self.critic.parameters(), *self.estimator.parameters(), *self.barrier_critic.parameters()], self.max_grad_norm)
                 self.optimizer.step()
 
                 if log_this_iteration:
