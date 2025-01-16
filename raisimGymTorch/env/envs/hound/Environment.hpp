@@ -66,7 +66,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_ = gcInit_.tail(actionDim_);
 //            actionStd_.setConstant(0.3);
-            actionStd_.setConstant(0.5);
+            actionStd_.setConstant(0.4);
 //      actionStd_ << 0.4, 0.2, 0.2;
 
     /// Reward coefficients
@@ -328,6 +328,10 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
     barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
+            /// scale down
+      avgReward /= 1e3;
+      barrierReward_ /= 1e3;
+
     updateHistory();
 
     return avgReward;
