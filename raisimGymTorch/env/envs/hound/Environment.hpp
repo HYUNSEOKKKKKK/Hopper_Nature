@@ -329,8 +329,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
     barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
             /// scale down
-      avgReward /= 1e3;
-      barrierReward_ /= 1e3;
+      avgReward /= 1e2;
+      barrierReward_ /= 1e2;
 
     updateHistory();
 
