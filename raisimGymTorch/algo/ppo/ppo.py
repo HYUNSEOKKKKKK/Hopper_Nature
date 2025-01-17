@@ -30,7 +30,8 @@ barrier_critic,
                  use_clipped_value_loss=True,
                  log_dir='run',
                  device='cpu',
-                 shuffle_batch=True):
+                 shuffle_batch=True,
+                 gradient_penalty_coef = 0.002):
 
         # PPO components
         self.actor = actor
@@ -62,6 +63,9 @@ barrier_critic,
         self.lam = lam
         self.max_grad_norm = max_grad_norm
         self.use_clipped_value_loss = use_clipped_value_loss
+
+        # Gradient penalty loss
+        self.gradient_penalty_coef = gradient_penalty_coef
 
         # Log
         self.log_dir = os.path.join(log_dir, datetime.now().strftime('%b%d_%H-%M-%S'))
@@ -98,11 +102,16 @@ barrier_critic,
         # Learning step
         self.storage.compute_returns(last_values.to(self.device), self.critic, self.gamma, self.lam)
         self.storage.compute_barrier_returns(last_barrier_values.to(self.device), self.barrier_critic, self.gamma, self.lam)
-        mean_value_loss, mean_surrogate_loss, mean_estimation_loss,mean_barrier_value_loss,mean_barrier_surrogate_loss, infos = self._train_step(log_this_iteration)
+        mean_value_loss, mean_surrogate_loss, mean_estimation_loss,mean_barrier_value_loss,mean_barrier_surrogate_loss, mean_GP_loss,infos = self._train_step(log_this_iteration)
         self.storage.clear()
 
         if log_this_iteration:
             self.log({**locals(), **infos, 'it': update})
+
+    def _calc_grad_penalty(self, obs_batch, actions_log_prob_batch):
+        grad_log_prob = torch.autograd.grad(actions_log_prob_batch.sum(), obs_batch, create_graph=True)[0]
+        gradient_penalty_loss = torch.sum(torch.square(grad_log_prob), dim=-1).mean()
+        return gradient_penalty_loss
 
     def log(self, variables):
         self.tot_timesteps += self.num_transitions_per_env * self.num_envs
@@ -113,6 +122,7 @@ barrier_critic,
         self.writer.add_scalar('PPO/barrier_surrogate', variables['mean_barrier_surrogate_loss'], variables['it'])
         self.writer.add_scalar('PPO/mean_noise_std', mean_std.item(), variables['it'])
         self.writer.add_scalar('PPO/estimation_loss', variables['mean_estimation_loss'], variables['it'])
+        self.writer.add_scalar('PPO/gradient_penalty_loss', variables['mean_GP_loss'], variables['it'])
         # self.writer.add_scalar('PPO/learning_rate', self.learning_rate, variables['it'])
 
     def _train_step(self, log_this_iteration):
@@ -121,16 +131,22 @@ barrier_critic,
         mean_surrogate_loss = 0
         mean_barrier_surrogate_loss = 0
         mean_estimation_loss = 0
+        mean_GP_loss = 0
         for epoch in range(self.num_learning_epochs):
             for (actor_obs_batch, critic_obs_batch, est_obs_batch, true_state_batch,actions_batch, current_values_batch, advantages_batch, returns_batch, old_actions_log_prob_batch,
                  current_barrier_values_batch, barrier_advantages_batch, barrier_returns_batch)\
                     in self.batch_sampler(self.num_mini_batches):
+                actor_obs_batch.requires_grad_() # for gradient penalty loss computation
+
                 actions_log_prob_batch, entropy_batch = self.actor.evaluate(actor_obs_batch, actions_batch)
                 value_batch = self.critic.evaluate(critic_obs_batch)
                 est_out_batch = self.estimator.evaluate(est_obs_batch)
                 barrier_value_batch = self.barrier_critic.evaluate(critic_obs_batch)
 
-                # Estimator supervised loss
+                # Gradient penalty loss (regularization for d(output of action)/d(input of action))
+                gradient_penalty_loss = self._calc_grad_penalty(actor_obs_batch, actions_log_prob_batch)
+
+            # Estimator supervised loss
                 estimation_loss = self.mse_loss(est_out_batch,true_state_batch)
 
                 # Surrogate loss
@@ -167,7 +183,7 @@ barrier_critic,
                 else:
                     barrier_value_loss = (barrier_returns_batch - barrier_value_batch).pow(2).mean()
 
-                loss = surrogate_loss + barrier_surrogate_loss+ self.value_loss_coef * value_loss - self.entropy_coef * entropy_batch.mean() + estimation_loss * 0.1 + self.value_loss_coef * barrier_value_loss
+                loss = (surrogate_loss + barrier_surrogate_loss+ self.value_loss_coef * value_loss - self.entropy_coef * entropy_batch.mean()+ estimation_loss * 0.1 + self.value_loss_coef * barrier_value_loss) + self.gradient_penalty_coef * gradient_penalty_loss
 
                 # Gradient step
                 self.optimizer.zero_grad()
@@ -181,6 +197,7 @@ barrier_critic,
                     mean_surrogate_loss += surrogate_loss.item()
                     mean_estimation_loss += estimation_loss.item()
                     mean_barrier_surrogate_loss += barrier_surrogate_loss.item()
+                    mean_GP_loss += gradient_penalty_loss.item()
 
         if log_this_iteration:
             num_updates = self.num_learning_epochs * self.num_mini_batches
@@ -189,5 +206,6 @@ barrier_critic,
             mean_surrogate_loss /= num_updates
             mean_estimation_loss /= num_updates
             mean_barrier_surrogate_loss /= num_updates
+            mean_GP_loss /= num_updates
 
-        return mean_value_loss, mean_surrogate_loss, mean_estimation_loss, mean_barrier_value_loss,mean_barrier_surrogate_loss,locals()
+        return mean_value_loss, mean_surrogate_loss, mean_estimation_loss, mean_barrier_value_loss,mean_barrier_surrogate_loss,mean_GP_loss, locals()

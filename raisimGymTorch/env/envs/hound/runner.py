@@ -173,9 +173,9 @@ for update in range(8001):
 
     min_std = torch.ones(act_dim)
     if update<2000:
-        min_std = torch.ones(act_dim) *0.4
+        min_std = torch.ones(act_dim)
     elif update<10000:
-        min_std = torch.ones(act_dim) * 0.4
+        min_std = torch.ones(act_dim) * 0.5
     else:
         min_std = torch.ones(act_dim) * 0.3
 
