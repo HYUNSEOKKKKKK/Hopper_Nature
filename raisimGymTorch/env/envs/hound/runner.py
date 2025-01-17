@@ -83,6 +83,7 @@ ppo = PPO.PPO(actor=actor,
               num_learning_epochs=4,
               gamma=0.99,
               lam=0.95,
+              # learning_rate = 9e-5,
               learning_rate = 3.0e-4,
               num_mini_batches=4,
               entropy_coef=0.01,
@@ -95,9 +96,10 @@ reward_analyzer = RewardAnalyzer(env, ppo.writer)
 # scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000], gamma=0.5)
 scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[1000], gamma=0.75)
 
-
+# mode = 'retrain'
+# weight_path = "/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-01-16-22-06-19/full_4500.pt"
 # if mode == 'retrain':
-#     load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
+#     load_param(weight_path, env, actor, critic, barrier_critic, estimator, ppo.optimizer, saver.data_dir)
 
 for update in range(8001):
     start = time.time()
@@ -171,9 +173,9 @@ for update in range(8001):
 
     min_std = torch.ones(act_dim)
     if update<2000:
-        min_std = torch.ones(act_dim)
+        min_std = torch.ones(act_dim) *0.4
     elif update<10000:
-        min_std = torch.ones(act_dim) * 0.5
+        min_std = torch.ones(act_dim) * 0.4
     else:
         min_std = torch.ones(act_dim) * 0.3
 

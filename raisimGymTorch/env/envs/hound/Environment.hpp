@@ -253,7 +253,7 @@ class ENVIRONMENT : public RaisimGymEnv {
             } else {
                 gvNoise_(i) = uniDist_(gen_) * 1.0;
             }
-            if (standingMode_) {gvNoise_(i) *= 1.2;}
+            if (standingMode_) {gvNoise_(i) *= 1.5;}
         }
     }
 
@@ -336,6 +336,15 @@ class ENVIRONMENT : public RaisimGymEnv {
       avgReward /= 1e1;
       barrierReward_ /= 1e1;
 
+//            if ((pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm() > 1e2){
+//          std::cout << "smoothness2 value: " << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm() << std::endl;
+//          std::cout << "smoothenss2 joint: " << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).transpose() << std::endl;
+//          std::cout << "phase: " << sin(phase_/gait_hz_ * 2*3.141592) << " , command: " << command_.transpose() << std::endl;
+////          std::cout << "pTarget_-actionMean_       : " << (pTarget_-actionMean_).transpose() << std::endl;
+////          std::cout << "prevTarget_-actionMean_    : " << (prevTarget_-actionMean_).transpose() << std::endl;
+////          std::cout << "prevPrevTarget_-actionMean_: " << (prevPrevTarget_-actionMean_).transpose() << std::endl;
+////                std::cout << "standingmode: " << standingMode_ << std::endl;
+//      }
     updateHistory();
 
     return avgReward;
@@ -409,14 +418,6 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (rot_(8)>1.0){ rot_(8) = 1.0; } /// preventing acos nan
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
-//      if ((pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm() > 2.0){
-//          std::cout << "smoothness2 value: " << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm() << std::endl;
-//          std::cout << "pTarget_-actionMean_       : " << (pTarget_-actionMean_).transpose() << std::endl;
-//          std::cout << "prevTarget_-actionMean_    : " << (prevTarget_-actionMean_).transpose() << std::endl;
-//          std::cout << "prevPrevTarget_-actionMean_: " << (prevPrevTarget_-actionMean_).transpose() << std::endl;
-//          std::cout << "torque : " << dhal_->getGeneralizedForce().e().tail(actionDim_).transpose() << std::endl;
-//      }
-
       rewards_.record("baseMotion", 0.4*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
 
       /// task space foot pos regulation -> not used
