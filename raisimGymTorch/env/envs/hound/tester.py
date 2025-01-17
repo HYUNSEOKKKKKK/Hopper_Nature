@@ -10,7 +10,7 @@ import argparse
 import numpy as np
 import pygame
 
-joystick = 1
+joystick = 0
 if (joystick == 1) :
     pygame.display.init()
     pygame.joystick.init()
@@ -38,7 +38,7 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-weight_path = "/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-01-17-19-27-19/full_1500.pt"
+weight_path = "/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-01-17-20-06-13/full_4500.pt"
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -54,7 +54,7 @@ else:
 
     env.reset()
     # env.set_terrain(4,4.7,1.0)
-    env.set_command(0.6,0.0,0.0)
+    env.set_command(1.0,0.0,0.0)
 
     reward_ll_sum = 0
     done_sum = 0
@@ -83,12 +83,12 @@ else:
                 command_yaw = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(1), 0.6))
                 env.set_command(command_x,command_y,command_yaw)
             else:
-                if step % 400 == 0:
-                    env.set_command(np.random.uniform(0.3, 0.3, 1),
-                                    np.random.uniform(0.0, 0.0, 1),
-                                    np.random.uniform(0.0, 0.0, 1))
+                if step % 200 == 0:
+                    env.set_command(np.random.uniform(-1.0, 1.0, 1),
+                                    np.random.uniform(-0.6, 0.6, 1),
+                                    np.random.uniform(-0.6, 0.6, 1))
 
-        time.sleep(0.01)
+        time.sleep(0.02)
         with torch.no_grad():
             obs = env.observe(False)
             est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
