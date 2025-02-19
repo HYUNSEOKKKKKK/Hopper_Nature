@@ -69,7 +69,8 @@ class ENVIRONMENT : public RaisimGymEnv {
             estDouble_.setZero(estDim_);
 
     /// action scaling
-    actionMean_ = gcInit_.tail(actionDim_);
+    actionMean_(0) = gcInit_(7);
+    actionMean_.tail(2) = gcInit_.tail(2);
 //            actionStd_.setConstant(0.3);
             actionStd_.setConstant(0.4);
 //      actionStd_ << 0.4, 0.2, 0.2;
