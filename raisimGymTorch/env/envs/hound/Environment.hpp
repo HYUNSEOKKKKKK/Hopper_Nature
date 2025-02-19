@@ -53,8 +53,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     gc_ = gcInit_;
 
     /// set pd gains
-    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(30.0); // knee, ankle input (active)
-    jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(1.0);
+    pGain_ = 100.0; dGain_ = 4.0;
+    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_); // knee, ankle input (active)
+    jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_);
     dhal_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
     dhal_->setGeneralizedForce(Eigen::VectorXd::Zero(gvDim_));
     /// set pd gains for sub-step
@@ -194,8 +195,8 @@ class ENVIRONMENT : public RaisimGymEnv {
   void init() final { }
 
   void reset() final {
-    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(30.0 + 2.5*uniDist_(gen_));
-    jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(1.0 + 0.1*uniDist_(gen_));
+    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_ + pGain_*0.1*uniDist_(gen_));
+    jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_ + dGain_*0.1*uniDist_(gen_));
     /// foot obs noise
     for (int i=0;i<(3*numLegs_);i++){
       footObsNoise_(i) = 0.02 * uniDist_(gen_);
@@ -853,6 +854,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   double terminalRewardCoeff_ = -10.0;
   raisim::ArticulatedSystem* dhal_;
 
+  double pGain_, dGain_;
   Eigen::VectorXd gc_, gv_, genForceTarget_;
   Eigen::Vector<double,16> gcInit_, gcNoise_, gcDes_;
   Eigen::Vector<double,15> gvInit_, gvNoise_, gvDes_, subStepPgain_,subStepDgain_;
