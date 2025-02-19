@@ -59,6 +59,7 @@
         <parent link="Thigh"/>
         <child link="Calf"/>
         <axis xyz="0 1 0"/>
+        <dynamics rotor_inertia="0.36880" damping="0" friction="0"/>
         <limit effort="600.0" velocity="9.0" lower="0" upper="2.26893"/>
     </joint>
     <link name="Calf">
@@ -95,7 +96,7 @@
             <geometry>
                 <mesh filename="URDF_Universal_verHopping1_Simplified.dae" scale="1 1 1"/>
             </geometry>
-            <material name="grey"/>
+            <material name="white"/>
         </visual>
         <inertial>
             <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -144,7 +145,7 @@
             <geometry>
                 <mesh filename="URDF_Calf_Link_Dice_verHopping1_Simplified.dae" scale="1 1 1"/>
             </geometry>
-            <material name="grey"/>
+            <material name="white"/>
         </visual>
         <inertial>
             <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -165,7 +166,7 @@
             <geometry>
                 <mesh filename="URDF_Calf_Link_S_verHopping1_Simplified.dae" scale="1 1 1"/>
             </geometry>
-            <material name="grey"/>
+            <material name="white"/>
         </visual>
         <inertial>
             <origin rpy="0 0 0" xyz="0.000021 0 0.083422"/>
@@ -186,7 +187,7 @@
             <geometry>
                 <mesh filename="URDF_Calf_Link_Dice_verHopping1_Simplified.dae" scale="1 1 1"/>
             </geometry>
-            <material name="grey"/>
+            <material name="white"/>
         </visual>
         <inertial>
             <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -207,7 +208,7 @@
             <geometry>
                 <mesh filename="URDF_Calf_Link_L_verHopping1_Simplified.dae" scale="1 1 1"/>
             </geometry>
-            <material name="grey"/>
+            <material name="white"/>
         </visual>
         <inertial>
             <origin rpy="0 0 0" xyz="0.000017 0 0.137377"/>
@@ -221,6 +222,7 @@
         <parent link="Calf"/>
         <child link="Left_Ankle_Link_Input"/>
         <axis xyz="0 1 0"/>
+        <dynamics rotor_inertia="0.0128" damping="0" friction="0"/>
         <limit effort="150.0" velocity="9.0"/>
     </joint>
     <link name="Left_Ankle_Link_Input">
@@ -229,7 +231,7 @@
             <geometry>
                 <mesh filename="URDF_Calf_Link_Input_verHopping1_Simplified.dae" scale="1 1 1"/>
             </geometry>
-            <material name="grey"/>
+            <material name="green"/>
         </visual>
         <inertial>
             <origin rpy="0 0 0" xyz="0.022550 0.012714 -0.001469"/>
@@ -243,6 +245,7 @@
         <parent link="Calf"/>
         <child link="Right_Ankle_Link_Input"/>
         <axis xyz="0 1 0"/>
+        <dynamics rotor_inertia="0.0128" damping="0" friction="0"/>
         <limit effort="150.0" velocity="9.0"/>
     </joint>
     <link name="Right_Ankle_Link_Input">
@@ -251,7 +254,7 @@
             <geometry>
                 <mesh filename="URDF_Calf_Link_Input_mir_verHopping1_Simplified.dae" scale="1 1 1"/>
             </geometry>
-            <material name="grey"/>
+            <material name="green"/>
         </visual>
         <inertial>
             <origin rpy="0 0 0" xyz="0.022550 -0.012714 -0.001469"/>

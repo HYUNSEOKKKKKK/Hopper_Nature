@@ -23,18 +23,18 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    dhal_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hop_verSimple_ver20250114/Hop_verSimple_temp.urdf");
+    dhal_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hop_verParallelAnkleLinks_ver20250114/Hop_verParallelAnkleLinks.urdf");
     dhal_->setName("dhal");
     dhal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
 
     /// Dim
-    gcDim_ = 10;
-    gvDim_ = 9;
+    gcDim_ = 16;
+    gvDim_ = 15;
     numLegs_ = 1;
     numEdges_ = 4;
     actionDim_ = 3;
-    obDim_ = 51;
+    obDim_ = 45;
     estDim_ = 7;
     valueObDim_ = obDim_ + estDim_;
 
@@ -47,15 +47,20 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// this is nominal configuration of robot
     gcInit_.segment(0,7) << 0.0,0.0,0.71,   0.9847265,0.0,-0.1741081,0.0;
-    gcInit_.tail(3) << 0.7, -0.35, 0.0;
+    gcInit_.segment(7,3) << 0.7, -0.35, 0.0; // knee, ankle output (passive)
+    gcInit_.tail(6) << 0.917012, 0.00244346, 0.728929, 0.0015708, 0.861556, 0.619949; // universal passive, ankle input (active)
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
     /// set pd gains
-    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(30.0);
+    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(30.0); // knee, ankle input (active)
     jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(1.0);
     dhal_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
     dhal_->setGeneralizedForce(Eigen::VectorXd::Zero(gvDim_));
+    /// set pd gains for sub-step
+    subStepPgain_.setZero(); subStepDgain_.setZero();
+    subStepPgain_.segment(6,3).setConstant(200.0); // knee, ankle output (passive) -> only for sub-step
+    subStepDgain_.segment(6,3).setConstant(3.0);
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
@@ -74,7 +79,11 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// indices of links that should not make contact with ground
     footIndices_.push_back(dhal_->getBodyIdx("Foot"));
-    calfIndices_.push_back(dhal_->getBodyIdx("Calf"));
+    exceptionIndices_.push_back(dhal_->getBodyIdx("Calf")); // not terminate for calf contact
+    exceptionIndices_.push_back(dhal_->getBodyIdx("Left_Ankle_Link"));
+    exceptionIndices_.push_back(dhal_->getBodyIdx("Left_Ankle_Link_Input"));
+    exceptionIndices_.push_back(dhal_->getBodyIdx("Right_Ankle_Link"));
+    exceptionIndices_.push_back(dhal_->getBodyIdx("Right_Ankle_Link_Input"));
     footJointFrames_.push_back("02_ankle_roll_joint");  /// joint
 //    hipJointFrames_.push_back("hip_abduction_left");
 
@@ -132,6 +141,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointPosErrorHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
     jointVelHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
     genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
+    genForceTarget_.setZero(gvDim_);
     /// initialize gait
     phase_ = 0.0;
     gait_hz_ = 0.80;
@@ -240,21 +250,21 @@ class ENVIRONMENT : public RaisimGymEnv {
         quat_ = rotTotalNoise_;
         quat_.normalize();
         gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
-        gcNoise_(7) += uniDist_(gen_) * 0.5 * ((standingMode_)? 1.2 : 1.0);
-        gcNoise_(8) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0);
-        gcNoise_(9) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0);
+        gcNoise_(7) += uniDist_(gen_) * 0.5 * ((standingMode_)? 1.2 : 1.0); // knee
+        gcNoise_(8) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0); // ankle output pitch (passive)
+        gcNoise_(9) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0); // ankle output roll (passive)
         /// Generalized Velocities randomization.
         gvNoise_.setZero();
         for (int i = 0; i < gvDim_; i++) {
-            if (i < 3) {
+            if (i < 6) {
                 gvNoise_(i) = uniDist_(gen_) * 0.3 * initializeCurriculum;
-            } else if (i < 6) {
-                gvNoise_(i) = uniDist_(gen_) * 0.3 * initializeCurriculum;
-            } else {
-                gvNoise_(i) = uniDist_(gen_) * 1.0;
+            } else if (i == 6) {
+                gvNoise_(i) = uniDist_(gen_) * 1.0 * initializeCurriculum; // knee, no noise for ankle parts
             }
             if (standingMode_) {gvNoise_(i) *= 1.5;}
         }
+
+        subStep();
     }
 
     /// preventing foot penetration
@@ -304,6 +314,39 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    }
   }
 
+  void subStep() {
+      /// Used in reset function to match the closed loop in ankle
+      // For the randomized ankle output, this substep adjusts other closed-loop parts to ensure the loop is closed properly.
+      world_->setTimeStep(0.020);
+      dhal_->setPdGains(subStepPgain_, subStepDgain_); // here, PD gain is enforced only for knee, ankle output (passive)
+      dhal_->setGeneralizedForce(Eigen::VectorXd::Zero(gvDim_));
+      gcNoise_(2) += 10.0;
+      dhal_->setPdTarget(gcNoise_, gvNoise_);
+      dhal_->setState(gcNoise_,gvNoise_);
+
+      raisim::Vec<4> quat = gcNoise_.segment(3,4);
+      // substep
+      for (int i=0; i<150; i++){
+          world_->integrate();
+          // prevent the contact with ground
+          dhal_->setBasePos(gcNoise_.head(3));
+          dhal_->setBaseOrientation(quat);
+          dhal_->setBaseVelocity({0.0, 0.0, 0.0});
+          dhal_->setBaseAngularVelocity({0.0, 0.0, 0.0});
+//          if (i%10 == 0){ /// for check
+//              dhal_->getState(gc_,gv_);
+//              std::cout << i << "-th step joint active: " << gc_(7) << " , " << gc_.tail(2).transpose() << " , ankle passive: " << gc_.segment(8,2).transpose() << " , gv (active) :" << gv_.tail(2).transpose() << std::endl;
+//              std::cout << "temp: " << gc_.tail(9).transpose() << std::endl;
+//          }
+      }
+
+      // back to the original setting
+      gcNoise_(2) -= 10.0;
+      dhal_->setBasePos(gcNoise_.head(3));
+      world_->setTimeStep(simulation_dt_);
+      dhal_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
+
+  }
   float step(const Eigen::Ref<EigenVec>& action) final {
     /// action scaling
     pTarget_ = action.cast<double>();
@@ -352,9 +395,11 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void computeTorque(){
         genForceTargetHist_.erase(genForceTargetHist_.begin());
-        Eigen::VectorXd tempGenForce(gvDim_); tempGenForce.head(6).setZero();
-        tempGenForce.tail(actionDim_) = jointPgain_.tail(actionDim_).cwiseProduct(pTarget_-gc_.tail(actionDim_))
-                              + jointDgain_.tail(actionDim_).cwiseProduct(-gv_.tail(actionDim_));
+        genForceTarget_.setZero();
+        genForceTarget_(6) = jointPgain_(0)*(pTarget_(0)-gc_(7))
+                             + jointDgain_(0)*(-gv_(6)); // knee
+        genForceTarget_.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2))
+                           + jointDgain_.tail(2).cwiseProduct(-gv_.tail(2)); // ankle input (active)
 
         /// joint friction (static friction, torque 잡아먹는 효과)
 //        for (int i = 0; i < actionDim_; i++){
@@ -362,7 +407,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          jTorque = (jTorque>0) ? std::min(jointFrictions_(i), jTorque) : std::max(-jointFrictions_(i), jTorque);
 //          tempGenForce.tail(actionDim_)(i) -= jTorque;
 //        }
-        genForceTargetHist_.push_back(tempGenForce);
+        genForceTargetHist_.push_back(genForceTarget_);
   }
 
   float getBarrierReward() final {
@@ -421,22 +466,28 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("baseMotion", 0.4*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
 
       /// task space foot pos regulation -> not used
-      Eigen::Vector3d  tempVec;
-      double tempReward = 0.0;
-      for(int index_leg = 0; index_leg < numLegs_; index_leg++){
-          tempVec = (footPos_[index_leg].e() - gc_.head(3));
-          tempVec = rot_.e().transpose() *  tempVec.eval();
-          tempReward += footPosWeight_.cwiseProduct(tempVec-refBodyToFoot_[index_leg].e()).squaredNorm();
-      }
-      /// pos vel acc regulation
+//      Eigen::Vector3d tempVec;
+//      double tempReward = 0.0;
+//      for(int index_leg = 0; index_leg < numLegs_; index_leg++){
+//          tempVec = (footPos_[index_leg].e() - gc_.head(3));
+//          tempVec = rot_.e().transpose() *  tempVec.eval();
+//          tempReward += footPosWeight_.cwiseProduct(tempVec-refBodyToFoot_[index_leg].e()).squaredNorm();
+//      }
+      /// pos vel acc regulation -> put only for output part (knee, ankle output (passive))
       jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
-      rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.tail(actionDim_)-gcInit_.tail(actionDim_))).squaredNorm());
-            jointRegulatingWeight_ << 0.5, 1.5, 1.5; // knee, ankle pitch, ankle roll
-      rewards_.record("jointVel", (jointRegulatingWeight_.cwiseProduct(gv_.tail(actionDim_))).squaredNorm());
-      rewards_.record("jointAcc", (jointRegulatingWeight_.cwiseProduct((gv_.tail(actionDim_) - preJointVel_))).squaredNorm());
+      rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.segment(7,actionDim_)-gcInit_.segment(7,actionDim_))).squaredNorm());
+      jointRegulatingWeight_ << 0.5, 1.5, 1.5; // knee, ankle pitch, ankle roll
+      rewards_.record("jointVel", (jointRegulatingWeight_.cwiseProduct(gv_.segment(6,actionDim_))).squaredNorm());
+      rewards_.record("jointAcc", (jointRegulatingWeight_.cwiseProduct((gv_.segment(6,actionDim_) - preJointVel_))).squaredNorm());
+
+      /// force regulation -> put only for active part (knee, ankle input (active))
       jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
-      rewards_.record("torque", (jointRegulatingWeight_.cwiseProduct(dhal_->getGeneralizedForce().e().tail(actionDim_))).squaredNorm());
-/// body contact reward
+      Eigen::Vector3d tempForce;
+      tempForce(0) = genForceTargetHist_[0](6); // knee
+      tempForce.tail(2) = genForceTargetHist_[0].tail(2); // knee
+      rewards_.record("torque", (jointRegulatingWeight_.cwiseProduct(tempForce).squaredNorm()));
+
+      /// body contact reward
       rewards_.record("bodyContact",(double) bodyContact_);
 
       /// sum
@@ -666,13 +717,13 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       obDouble_ << rot_.e().row(2).transpose(),                                     /// body orientation. 3
           bodyAngularVel_,                                                      /// body angular velocity. 3
-          gc_.tail(actionDim_),                                                      /// joint pos 3
-          gv_.tail(actionDim_),                                                      /// joint velocity 3
+          gc_.segment(7,9),                                                      /// joint pos 3 -> temp 9
+          gv_.segment(6,9),                                                      /// joint velocity 3 -> temp 9
 
           prevTarget_ - actionMean_,                                                          /// previous action 3
           prevPrevTarget_ - actionMean_,                                                      /// preprevious action 3
-          jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
-          jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
+//          jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
+//          jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
           rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),               /// relative foot position with respect to the body COM, expressed in the body frame 3
                     rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)),
               rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)),/// relative edge pos (heel, toe)
@@ -705,13 +756,13 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       valueObDouble_ << rot_.e().row(2).transpose(),                               /// body orientation. 3
               bodyAngularVel_,                                                      /// body angular velocity. 3
-              gc_.tail(actionDim_),                                                      /// joint pos 3
-              gv_.tail(actionDim_),                                                      /// joint velocity 3
+              gc_.segment(7,9),                                                      /// joint pos 3 -> temp 9
+              gv_.segment(6,9),                                                      /// joint velocity 3 -> temp 9
 
               prevTarget_- actionMean_,                                                          /// previous action 3
               prevPrevTarget_- actionMean_,                                                      /// preprevious action 3
-              jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
-              jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
+//              jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
+//              jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
               rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),        /// relative foot position with respect to the body COM, expressed in the body frame 3
               rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)),
               rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)),/// relative edge pos (heel, toe)
@@ -735,7 +786,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// if the contact body is not feet
     for(auto& contact: dhal_->getContacts())
         if ((std::find(footIndices_.begin(), footIndices_.end(), contact.getlocalBodyIndex()) == footIndices_.end())
-                and (std::find(calfIndices_.begin(), calfIndices_.end(), contact.getlocalBodyIndex()) == calfIndices_.end())) {
+                and (std::find(exceptionIndices_.begin(), exceptionIndices_.end(), contact.getlocalBodyIndex()) == exceptionIndices_.end())) {
             terminalStack_ += 1;
         }
     if (terminalStack_ > 50){
@@ -801,18 +852,18 @@ class ENVIRONMENT : public RaisimGymEnv {
   double terminalRewardCoeff_ = -10.0;
   raisim::ArticulatedSystem* dhal_;
 
-  Eigen::VectorXd gc_, gv_;
-  Eigen::Vector<double,10> gcInit_, gcNoise_, gcDes_;
-  Eigen::Vector<double,9> gvInit_, gvNoise_, gvDes_;
+  Eigen::VectorXd gc_, gv_, genForceTarget_;
+  Eigen::Vector<double,16> gcInit_, gcNoise_, gcDes_;
+  Eigen::Vector<double,15> gvInit_, gvNoise_, gvDes_, subStepPgain_,subStepDgain_;
   Eigen::Vector<double,3> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_, jointFrictions_;
   Eigen::Vector<double,3> jointPgain_, jointDgain_;
-    Eigen::VectorXd jointRegulatingWeight_;
+  Eigen::VectorXd jointRegulatingWeight_;
 
   Eigen::Matrix<double,3,3> rotConversion_;
   raisim::Mat<3,3> rot_;
   Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_, estDouble_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
-  std::vector<size_t> footIndices_, calfIndices_;
+  std::vector<size_t> footIndices_, exceptionIndices_;
     /// collision reward
     std::vector<size_t> bodyIndices_;
 
