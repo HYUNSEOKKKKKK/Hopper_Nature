@@ -113,17 +113,43 @@
         <limit lower="-0.523599" upper="0.523599"/>
     </joint>
     <link name="Foot">
+<!--        <visual>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--            <geometry>-->
+<!--                <mesh filename="URDF_Foot_verHopping1_Simplified.dae" scale="1 1 1"/>-->
+<!--            </geometry>-->
+<!--            <material name="grey"/>-->
+<!--        </visual>-->
+<!--        <collision>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 -0.065"/>-->
+<!--            <geometry>-->
+<!--                <box size="0.24 0.08 0.03"/>-->
+<!--            </geometry>-->
+<!--        </collision>-->
         <visual>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <origin rpy="0 0 0" xyz="-0.02 0 -0.065"/>
             <geometry>
-                <mesh filename="URDF_Foot_verHopping1_Simplified.dae" scale="1 1 1"/>
+                <box size="0.20 0.1 0.03"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <visual>
+            <origin rpy="0 -0.5 0" xyz="0.12 0 -0.045"/>
+            <geometry>
+                <box size="0.06 0.1 0.03"/>
             </geometry>
             <material name="grey"/>
         </visual>
         <collision>
-            <origin rpy="0 0 0" xyz="0 0 -0.065"/>
+            <origin rpy="0 0 0" xyz="-0.02 0 -0.065"/>
             <geometry>
-                <box size="0.24 0.08 0.03"/>
+                <box size="0.20 0.1 0.03"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 -0.5 0" xyz="0.12 0 -0.045"/>
+            <geometry>
+                <box size="0.06 0.1 0.03"/>
             </geometry>
         </collision>
         <inertial>
