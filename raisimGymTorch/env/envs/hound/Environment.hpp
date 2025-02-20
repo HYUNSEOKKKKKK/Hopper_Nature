@@ -53,7 +53,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     gc_ = gcInit_;
 
     /// set pd gains
-    pGain_ = 30.0; dGain_ = 1.0;
+    pGain_ = 100.0; dGain_ = 4.0;
     jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_); // knee, ankle input (active)
     jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_);
     dhal_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
@@ -301,7 +301,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        }else{
 //            phase_ = gait_hz_/2.0;
 //        }
-                phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
+        phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
         footContactPhase_.setZero();
         footClearance_.setZero();
     }
@@ -383,15 +383,6 @@ class ENVIRONMENT : public RaisimGymEnv {
       avgReward /= 1e1;
       barrierReward_ /= 1e1;
 
-//            if ((pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm() > 1e2){
-//          std::cout << "smoothness2 value: " << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm() << std::endl;
-//          std::cout << "smoothenss2 joint: " << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).transpose() << std::endl;
-//          std::cout << "phase: " << sin(phase_/gait_hz_ * 2*3.141592) << " , command: " << command_.transpose() << std::endl;
-////          std::cout << "pTarget_-actionMean_       : " << (pTarget_-actionMean_).transpose() << std::endl;
-////          std::cout << "prevTarget_-actionMean_    : " << (prevTarget_-actionMean_).transpose() << std::endl;
-////          std::cout << "prevPrevTarget_-actionMean_: " << (prevPrevTarget_-actionMean_).transpose() << std::endl;
-////                std::cout << "standingmode: " << standingMode_ << std::endl;
-//      }
     updateHistory();
 
     return avgReward;
@@ -445,7 +436,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       } else {
           limitBaseMotion_.row(0) << -0.4,0.4;
           limitBaseMotion_.row(1) << -0.2,0.2;
-          standingSmoothness_ = 2.0;
+          standingSmoothness_ = 1.0;
           footPosWeight_ << 1.0,1.0,1.0;
       }
   }
@@ -468,7 +459,15 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("baseMotion", 0.4*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
-
+//      if (rewards_.getReward("smoothness2") < -1e2){
+//          std::cout << "smoothness2 reward: " << rewards_.getReward("smoothness2") << ", smoothness2 value: " << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm() << std::endl;
+//          std::cout << "smoothenss2 joint: " << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).transpose() << std::endl;
+//          std::cout << "phase: " << sin(phase_/gait_hz_ * 2*3.141592) << " , command: " << command_.transpose() << " , standing mode: " << standingMode_ << std::endl;
+////          std::cout << "pTarget_-actionMean_       : " << (pTarget_-actionMean_).transpose() << std::endl;
+////          std::cout << "prevTarget_-actionMean_    : " << (prevTarget_-actionMean_).transpose() << std::endl;
+////          std::cout << "prevPrevTarget_-actionMean_: " << (prevPrevTarget_-actionMean_).transpose() << std::endl;
+////                std::cout << "standingmode: " << standingMode_ << std::endl;
+//      }
       /// task space foot pos regulation -> not used
 //      Eigen::Vector3d tempVec;
 //      double tempReward = 0.0;
@@ -577,7 +576,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
