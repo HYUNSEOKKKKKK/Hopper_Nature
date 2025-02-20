@@ -793,9 +793,6 @@ class ENVIRONMENT : public RaisimGymEnv {
                 and (std::find(exceptionIndices_.begin(), exceptionIndices_.end(), contact.getlocalBodyIndex()) == exceptionIndices_.end())) {
             terminalStack_ += 1;
         }
-    if ((gc_(2) - heightMap_->getHeight(gc_(0),gc_(1))) < 0.30){
-        terminalStack_ += 1;
-    }
     if (terminalStack_ > 50){
         return true;
     }
