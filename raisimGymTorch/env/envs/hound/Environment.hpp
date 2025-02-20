@@ -255,13 +255,14 @@ class ENVIRONMENT : public RaisimGymEnv {
         gcNoise_(7) += uniDist_(gen_) * 0.5 * ((standingMode_)? 1.2 : 1.0); // knee
         gcNoise_(8) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0); // ankle output pitch (passive)
         gcNoise_(9) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0); // ankle output roll (passive)
+
         /// Generalized Velocities randomization.
         gvNoise_.setZero();
         for (int i = 0; i < gvDim_; i++) {
             if (i < 6) {
                 gvNoise_(i) = uniDist_(gen_) * 0.3 * initializeCurriculum;
             } else if (i == 6) {
-                gvNoise_(i) = uniDist_(gen_) * 1.0 * initializeCurriculum; // knee, no noise for ankle parts
+                gvNoise_(i) = uniDist_(gen_) * 1.0; // knee, no noise for ankle parts
             }
             if (standingMode_) {gvNoise_(i) *= 1.5;}
         }
@@ -319,6 +320,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   void subStep() {
       /// Used in reset function to match the closed loop in ankle
       // For the randomized ankle output, this substep adjusts other closed-loop parts to ensure the loop is closed properly.
+      // change gcNoise_ for closed-loop ankle part
       world_->setTimeStep(0.020);
       dhal_->setPdGains(subStepPgain_, subStepDgain_); // here, PD gain is enforced only for knee, ankle output (passive)
       dhal_->setGeneralizedForce(Eigen::VectorXd::Zero(gvDim_));
@@ -335,12 +337,12 @@ class ENVIRONMENT : public RaisimGymEnv {
           dhal_->setBaseOrientation(quat);
           dhal_->setBaseVelocity({0.0, 0.0, 0.0});
           dhal_->setBaseAngularVelocity({0.0, 0.0, 0.0});
-//          if (i%10 == 0){ /// for check
-//              dhal_->getState(gc_,gv_);
-//              std::cout << i << "-th step joint active: " << gc_(7) << " , " << gc_.tail(2).transpose() << " , ankle passive: " << gc_.segment(8,2).transpose() << " , gv (active) :" << gv_.tail(2).transpose() << std::endl;
-//              std::cout << "temp: " << gc_.tail(9).transpose() << std::endl;
-//          }
       }
+      dhal_->getState(gc_,gv_);
+      gcNoise_.tail(9) = gc_.tail(9);
+      /// for check
+//      std::cout << "final step joint active: " << gc_(7) << " , " << gc_.tail(2).transpose() << " , ankle passive: " << gc_.segment(8,2).transpose() << " , gv (active) :" << gv_.tail(2).transpose() << std::endl;
+//      std::cout << "temp: " << gc_.tail(9).transpose() << std::endl;
 
       // back to the original setting
       gcNoise_(2) -= 10.0;
