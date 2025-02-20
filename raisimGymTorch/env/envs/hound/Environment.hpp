@@ -72,9 +72,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_(0) = gcInit_(7);
     actionMean_.tail(2) = gcInit_.tail(2);
-//            actionStd_.setConstant(0.3);
-            actionStd_.setConstant(0.4);
-//      actionStd_ << 0.4, 0.2, 0.2;
+    actionStd_.setConstant(0.5);
+//            actionStd_.setConstant(0.4);
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
@@ -576,7 +575,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.015,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
 
@@ -852,7 +851,7 @@ class ENVIRONMENT : public RaisimGymEnv {
  private:
   int gcDim_, gvDim_, numLegs_, numEdges_;
   bool visualizable_ = false;
-  double terminalRewardCoeff_ = -10.0;
+  double terminalRewardCoeff_ = -1e1/1e1;
   raisim::ArticulatedSystem* dhal_;
 
   double pGain_, dGain_;
