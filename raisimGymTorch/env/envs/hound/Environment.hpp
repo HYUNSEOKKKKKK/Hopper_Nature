@@ -46,15 +46,14 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointFrictions_.setZero();
 
     /// this is nominal configuration of robot
-    gcInit_.segment(0,7) << 0.0,0.0,0.71,   0.9847265,0.0,-0.1741081,0.0; // 0.35 rad 기준 (knee 0.7, ankle pitch 0.35)
-    gcInit_.segment(7,3) << 0.7, -0.1, 0.0; // knee, ankle output (passive)
-//    gcInit_.tail(6) << 0.917012, 0.00244346, 0.728929, 0.0015708, 0.861556, 0.619949; // ankle pitch -0.35 -> universal passive, ankle input (active)
-    gcInit_.tail(6) << 0.727173, 0.00244346, 0.506211, 0.0015708, 0.659643, 0.392726; // ankle pitch -0.1 -> universal passive, ankle input (active)
+    gcInit_.segment(0,7) << 0.0,0.0,0.71,   0.9847265,0.0,-0.1741081,0.0;
+    gcInit_.segment(7,3) << 0.7, -0.35, 0.0; // knee, ankle output (passive)
+    gcInit_.tail(6) << 0.917012, 0.00244346, 0.728929, 0.0015708, 0.861556, 0.619949; // universal passive, ankle input (active)
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
     /// set pd gains
-    pGain_ = 100.0; dGain_ = 4.0;
+    pGain_ = 30.0; dGain_ = 1.0;
     jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_); // knee, ankle input (active)
     jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_);
     dhal_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
@@ -73,8 +72,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_(0) = gcInit_(7);
     actionMean_.tail(2) = gcInit_.tail(2);
-    actionStd_.setConstant(0.3);
-//    actionStd_.setConstant(0.4);
+//            actionStd_.setConstant(0.3);
+            actionStd_.setConstant(0.4);
+//      actionStd_ << 0.4, 0.2, 0.2;
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
@@ -354,7 +354,8 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
   float step(const Eigen::Ref<EigenVec>& action) final {
     /// action scaling
-    pTarget_ = action.cast<double>();
+    auto action_conversion = action.cast<double>();
+    pTarget_ << action_conversion(0), action_conversion(1)+action_conversion(2), action_conversion(1)-action_conversion(2);
     pTarget_ = pTarget_.cwiseProduct(actionStd_);
     pTarget_ += actionMean_;                                   /// joint P target
 
