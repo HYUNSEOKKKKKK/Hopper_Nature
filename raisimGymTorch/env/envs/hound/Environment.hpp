@@ -727,8 +727,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
 //          jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
           rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),               /// relative foot position with respect to the body COM, expressed in the body frame 3
-                    rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)),
-              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)),/// relative edge pos (heel, toe)
+          rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)),
+          rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)),/// relative edge pos (heel, toe)
           command_,                                                             /// command 3
           phaseSin_, /// phase encoding 2
           static_cast<double>(standingMode_);  /// standingMode 1
@@ -851,7 +851,7 @@ class ENVIRONMENT : public RaisimGymEnv {
  private:
   int gcDim_, gvDim_, numLegs_, numEdges_;
   bool visualizable_ = false;
-  double terminalRewardCoeff_ = -1e1/1e1;
+  double terminalRewardCoeff_ = -1e1;
   raisim::ArticulatedSystem* dhal_;
 
   double pGain_, dGain_;
