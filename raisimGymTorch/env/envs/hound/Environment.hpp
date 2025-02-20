@@ -72,7 +72,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// action scaling
     actionMean_(0) = gcInit_(7);
     actionMean_.tail(2) = gcInit_.tail(2);
-    actionStd_.setConstant(0.5);
+    actionStd_.setConstant(0.3);
 //            actionStd_.setConstant(0.4);
 
     /// Reward coefficients
