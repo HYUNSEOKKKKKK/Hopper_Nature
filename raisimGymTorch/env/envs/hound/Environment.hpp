@@ -46,9 +46,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointFrictions_.setZero();
 
     /// this is nominal configuration of robot
-    gcInit_.segment(0,7) << 0.0,0.0,0.71,   0.9847265,0.0,-0.1741081,0.0;
-    gcInit_.segment(7,3) << 0.7, -0.35, 0.0; // knee, ankle output (passive)
-    gcInit_.tail(6) << 0.917012, 0.00244346, 0.728929, 0.0015708, 0.861556, 0.619949; // universal passive, ankle input (active)
+    gcInit_.segment(0,7) << 0.0,0.0,0.71,   0.9847265,0.0,-0.1741081,0.0; // 0.35 rad 기준 (knee 0.7, ankle pitch 0.35)
+    gcInit_.segment(7,3) << 0.7, -0.1, 0.0; // knee, ankle output (passive)
+//    gcInit_.tail(6) << 0.917012, 0.00244346, 0.728929, 0.0015708, 0.861556, 0.619949; // ankle pitch -0.35 -> universal passive, ankle input (active)
+    gcInit_.tail(6) << 0.727173, 0.00244346, 0.506211, 0.0015708, 0.659643, 0.392726; // ankle pitch -0.1 -> universal passive, ankle input (active)
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
@@ -73,7 +74,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     actionMean_(0) = gcInit_(7);
     actionMean_.tail(2) = gcInit_.tail(2);
     actionStd_.setConstant(0.3);
-//            actionStd_.setConstant(0.4);
+//    actionStd_.setConstant(0.4);
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
@@ -224,9 +225,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
     world_->setDefaultMaterial(mu_, 0, 0);
 
-    /// initialize the pose
-    bool reset = !standingMode_;
-    if (standingMode_){ reset = uniDist_(gen_) > 0.0;}
+    /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김 (나중에 hound 참고해서 바꿔야 함)
+    bool reset = true;
+//    bool reset = !standingMode_;
+//    if (standingMode_){ reset = uniDist_(gen_) > 0.0;}
 
     if(!reset){ /// command -> sudden stop
         gcNoise_ = gc_;
@@ -791,6 +793,9 @@ class ENVIRONMENT : public RaisimGymEnv {
                 and (std::find(exceptionIndices_.begin(), exceptionIndices_.end(), contact.getlocalBodyIndex()) == exceptionIndices_.end())) {
             terminalStack_ += 1;
         }
+    if ((gc_(2) - heightMap_->getHeight(gc_(0),gc_(1))) < 0.30){
+        terminalStack_ += 1;
+    }
     if (terminalStack_ > 50){
         return true;
     }
