@@ -54,8 +54,8 @@ total_steps = n_steps * env.num_envs
 
 avg_rewards = []
 
-# actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim+est_dim   , act_dim),
-actor = ppo_module.Actor(ppo_module.CustomMLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim+est_dim, act_dim),
+actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim+est_dim   , act_dim),
+# actor = ppo_module.Actor(ppo_module.CustomMLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim+est_dim, act_dim),
                          ppo_module.MultivariateGaussianDiagonalCovariance(act_dim,
                                                                            env.num_envs,
                                                                            1.1,
@@ -120,8 +120,8 @@ for update in range(20001):
             'optimizer_state_dict': ppo.optimizer.state_dict(),
         }, saver.data_dir+"/full_"+str(update)+'.pt')
         # we create another graph just to demonstrate the save/load method
-        # loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim + est_dim, act_dim)
-        loaded_graph = ppo_module.CustomMLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim + est_dim, act_dim)
+        loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim + est_dim, act_dim)
+        # loaded_graph = ppo_module.CustomMLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim + est_dim, act_dim)
         loaded_graph.load_state_dict(torch.load(saver.data_dir+"/full_"+str(update)+'.pt')['actor_architecture_state_dict'])
         loaded_graph_est = ppo_module.MLP(cfg['architecture']['estimator_net'], nn.LeakyReLU, ob_dim, est_dim)
         loaded_graph_est.load_state_dict(torch.load(saver.data_dir+"/full_"+str(update)+'.pt')['estimator_architecture_state_dict'])

@@ -34,8 +34,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     numLegs_ = 1;
     numEdges_ = 4;
     actionDim_ = 3;
-    obDim_ = 45;
-    estDim_ = 7;
+    obDim_ = 42;
+    estDim_ = 14;
     valueObDim_ = obDim_ + estDim_;
 
     /// initialize
@@ -116,8 +116,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointPos_.col(1) -= tempJointPos*0.05;
 
     limitBodyHeight_ << 0.30, 1.10;
-    limitBaseMotion_.row(0) << -1.0,1.0; // z, pitch
-      limitBaseMotion_.row(1) << -0.6,0.6; // roll
+    limitBaseMotion_.row(0) << -1.2,1.2; // z, pitch
+    limitBaseMotion_.row(1) << -0.8,0.8; // roll
     limitJointVel_ << -6,6; // max vel limit is 9
     limitTargetVel_ << -0.6,0.6;
     limitFootContact_ << -0.3,2;
@@ -139,9 +139,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     standingSmoothness_ = 1.0;
     smoothnessWeight_.setZero(actionDim_);
     footPosWeight_.setZero();
-            terminalStack_ = 0;
+    terminalStack_ = 0;
+    prevTerminal_ = false;
 
-      /// initialize history
+    /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
     jointVelHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
     genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
@@ -227,10 +228,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
     world_->setDefaultMaterial(mu_, 0, 0);
 
-    /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김 (나중에 hound 참고해서 바꿔야 함)
-    bool reset = true;
-//    bool reset = !standingMode_;
-//    if (standingMode_){ reset = uniDist_(gen_) > 0.0;}
+    /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
+    bool reset = false;
+    if (standingMode_ and !prevTerminal_){ reset = uniDist_(gen_) > 0.0;}
 
     if(!reset){ /// command -> sudden stop
         gcNoise_ = gc_;
@@ -314,6 +314,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       for (auto& vec : jointVelHist_) { vec.setZero(); }
 
       terminalStack_ = 0;
+      prevTerminal_ = false;
     /// random joint friction
 //    for (int i=0;i<actionDim_;i++){
 //        jointFrictions_(i) = 0.2 + 0.2 * uniDist_(gen_); // small friction
@@ -418,11 +419,14 @@ class ENVIRONMENT : public RaisimGymEnv {
       prevPrevTarget_ = prevTarget_;
       prevTarget_ = pTarget_;
 
+      Eigen::VectorXd tempVec(3);
+      tempVec << gv_(6), gv_.tail(2); // knee, ankle input
       jointVelHist_.erase(jointVelHist_.begin());
-      jointVelHist_.push_back(gv_.tail(actionDim_));
+      jointVelHist_.push_back(tempVec);
 
       jointPosErrorHist_.erase(jointPosErrorHist_.begin());
-      jointPosErrorHist_.push_back(pTarget_ - gc_.tail(actionDim_));
+      tempVec << gc_(7), gc_.tail(2); // knee, ankle input
+      jointPosErrorHist_.push_back(pTarget_ - tempVec);
   }
 
   double getReward(){
@@ -434,13 +438,13 @@ class ENVIRONMENT : public RaisimGymEnv {
   void standingReward(){
       /// for standingMode
       if (!standingMode_){
-          limitBaseMotion_.row(0) << -1.0,1.0;
-          limitBaseMotion_.row(1) << -0.6,0.6;
+          limitBaseMotion_.row(0) << -1.2,1.2;
+          limitBaseMotion_.row(1) << -0.8,0.8;
           standingSmoothness_ = 1.0;
           footPosWeight_ << 0.6,1.0,0.4;
       } else {
-          limitBaseMotion_.row(0) << -0.4,0.4;
-          limitBaseMotion_.row(1) << -0.2,0.2;
+          limitBaseMotion_.row(0) << -0.8,0.8;
+          limitBaseMotion_.row(1) << -0.4,0.4;
           standingSmoothness_ = 1.0;
           footPosWeight_ << 1.0,1.0,1.0;
       }
@@ -529,7 +533,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.16;
+          double desiredFootZPosition = 0.12;
           for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
@@ -586,7 +590,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.015,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
       /// Log Barrier - limit_body_contact
@@ -733,36 +737,30 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          footContactPhase_.setZero();
           phaseSin_.setZero();
       }
-      obDouble_ << rot_.e().row(2).transpose(),                                     /// body orientation. 3
+      obDouble_ << rot_.e().row(2).transpose(),                                 /// body orientation. 3
           bodyAngularVel_,                                                      /// body angular velocity. 3
-          gc_.segment(7,9),                                                      /// joint pos 3 -> temp 9
-          gv_.segment(6,9),                                                      /// joint velocity 3 -> temp 9
+          gc_(7)-gcInit_(7),
+          gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
+          gv_(6),
+          gv_.tail(2),                                                          /// joint velocity 3
 
-          prevTarget_ - actionMean_,                                                          /// previous action 3
-          prevPrevTarget_ - actionMean_,                                                      /// preprevious action 3
-//          jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
-//          jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
-          rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),               /// relative foot position with respect to the body COM, expressed in the body frame 3
-          rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)),
-          rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)),/// relative edge pos (heel, toe)
+          prevTarget_ - actionMean_,                                            /// previous action 3
+          prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
+          jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
+          jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
-          phaseSin_, /// phase encoding 2
-          static_cast<double>(standingMode_);  /// standingMode 1
+          phaseSin_,                                                            /// phase encoding 2
+          static_cast<double>(standingMode_);                                   /// standingMode 1
 
       double noise = 0.0;
-//      for (int i=0; i<obDim_; i++){
-//          if (i<3)       {noise = 0.03;}  /// body orientation
-//          else if(i<6)   {noise = 0.1;}   /// body angular velocity (rad/sec)
-//          else if(i<28)  {noise = 0.05;}  /// joint pos             (rad)
-//          else if(i<50)  {noise = 0.5;}   /// joint vel             (rad/sec)
-//          else if(i<94)  {noise = 0.0;}  /// action related
-//          else if(i<160) {noise = 0.0;}   /// action related
-//          else if(i<226) {noise = 0.1;}  /// vel history
-//          else if(i<232) {noise = footObsNoise_(i-226);} /// relative foot pos (2 cm)
-//          else           {noise = 0.0;}
-//
-//          obDouble_(i) += uniDist_(gen_) * noise;
-//      }
+      for (int i=0; i<obDim_; i++){
+          if (i<3)       {noise = 0.03;}  /// body orientation
+          else if(i<6)   {noise = 0.05;}   /// body angular velocity (rad/sec)
+          else if(i<9)   {noise = 0.05;}  /// joint pos             (rad)
+          else if(i<12)  {noise = 0.1;}   /// joint vel             (rad/sec)
+          else           {noise = 0.0;}
+          obDouble_(i) += uniDist_(gen_) * noise;
+      }
 
     /// convert it to float
     ob = obDouble_.cast<float>();
@@ -772,30 +770,35 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (standingMode_){
           phaseSin_.setZero();
       }
-      valueObDouble_ << rot_.e().row(2).transpose(),                               /// body orientation. 3
+      Eigen::Vector3d temp; /// ref foot to body com
+      temp << 0.0, 0.0, -0.70;
+      valueObDouble_ << rot_.e().row(2).transpose(),                                /// body orientation. 3
               bodyAngularVel_,                                                      /// body angular velocity. 3
-              gc_.segment(7,9),                                                      /// joint pos 3 -> temp 9
-              gv_.segment(6,9),                                                      /// joint velocity 3 -> temp 9
+              gc_(7)-gcInit_(7),
+              gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
+              gv_(6),
+              gv_.tail(2),                                                          /// joint velocity 3
 
-              prevTarget_- actionMean_,                                                          /// previous action 3
-              prevPrevTarget_- actionMean_,                                                      /// preprevious action 3
-//              jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
-//              jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
-              rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)),        /// relative foot position with respect to the body COM, expressed in the body frame 3
-              rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)),
-              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)),/// relative edge pos (heel, toe)
+              prevTarget_- actionMean_,                                             /// previous action 3
+              prevPrevTarget_- actionMean_,                                         /// preprevious action 3
+              jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
+              jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
               command_,                                                             /// command 3
-              phaseSin_, /// phase sin cos 2
+              phaseSin_,                                                            /// phase encoding 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
               bodyLinearVel_,                                                       /// body linear velocity. 3
-//              footClearance_ * 4.0,                                                       /// min foot z
-              (footToTerrain_(0) + footToTerrain_(2)) * 2.0,
-              (footToTerrain_(4) + footToTerrain_(6)) * 2.0,                         /// heel & toe height
+              (footToTerrain_(0) + footToTerrain_(2)) * 1e1,
+              (footToTerrain_(4) + footToTerrain_(6)) * 1e1,                        /// heel & toe height 2
               static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
-              static_cast<double>(bodyContact_)/4.0;                                /// 1 body contact num
+              static_cast<double>(bodyContact_)/4.0,                                /// 1 body contact num
+              (rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)) - temp)*2.0,  /// 3 relative foot position with respect to the body COM, expressed in the body frame 3
+//              rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)) - temp,
+//              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
+              (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
+              gv_.segment(7,2)/2e1;                                                 /// 2 ankle output vel
 
-      /// convert it to float
+              /// convert it to float
       ob = valueObDouble_.cast<float>();
   }
 
@@ -808,6 +811,7 @@ class ENVIRONMENT : public RaisimGymEnv {
             terminalStack_ += 1;
         }
     if (terminalStack_ > 50){
+        prevTerminal_ = true;
         return true;
     }
     terminalReward = -0.f;
@@ -938,7 +942,8 @@ class ENVIRONMENT : public RaisimGymEnv {
   double mu_;
   /// for barrier
   float barrierReward_;
-        int terminalStack_;
+  int terminalStack_;
+  bool prevTerminal_;
 
   thread_local static std::mt19937 gen_;
   thread_local static std::normal_distribution<double> normDist_;

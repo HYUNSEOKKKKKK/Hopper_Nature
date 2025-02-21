@@ -39,7 +39,7 @@ act_dim = env.num_acts
 est_dim = env.num_est
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2.1th_closed_loop_highPD_2025-02-20-00-42-22/full_2000.pt"
-weight_path = "/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-02-21-22-25-14/full_2000.pt"
+weight_path = "/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-02-22-00-24-20/full_2500.pt"
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -65,8 +65,8 @@ else:
     start_step_id = 0
 
     print("Visualizing and evaluating the policy: ", weight_path)
-    # loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
-    loaded_graph = ppo_module.CustomMLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
+    loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
+    # loaded_graph = ppo_module.CustomMLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
     loaded_graph.load_state_dict(torch.load(weight_path)['actor_architecture_state_dict'])
     loaded_graph_est = ppo_module.MLP(cfg['architecture']['estimator_net'], torch.nn.LeakyReLU, ob_dim, est_dim)
     loaded_graph_est.load_state_dict(torch.load(weight_path)['estimator_architecture_state_dict'])
