@@ -134,7 +134,7 @@ class CustomMLP(nn.Module):
         modules.append(nn.Linear(shape[-1], output_size))
         # test for decoupled ankle motion (one-leg)
         final_layer = nn.Linear(3, 3, bias=False)
-        fixed_weights = torch.tensor([[1, 0, 0], [0, 1, 1], [0, 1, -1]], dtype=torch.float32)
+        fixed_weights = torch.tensor([[1.0, 0., 0.], [0., 0.5, 0.5], [0., 0.5, -0.5]], dtype=torch.float32)
         final_layer.weight = nn.Parameter(fixed_weights, requires_grad=False)
         modules.append(final_layer)
         #
