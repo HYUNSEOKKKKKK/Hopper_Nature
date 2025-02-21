@@ -464,6 +464,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("footSlip", footSlip_.sum());
       if (rot_(8)>1.0){ rot_(8) = 1.0; } /// preventing acos nan
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
+      rewards_.record("smoothness1", (pTarget_ - prevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("baseMotion", 0.4*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
 //      if (rewards_.getReward("smoothness2") < -1e2){
@@ -509,7 +510,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
       negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("jointPos") + rewards_.getReward("footPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque")
-              + rewards_.getReward("footSlip") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion"));
+              + rewards_.getReward("footSlip") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -735,6 +736,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          footContactPhase_.setZero();
           phaseSin_.setZero();
       }
+
       obDouble_ << rot_.e().row(2).transpose(),                                 /// body orientation. 3
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
@@ -750,6 +752,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
 
+
       double noise = 0.0;
       for (int i=0; i<obDim_; i++){
           if (i<3)       {noise = 0.03;}  /// body orientation
@@ -757,7 +760,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           else if(i<9)   {noise = 0.05;}  /// joint pos             (rad)
           else if(i<12)  {noise = 0.1;}   /// joint vel             (rad/sec)
           else           {noise = 0.0;}
-          obDouble_(i) += uniDist_(gen_) * noise;
+          obDouble_(i) += uniDist_(gen_) * noise * 0.1;
       }
 
     /// convert it to float

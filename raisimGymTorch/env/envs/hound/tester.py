@@ -65,8 +65,8 @@ else:
     start_step_id = 0
 
     print("Visualizing and evaluating the policy: ", weight_path)
-    # loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
-    loaded_graph = ppo_module.CustomMLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
+    loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
+    # loaded_graph = ppo_module.CustomMLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
     loaded_graph.load_state_dict(torch.load(weight_path)['actor_architecture_state_dict'])
     loaded_graph_est = ppo_module.MLP(cfg['architecture']['estimator_net'], torch.nn.LeakyReLU, ob_dim, est_dim)
     loaded_graph_est.load_state_dict(torch.load(weight_path)['estimator_architecture_state_dict'])
