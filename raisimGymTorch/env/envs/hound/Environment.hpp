@@ -355,7 +355,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   float step(const Eigen::Ref<EigenVec>& action) final {
     /// action scaling
     auto action_conversion = action.cast<double>();
-    pTarget_ << action_conversion(0), action_conversion(1)+action_conversion(2), action_conversion(1)-action_conversion(2);
+    pTarget_ << action_conversion(0), action_conversion(1)+action_conversion(2)/2.0, action_conversion(1)-action_conversion(2)/2.0;
     pTarget_ = pTarget_.cwiseProduct(actionStd_);
     pTarget_ += actionMean_;                                   /// joint P target
 
