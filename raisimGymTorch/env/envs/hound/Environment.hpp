@@ -53,7 +53,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     gc_ = gcInit_;
 
     /// set pd gains
-    pGain_ = 30.0; dGain_ = 1.0;
+    pGain_ = 50.0; dGain_ = 5.0;
     jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_); // knee, ankle input (active)
     jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_);
     dhal_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
@@ -73,7 +73,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     actionMean_(0) = gcInit_(7);
     actionMean_.tail(2) = gcInit_.tail(2);
 //            actionStd_.setConstant(0.3);
-            actionStd_.setConstant(0.4);
+    actionStd_.setConstant(0.4);
 //      actionStd_ << 0.4, 0.2, 0.2;
 
     /// Reward coefficients
@@ -229,10 +229,11 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_->setDefaultMaterial(mu_, 0, 0);
 
     /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
-    bool reset = false;
-    if (standingMode_ and !prevTerminal_){ reset = uniDist_(gen_) > 0.0;}
+    bool reset = true;
+    if (standingMode_ and !prevTerminal_){ reset = uniDist_(gen_) > 0.0;} /// very important
 
     if(!reset){ /// command -> sudden stop
+        /// 굉장히 주의를 요함 (heightMap 이 변하는 경우, 넘어졌는데 reset 안되는 경우 등)
         gcNoise_ = gc_;
         gvNoise_ = gv_;
         gcNoise_.head(3) = gcInit_.head(3);
@@ -272,23 +273,25 @@ class ENVIRONMENT : public RaisimGymEnv {
 
         subStep();
     }
-
-    /// preventing foot penetration
     dhal_->setState(gcNoise_,gvNoise_);
-    double heightShift = 1e3;  /// -> 공중에 있는 것도 데리고 옴
-    double temp = 0.0;
-    for (int i = 0; i < numLegs_; i++){
-        dhal_->getFramePosition(footJointFrames_[i], footPos_[i]);
-        dhal_->getFrameOrientation(footJointFrames_[i], footOrientation_[i]);
-                edgePosWorld_ = footOrientation_[i].e() * edgePosLocal_;
-                for (int j=0; j<numEdges_; j++){
-                    edgePosWorld_.col(j) += footPos_[i].e();
-                    temp = edgePosWorld_.col(j)(2) - 0.01 - heightMap_->getHeight(edgePosWorld_.col(j)(0), edgePosWorld_.col(j)(1)); /// but, 돌아가면 땅에 푹 파일겨
-                    if (temp < heightShift){heightShift = temp;}
-                }
+
+    /// preventing foot penetration (주의, if map changed, then, it should be always executed, but, if the robot fails, then, it could be problematic !!!)
+    if (reset){ /// *** here, we only do for plain setting ***
+        double heightShift = 1e3;  /// -> 공중에 있는 것도 데리고 옴
+        double temp = 0.0;
+        for (int i = 0; i < numLegs_; i++){
+            dhal_->getFramePosition(footJointFrames_[i], footPos_[i]);
+            dhal_->getFrameOrientation(footJointFrames_[i], footOrientation_[i]);
+            edgePosWorld_ = footOrientation_[i].e() * edgePosLocal_;
+            for (int j=0; j<numEdges_; j++){
+                edgePosWorld_.col(j) += footPos_[i].e();
+                temp = edgePosWorld_.col(j)(2) - 0.01 - heightMap_->getHeight(edgePosWorld_.col(j)(0), edgePosWorld_.col(j)(1)); /// but, 돌아가면 땅에 푹 파일겨
+                if (temp < heightShift){heightShift = temp;}
+            }
+        }
+        gcNoise_(2) -= heightShift;
+        dhal_->setState(gcNoise_, gvNoise_);
     }
-    gcNoise_(2) -= heightShift;
-    dhal_->setState(gcNoise_, gvNoise_);
     updateObservation();
 
     for (auto& vec : genForceTargetHist_) { vec.setZero(); }
@@ -299,22 +302,17 @@ class ENVIRONMENT : public RaisimGymEnv {
         for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
         for (auto& vec : jointVelHist_) { vec.setZero(); }
 
-//        if (uniDist_(gen_)<=0.0){
-//            phase_ = 0.0;
-//        }else{
-//            phase_ = gait_hz_/2.0;
-//        }
         phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
         footContactPhase_.setZero();
         footClearance_.setZero();
     }
 
     /// even though not reset, these values should be reset -> empirical result
-      for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
-      for (auto& vec : jointVelHist_) { vec.setZero(); }
+    for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
+    for (auto& vec : jointVelHist_) { vec.setZero(); }
 
-      terminalStack_ = 0;
-      prevTerminal_ = false;
+    terminalStack_ = 0;
+    prevTerminal_ = false;
     /// random joint friction
 //    for (int i=0;i<actionDim_;i++){
 //        jointFrictions_(i) = 0.2 + 0.2 * uniDist_(gen_); // small friction
