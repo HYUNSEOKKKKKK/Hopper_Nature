@@ -81,7 +81,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// indices of links that should not make contact with ground
     footIndices_.push_back(dhal_->getBodyIdx("Foot"));
-    exceptionIndices_.push_back(dhal_->getBodyIdx("Calf")); // not terminate for calf contact
+//    exceptionIndices_.push_back(dhal_->getBodyIdx("Calf")); // due to added links of closed-loop -> it can stand with these contacts
     exceptionIndices_.push_back(dhal_->getBodyIdx("Left_Ankle_Link"));
     exceptionIndices_.push_back(dhal_->getBodyIdx("Left_Ankle_Link_Input"));
     exceptionIndices_.push_back(dhal_->getBodyIdx("Right_Ankle_Link"));
