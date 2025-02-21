@@ -74,7 +74,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     actionMean_.tail(2) = gcInit_.tail(2);
 //            actionStd_.setConstant(0.3);
 //            actionStd_.setConstant(0.4);
-    actionStd_ << 0.4, 0.1, 0.1;
+    actionStd_ << 0.4, 0.2, 0.2;
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
@@ -354,8 +354,9 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
   float step(const Eigen::Ref<EigenVec>& action) final {
     /// action scaling
-    auto action_conversion = action.cast<double>();
-    pTarget_ << action_conversion(0), action_conversion(1)+action_conversion(2)/2.0, action_conversion(1)-action_conversion(2)/2.0;
+//    auto action_conversion = action.cast<double>();
+//    pTarget_ << action_conversion(0), action_conversion(1)+action_conversion(2)/2.0, action_conversion(1)-action_conversion(2)/2.0;
+    pTarget_ = action.cast<double>();
     pTarget_ = pTarget_.cwiseProduct(actionStd_);
     pTarget_ += actionMean_;                                   /// joint P target
 

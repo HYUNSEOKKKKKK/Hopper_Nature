@@ -118,6 +118,39 @@ class MLP(nn.Module):
         [torch.nn.init.orthogonal_(module.weight, gain=scales[idx]) for idx, module in
          enumerate(mod for mod in sequential if isinstance(mod, nn.Linear))]
 
+class CustomMLP(nn.Module):
+    def __init__(self, shape, actionvation_fn, input_size, output_size):
+        super(CustomMLP, self).__init__()
+        self.activation_fn = actionvation_fn
+
+        modules = [nn.Linear(input_size, shape[0]), self.activation_fn()]
+        scale = [np.sqrt(2)]
+
+        for idx in range(len(shape)-1):
+            modules.append(nn.Linear(shape[idx], shape[idx+1]))
+            modules.append(self.activation_fn())
+            scale.append(np.sqrt(2))
+
+        modules.append(nn.Linear(shape[-1], output_size))
+        # test for decoupled ankle motion (one-leg)
+        final_layer = nn.Linear(3, 3, bias=False)
+        fixed_weights = torch.tensor([[1, 0, 0], [0, 1, 1], [0, 1, -1]], dtype=torch.float32)
+        final_layer.weight = nn.Parameter(fixed_weights, requires_grad=False)
+        modules.append(final_layer)
+        #
+        self.architecture = nn.Sequential(*modules)
+        scale.append(np.sqrt(2))
+
+        self.init_weights(self.architecture, scale)
+        self.input_shape = [input_size]
+        self.output_shape = [output_size]
+
+    @staticmethod
+    def init_weights(sequential, scales):
+        # [torch.nn.init.orthogonal_(module.weight, gain=scales[idx]) for idx, module in
+        #  enumerate(mod for mod in sequential if isinstance(mod, nn.Linear))]
+        for idx, module in enumerate(mod for mod in sequential if isinstance(mod, nn.Linear) and mod.weight.requires_grad):
+            torch.nn.init.orthogonal_(module.weight, gain=scales[idx])
 
 class MultivariateGaussianDiagonalCovariance(nn.Module):
     def __init__(self, dim, size, init_std, fast_sampler, seed=0):
