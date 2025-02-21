@@ -36,7 +36,7 @@ environment:
     barrierTargetVel:     1e-1
     barrierFootContact:   1e-1
     barrierFootClearance: 1e-1
-    barrierArmLegCoupling: 1e-1
+    barrierBodyContact:   1e-1
 
     # total sum
     negSumPos:          1.0 #1.0

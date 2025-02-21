@@ -90,7 +90,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    hipJointFrames_.push_back("hip_abduction_left");
 
       bodyIndices_.push_back(dhal_->getBodyIdx("Thigh"));
-      bodyIndices_.push_back(dhal_->getBodyIdx("Calf")); // calf contact 추가 -> due to closed loop contact points
+      bodyIndices_.push_back(dhal_->getBodyIdx("Calf")); // calf contact 추가 -> due to closed loop contact points (should change the body contact num part)
 
        /// visualize if it is the first environment
     if (visualizable_) {
@@ -122,6 +122,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitTargetVel_ << -0.6,0.6;
     limitFootContact_ << -0.3,2;
     limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
+    limitBodyContact_ << -1.0,1.0;
 
     /// initialize
     command_.setZero();
@@ -524,7 +525,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (!standingMode_){ /// walking
           /// footContactDouble_ -> limit_foot_contact 에 있도록 (-0.3,3) -> Gait Enforcing (요 -0.3 이 벗어나도 되는 범위)
           for(int i=0; i<numLegs_; i++) {
-              if (footContact_ > 1) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
+              if (footContact_ > 0) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
@@ -544,7 +545,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
 
       /// compute barrier reward
-      double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0;
+      double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0, barrierBodyContact = 0.0;
       double tempReward = 0.0;
       /// Log Barrier - limit_joint_pos
       for (int index_joint=0;index_joint<actionDim_;index_joint++){
@@ -588,6 +589,9 @@ class ENVIRONMENT : public RaisimGymEnv {
           relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
+      /// Log Barrier - limit_body_contact
+      relaxedLogBarrier(0.5, limitBodyContact_(0), limitBodyContact_(1),-bodyContact_,tempReward);
+      barrierBodyContact += tempReward;
 
       double logClip = -500.0;
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
@@ -598,9 +602,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierTargetVel", barrierTargetVel);
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
+      rewards_.record("barrierBodyContact", barrierBodyContact);
 
 
-      float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance));
+      float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance + barrierBodyContact));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
@@ -913,6 +918,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,1,2> limitTargetVel_;
   Eigen::Matrix<double,1,2> limitFootClearance_;
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
+  Eigen::Matrix<double,1,2> limitBodyContact_; // for gait enforcing
   ///
   std::vector<Eigen::VectorXd> jointPosErrorHist_, jointVelHist_;
   std::vector<Eigen::VectorXd> genForceTargetHist_;
