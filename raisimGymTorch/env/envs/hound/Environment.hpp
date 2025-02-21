@@ -662,7 +662,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       for(auto& contact: dhal_->getContacts()){
           for (size_t i=0; i<2; i++){
               if(contact.getlocalBodyIndex() == bodyIndices_[i]){
-                  std::cout << "bodyIndices_[i] : " << i << std::endl;
+//                  std::cout << "bodyIndices_[i] : " << i << std::endl;
                   bodyContact_ += 1;
               }
           }
