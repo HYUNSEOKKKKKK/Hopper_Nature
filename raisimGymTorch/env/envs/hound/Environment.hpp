@@ -90,6 +90,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    hipJointFrames_.push_back("hip_abduction_left");
 
       bodyIndices_.push_back(dhal_->getBodyIdx("Thigh"));
+      bodyIndices_.push_back(dhal_->getBodyIdx("Calf")); // calf contact 추가 -> due to closed loop contact points
 
        /// visualize if it is the first environment
     if (visualizable_) {
