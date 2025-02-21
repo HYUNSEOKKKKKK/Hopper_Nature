@@ -74,7 +74,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     actionMean_.tail(2) = gcInit_.tail(2);
 //            actionStd_.setConstant(0.3);
 //            actionStd_.setConstant(0.4);
-    actionStd_ << 0.4, 0.2, 0.2;
+    actionStd_ << 0.4, 0.1, 0.1;
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
@@ -491,6 +491,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       tempForce(0) = genForceTargetHist_[0](6); // knee
       tempForce.tail(2) = genForceTargetHist_[0].tail(2); // knee
       rewards_.record("torque", (jointRegulatingWeight_.cwiseProduct(tempForce).squaredNorm()));
+//      if (rewards_.getReward("torque") < -1e0){
+//          std::cout << "torque reward: " << rewards_.getReward("torque") << std::endl;
+//          std::cout << "tempForce : " << tempForce.transpose() << std::endl;
+//          std::cout << "pTarget_-actionMean_: " << (pTarget_-actionMean_).transpose() << std::endl;
+//      }
 
       /// body contact reward
       rewards_.record("bodyContact",(double) bodyContact_);
