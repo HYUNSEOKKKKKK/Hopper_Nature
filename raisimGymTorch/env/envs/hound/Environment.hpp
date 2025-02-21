@@ -73,8 +73,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     actionMean_(0) = gcInit_(7);
     actionMean_.tail(2) = gcInit_.tail(2);
 //            actionStd_.setConstant(0.3);
-//            actionStd_.setConstant(0.4);
-    actionStd_ << 0.4, 0.2, 0.2;
+            actionStd_.setConstant(0.4);
+//      actionStd_ << 0.4, 0.2, 0.2;
 
     /// Reward coefficients
     rewards_.initializeFromConfigurationFile (cfg["reward"]);
