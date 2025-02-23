@@ -532,7 +532,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.12;
+          double desiredFootZPosition = 0.16;
           for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
@@ -754,14 +754,14 @@ class ENVIRONMENT : public RaisimGymEnv {
 
 
       double noise = 0.0;
-      for (int i=0; i<obDim_; i++){
-          if (i<3)       {noise = 0.03;}  /// body orientation
-          else if(i<6)   {noise = 0.05;}   /// body angular velocity (rad/sec)
-          else if(i<9)   {noise = 0.05;}  /// joint pos             (rad)
-          else if(i<12)  {noise = 0.1;}   /// joint vel             (rad/sec)
-          else           {noise = 0.0;}
-          obDouble_(i) += uniDist_(gen_) * noise * 0.1;
-      }
+      // for (int i=0; i<obDim_; i++){
+      //    if (i<3)       {noise = 0.03;}  /// body orientation
+      //    else if(i<6)   {noise = 0.05;}   /// body angular velocity (rad/sec)
+      //    else if(i<9)   {noise = 0.05;}  /// joint pos             (rad)
+      //    else if(i<12)  {noise = 0.1;}   /// joint vel             (rad/sec)
+       //   else           {noise = 0.0;}
+      //    obDouble_(i) += uniDist_(gen_) * noise * 0.1;
+      //}
 
     /// convert it to float
     ob = obDouble_.cast<float>();
