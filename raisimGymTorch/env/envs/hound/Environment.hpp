@@ -634,7 +634,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void updateObservation() {
     /// update previous footVel
-    preJointVel_ = gv_.tail(actionDim_);
+    preJointVel_ = gv_.segment(6,actionDim_);
     /// update state
     dhal_->getState(gc_, gv_);
     raisim::Vec<4> quat;
