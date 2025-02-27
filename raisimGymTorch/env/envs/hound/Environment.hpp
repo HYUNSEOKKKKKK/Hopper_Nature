@@ -53,7 +53,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     gc_ = gcInit_;
 
     /// set pd gains
-    pGain_ = 100.0; dGain_ = 5.0;
+    pGain_ = 50.0; dGain_ = 5.0;
     jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_); // knee, ankle input (active)
     jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_);
     dhal_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
@@ -257,7 +257,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         quat_.normalize();
         gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
         gcNoise_(7) += uniDist_(gen_) * 0.5 * ((standingMode_)? 1.2 : 1.0); // knee
-        gcNoise_(8) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0); // ankle output pitch (passive)
+        gcNoise_(8) += uniDist_(gen_) * 0.4; // ankle output pitch (passive)
         gcNoise_(9) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0); // ankle output roll (passive)
 
         /// Generalized Velocities randomization.
@@ -589,7 +589,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.020,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.018,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
       /// Log Barrier - limit_body_contact
