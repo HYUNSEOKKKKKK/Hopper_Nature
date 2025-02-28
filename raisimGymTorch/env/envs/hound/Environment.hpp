@@ -41,7 +41,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize
     gc_.setZero(gcDim_); gcInit_.setZero(); gcNoise_.setZero();
     gv_.setZero(gvDim_); gvInit_.setZero(); gvNoise_.setZero();
-    gcDes_.setZero(); gvDes_.setZero();
     pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero(); preJointVel_.setZero();
     jointFrictions_.setZero();
 
@@ -121,7 +120,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -6,6; // max vel limit is 9
     limitTargetVel_ << -0.6,0.6;
     limitFootContact_ << -0.3,2;
-    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
+    limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
     limitBodyContact_ << -1.0,1.0;
 
     /// initialize
@@ -143,8 +142,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     prevTerminal_ = false;
 
     /// initialize history
-    jointPosErrorHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
-    jointVelHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
+    jointPosErrorHist_ = std::vector<Eigen::VectorXd>(9,Eigen::VectorXd::Zero(actionDim_));
+    jointVelHist_ = std::vector<Eigen::VectorXd>(9,Eigen::VectorXd::Zero(actionDim_));
     genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
@@ -297,8 +296,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     for (auto& vec : genForceTargetHist_) { vec.setZero(); }
     /// reset (except the standingMode_ -> which preserves previous state for sudden command stop)
     if (reset){
-        pTarget_ = gc_.tail(actionDim_);
-        gcDes_.tail(actionDim_) = pTarget_; prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
+//        pTarget_ = gc_.tail(actionDim_);
+        pTarget_ = actionMean_;
+        prevTarget_ = pTarget_; prevPrevTarget_ = pTarget_; preJointVel_.setZero();
         for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
         for (auto& vec : jointVelHist_) { vec.setZero(); }
 
@@ -384,8 +384,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
     barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
             /// scale down
-      avgReward /= 1e1;
-      barrierReward_ /= 1e1;
+      avgReward /= 2e1;
+      barrierReward_ /= 2e1;
 
     updateHistory();
 
@@ -589,7 +589,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.016,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.018,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
       /// Log Barrier - limit_body_contact
@@ -747,8 +747,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
-          jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
-          jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
+          jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6], /// joint History 9 (0.18, 0.12, 0.6)
+          jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                /// joint History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
@@ -878,8 +878,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   double pGain_, dGain_;
   Eigen::VectorXd gc_, gv_, genForceTarget_;
-  Eigen::Vector<double,16> gcInit_, gcNoise_, gcDes_;
-  Eigen::Vector<double,15> gvInit_, gvNoise_, gvDes_, subStepPgain_,subStepDgain_;
+  Eigen::Vector<double,16> gcInit_, gcNoise_;
+  Eigen::Vector<double,15> gvInit_, gvNoise_, subStepPgain_,subStepDgain_;
   Eigen::Vector<double,3> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_, jointFrictions_;
   Eigen::Vector<double,3> jointPgain_, jointDgain_;
   Eigen::VectorXd jointRegulatingWeight_;
