@@ -257,7 +257,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         quat_.normalize();
         gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
         gcNoise_(7) += uniDist_(gen_) * 0.5 * ((standingMode_)? 1.2 : 1.0); // knee
-        gcNoise_(8) += uniDist_(gen_) * 0.4; // ankle output pitch (passive)
+        gcNoise_(8) += uniDist_(gen_) * 0.3 * ((standingMode_)? 1.2 : 1.0); // ankle output pitch (passive)
         gcNoise_(9) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0); // ankle output roll (passive)
 
         /// Generalized Velocities randomization.
