@@ -121,7 +121,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointVel_ << -6,6; // max vel limit is 9
     limitTargetVel_ << -0.6,0.6;
     limitFootContact_ << -0.3,2;
-    limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
+    limitFootClearance_ << -0.06,1.0; // 어차피 desired_foot_clearance 를
     limitBodyContact_ << -1.0,1.0;
 
     /// initialize
@@ -589,7 +589,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.018,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.016,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
       /// Log Barrier - limit_body_contact
@@ -608,7 +608,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierBodyContact", barrierBodyContact);
 
 
-      float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance + barrierBodyContact));
+      float logBarReward =  (float)(8e-2*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierBodyContact)
+              + 1e-1*(barrierFootContact + barrierFootClearance));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
