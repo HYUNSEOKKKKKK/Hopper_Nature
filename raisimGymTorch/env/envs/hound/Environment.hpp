@@ -783,8 +783,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
               prevTarget_- actionMean_,                                             /// previous action 3
               prevPrevTarget_- actionMean_,                                         /// preprevious action 3
-              jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12], /// joint History 9 (0.18, 0.12, 0.6)
-              jointVelHist_[0], jointVelHist_[6], jointVelHist_[12],                /// joint History 9 (0.18, 0.12, 0.6)
+              jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6], /// joint History 9 (0.18, 0.12, 0.6)
+              jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                /// joint History 9 (0.18, 0.12, 0.6)
               command_,                                                             /// command 3
               phaseSin_,                                                            /// phase encoding 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
