@@ -119,7 +119,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitBaseMotion_.row(1) << -0.8,0.8; // roll
     limitJointVel_ << -6,6; // max vel limit is 9
     limitTargetVel_ << -0.6,0.6;
-    limitFootContact_ << -0.6,2;
+    limitFootContact_ << -0.3,2;
     limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
     limitBodyContact_ << -1.0,1.0;
 
@@ -148,7 +148,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
     phase_ = 0.0;
-    gait_hz_ = 0.80;
+    gait_hz_ = 0.7;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -387,7 +387,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       avgReward /= 2e1;
       barrierReward_ /= 2e1;
 
-    updateHistory();
+//      std::cout << footContact_ << ", " << footContactPhase_ << std::endl;
+
+      updateHistory();
 
     return avgReward;
   }
@@ -534,7 +536,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
           double desiredFootZPosition = 0.16;
           for (int i=0; i<numLegs_; i++){
-              if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
+              if (footContactPhase_(i) < -0.3) { /// during swing, (0.6 전체시간의 33 %)
                   footClearance_(i) =
                           footToTerrain_.segment(i * 8, 8).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
@@ -589,7 +591,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.018,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.020,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
       /// Log Barrier - limit_body_contact
@@ -608,8 +610,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierBodyContact", barrierBodyContact);
 
 
-      float logBarReward =  (float)(8e-2*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierBodyContact)
-              + 1e-1*(barrierFootContact + barrierFootClearance));
+      float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance + barrierBodyContact));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
