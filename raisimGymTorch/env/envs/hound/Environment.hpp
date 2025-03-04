@@ -23,7 +23,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    dhal_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hop_verParallelAnkleLinks_ver20250114/Hop_verParallelAnkleLinks.urdf");
+    dhal_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hop_verParallelAnkleLinks_ver20250304/Hop_verParallelAnkleLinks.urdf");
     dhal_->setName("dhal");
     dhal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -45,8 +45,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointFrictions_.setZero();
 
     /// this is nominal configuration of robot
-    gcInit_.segment(0,7) << 0.0,0.0,0.71,   0.9847265,0.0,-0.1741081,0.0;
-    gcInit_.segment(7,3) << 0.7, -0.35, 0.0; // knee, ankle output (passive)
+    gcInit_.segment(0,7) << 0.0,0.0,0.73,   0.9887711, 0.0, -0.1494381, 0.0,;
+    gcInit_.segment(7,3) << 0.4, -0.1, 0.0; // knee, ankle output (passive)
     gcInit_.tail(6) << 0.917012, 0.00244346, 0.728929, 0.0015708, 0.861556, 0.619949; // universal passive, ankle input (active)
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
@@ -255,7 +255,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         quat_ = rotTotalNoise_;
         quat_.normalize();
         gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
-        gcNoise_(7) += uniDist_(gen_) * 0.5 * ((standingMode_)? 1.2 : 1.0); // knee
+        gcNoise_(7) += (uniDist_(gen_) * 0.5 * ((standingMode_)? 1.2 : 1.0)+0.22); // knee
         gcNoise_(8) += uniDist_(gen_) * 0.3 * ((standingMode_)? 1.2 : 1.0); // ankle output pitch (passive)
         gcNoise_(9) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0); // ankle output roll (passive)
 
@@ -530,13 +530,13 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (!standingMode_){ /// walking
           /// footContactDouble_ -> limit_foot_contact 에 있도록 (-0.3,3) -> Gait Enforcing (요 -0.3 이 벗어나도 되는 범위)
           for(int i=0; i<numLegs_; i++) {
-              if (footContact_ > 0) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
+              if (footContact_ > 1) { footContactDouble_(i) = 1.0 * footContactPhase_(i); }
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
           double desiredFootZPosition = 0.16;
           for (int i=0; i<numLegs_; i++){
-              if (footContactPhase_(i) < -0.3) { /// during swing, (0.6 전체시간의 33 %)
+              if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
                           footToTerrain_.segment(i * 8, 8).minCoeff() - desiredFootZPosition; // 대략, 0.17 sec, 0 보다 크거나 같으면 됨 (enforcing clearance)
               }else{ footClearance_(i) = 0.0; } // max reward (not enforcing clearance)
@@ -591,7 +591,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.020,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.018,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
       /// Log Barrier - limit_body_contact
