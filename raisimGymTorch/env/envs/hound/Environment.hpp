@@ -45,7 +45,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointFrictions_.setZero();
 
     /// this is nominal configuration of robot
-    gcInit_.segment(0,7) << 0.0,0.0,0.73,   0.9887711, 0.0, -0.1494381, 0.0,;
+    gcInit_.segment(0,7) << 0.0,0.0,0.73,   0.9887711, 0.0, -0.1494381, 0.0;
     gcInit_.segment(7,3) << 0.4, -0.1, 0.0; // knee, ankle output (passive)
     gcInit_.tail(6) << 0.917012, 0.00244346, 0.728929, 0.0015708, 0.861556, 0.619949; // universal passive, ankle input (active)
     gcInit_.segment(3,4).normalize();
