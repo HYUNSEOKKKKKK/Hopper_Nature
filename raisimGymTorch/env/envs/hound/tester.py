@@ -38,8 +38,8 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2025-03-04-12-31-16/full_2000.pt"
-# weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-04-12-31-16/full_2000.pt")
+# weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2025-03-04-12-31-16/full_2000.pt"
+weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-04-21-05-51/full_8000.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -55,7 +55,7 @@ else:
 
     env.reset()
     # env.set_terrain(4,4.7,1.0)
-    env.set_command(1.0,0.0,0.0)
+    env.set_command(-0.8,0.0,0.0)
 
     reward_ll_sum = 0
     done_sum = 0
