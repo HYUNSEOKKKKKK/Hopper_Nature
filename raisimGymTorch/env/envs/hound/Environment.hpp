@@ -811,8 +811,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
               (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
               gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
-              jointFrictions_(0)/5.0,
-              jointFrictions_.tail(2);                                              /// 3 joint friction
+              jointFrictions_(0)/1e1,
+              jointFrictions_.tail(2)/2e0;                                              /// 3 joint friction
 
               /// convert it to float
       ob = valueObDouble_.cast<float>();
