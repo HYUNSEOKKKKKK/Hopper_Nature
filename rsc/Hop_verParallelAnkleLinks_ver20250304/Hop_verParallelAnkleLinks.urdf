@@ -127,9 +127,9 @@
             </geometry>
         </collision>
         <inertial>
-            <origin rpy="0 0 0" xyz="0.003088 -0.0000 -0.044077"/>
-            <mass value="1.205532"/>
-            <inertia ixx="0.003946" ixy="0.000001" ixz="-0.000434" iyy="0.008954" iyz="0" izz="0.006827"/>
+            <origin rpy="0 0 0" xyz="-0.014103 -0.0000 -0.044208"/>
+            <mass value="0.899532"/>
+            <inertia ixx="0.002914" ixy="0.000001" ixz="0.000081" iyy="0.005654" iyz="0" izz="0.003715"/>
         </inertial>
 <!--        <visual>-->
 <!--            <origin rpy="0 0 0" xyz="-0.02 0 -0.065"/>-->
