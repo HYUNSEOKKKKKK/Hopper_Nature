@@ -39,7 +39,7 @@ act_dim = env.num_acts
 est_dim = env.num_est
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2025-03-04-12-31-16/full_2000.pt"
-weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-04-21-05-51/full_8000.pt")
+weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-05-11-55-32/full_3500.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -55,7 +55,7 @@ else:
 
     env.reset()
     # env.set_terrain(4,4.7,1.0)
-    env.set_command(-0.8,0.0,0.0)
+    env.set_command(0.0,0.0,0.0)
 
     reward_ll_sum = 0
     done_sum = 0
@@ -92,16 +92,22 @@ else:
                                     np.random.uniform(-0., 0., 1),
                                     np.random.uniform(-0., 0., 1))
 
+        if step % 200 == 0:
+            env.reset()
+            env.set_command(np.random.uniform(-1.0, 1.0, 1),0.,0.)
         time.sleep(0.020)
         with torch.no_grad():
             obs = env.observe(False)
             est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
             value_obs = env.value_observe(False) # obs + true state
+            print(value_obs[:,-est_dim:])
+            print(est_out)
+            value_obs = env.value_observe(False) # obs + true state
             # print("===========")
             # print(est_out)
             # print(value_obs[:,-est_dim:])
             action_ll = loaded_graph.architecture(torch.from_numpy(np.hstack((obs,est_out))).cpu())
-        # print(action_ll)
+        print(action_ll)
         reward_ll, dones, _= env.step(action_ll.cpu().detach().numpy())
         reward_ll_sum = reward_ll_sum + reward_ll[0]
         if dones or step == max_steps - 1:

@@ -35,7 +35,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     numEdges_ = 4;
     actionDim_ = 3;
     obDim_ = 42;
-    estDim_ = 14;
+    estDim_ = 17;
     valueObDim_ = obDim_ + estDim_;
 
     /// initialize
@@ -43,6 +43,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     gv_.setZero(gvDim_); gvInit_.setZero(); gvNoise_.setZero();
     pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero(); preJointVel_.setZero();
     jointFrictions_.setZero();
+    jointFrictionsCompensation_.setZero();
 
     /// this is nominal configuration of robot
     gcInit_.segment(0,7) << 0.0,0.0,0.73,   0.9887711, 0.0, -0.1494381, 0.0;
@@ -314,9 +315,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     terminalStack_ = 0;
     prevTerminal_ = false;
     /// random joint friction
-//    for (int i=0;i<actionDim_;i++){
-//        jointFrictions_(i) = 0.2 + 0.2 * uniDist_(gen_); // small friction
-//    }
+    jointFrictions_(0) = 10.0 + 5.0 * uniDist_(gen_);
+    jointFrictions_(1) = 1.5 + 1.5 * uniDist_(gen_);
+    jointFrictions_(2) = 1.5 + 1.5 * uniDist_(gen_);
   }
 
   void subStep() {
@@ -396,18 +397,28 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void computeTorque(){
         genForceTargetHist_.erase(genForceTargetHist_.begin());
-        genForceTarget_.setZero();
-        genForceTarget_(6) = jointPgain_(0)*(pTarget_(0)-gc_(7))
-                             + jointDgain_(0)*(-gv_(6)); // knee
-        genForceTarget_.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2))
-                           + jointDgain_.tail(2).cwiseProduct(-gv_.tail(2)); // ankle input (active)
-
+        Eigen::Vector3d tempForce;
+        tempForce(0) = jointPgain_(0)*(pTarget_(0)-gc_(7))
+                       + jointDgain_(0)*(-gv_(6)); // knee
+        tempForce.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2))
+                            + jointDgain_.tail(2).cwiseProduct(-gv_.tail(2)); // ankle input (active)
         /// joint friction (static friction, torque 잡아먹는 효과)
-//        for (int i = 0; i < actionDim_; i++){
-//          double jTorque = tempGenForce.tail(actionDim_)(i);
-//          jTorque = (jTorque>0) ? std::min(jointFrictions_(i), jTorque) : std::max(-jointFrictions_(i), jTorque);
-//          tempGenForce.tail(actionDim_)(i) -= jTorque;
-//        }
+        for (int i = 0; i < actionDim_; i++){
+          double jTorque = tempForce(i);
+          jTorque = (jTorque>0) ? std::min(jointFrictions_(i), jTorque) : std::max(-jointFrictions_(i), jTorque);
+          tempForce(i) -= jTorque;
+//          tempForce(i) += jointFrictionsCompensation_(i); /// joint friction compensation
+        }
+        genForceTarget_.setZero();
+        genForceTarget_(6) = tempForce(0);
+        genForceTarget_.tail(2) = tempForce.tail(2);
+
+//        genForceTarget_.setZero();
+//        genForceTarget_(6) = jointPgain_(0)*(pTarget_(0)-gc_(7))
+//                             + jointDgain_(0)*(-gv_(6)); // knee
+//        genForceTarget_.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2))
+//                           + jointDgain_.tail(2).cwiseProduct(-gv_.tail(2)); // ankle input (active)
+
         genForceTargetHist_.push_back(genForceTarget_);
   }
 
@@ -799,7 +810,9 @@ class ENVIRONMENT : public RaisimGymEnv {
 //              rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)) - temp,
 //              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
               (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
-              gv_.segment(7,2)/2e1;                                                 /// 2 ankle output vel
+              gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
+              jointFrictions_(0)/5.0,
+              jointFrictions_.tail(2);                                              /// 3 joint friction
 
               /// convert it to float
       ob = valueObDouble_.cast<float>();
@@ -881,7 +894,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::VectorXd gc_, gv_, genForceTarget_;
   Eigen::Vector<double,16> gcInit_, gcNoise_;
   Eigen::Vector<double,15> gvInit_, gvNoise_, subStepPgain_,subStepDgain_;
-  Eigen::Vector<double,3> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_, jointFrictions_;
+  Eigen::Vector<double,3> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_, jointFrictions_, jointFrictionsCompensation_;
   Eigen::Vector<double,3> jointPgain_, jointDgain_;
   Eigen::VectorXd jointRegulatingWeight_;
 
