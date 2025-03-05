@@ -34,8 +34,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     numLegs_ = 1;
     numEdges_ = 4;
     actionDim_ = 3;
-    obDim_ = 42;
-    estDim_ = 17;
+    obDim_ = 39;
+    estDim_ = 20;
     valueObDim_ = obDim_ + estDim_;
 
     /// initialize
@@ -750,7 +750,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           phaseSin_.setZero();
       }
 
-      obDouble_ << rot_.e().row(2).transpose(),                                 /// body orientation. 3
+      obDouble_ <<
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
@@ -786,7 +786,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       Eigen::Vector3d temp; /// ref foot to body com
       temp << 0.0, 0.0, -0.70;
-      valueObDouble_ << rot_.e().row(2).transpose(),                                /// body orientation. 3
+      valueObDouble_ <<
               bodyAngularVel_,                                                      /// body angular velocity. 3
               gc_(7)-gcInit_(7),
               gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
@@ -811,8 +811,9 @@ class ENVIRONMENT : public RaisimGymEnv {
 //              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
               (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
               gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
-              jointFrictions_(0)/1e1,
-              jointFrictions_.tail(2)/2e0;                                              /// 3 joint friction
+              jointFrictions_(0)/2e1,
+              jointFrictions_.tail(2)/4e0,                                           /// 3 joint friction
+              rot_.e().row(2).transpose()*2e0;                                       /// body orientation. 3
 
               /// convert it to float
       ob = valueObDouble_.cast<float>();
