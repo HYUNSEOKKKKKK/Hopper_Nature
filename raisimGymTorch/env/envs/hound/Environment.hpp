@@ -34,8 +34,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     numLegs_ = 1;
     numEdges_ = 4;
     actionDim_ = 3;
-    obDim_ = 39;
-    estDim_ = 20;
+    obDim_ = 42;
+    estDim_ = 17;
     valueObDim_ = obDim_ + estDim_;
 
     /// initialize
@@ -145,7 +145,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::VectorXd>(9,Eigen::VectorXd::Zero(actionDim_));
     jointVelHist_ = std::vector<Eigen::VectorXd>(9,Eigen::VectorXd::Zero(actionDim_));
-    genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms 으로 설정 -> 아마 더 클 수 있음
+    genForceTargetHist_ = std::vector<Eigen::VectorXd>(5,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms _ 1 tick 으로 설정 -> 1~4 tick delay
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
     phase_ = 0.0;
@@ -236,7 +236,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         /// 굉장히 주의를 요함 (heightMap 이 변하는 경우, 넘어졌는데 reset 안되는 경우 등)
         gcNoise_ = gc_;
         gvNoise_ = gv_;
-        gcNoise_.head(3) = gcInit_.head(3);
+        gcNoise_.head(3) = gcInit_.head(3); // 요것 때문에 무조건 땅으로 데리고 오는 거 해줘야 함
     }else{ /// reset
         /// initialize with noise
         gcNoise_ = gcInit_;
@@ -276,22 +276,21 @@ class ENVIRONMENT : public RaisimGymEnv {
     dhal_->setState(gcNoise_,gvNoise_);
 
     /// preventing foot penetration (주의, if map changed, then, it should be always executed, but, if the robot fails, then, it could be problematic !!!)
-    if (reset){ /// *** here, we only do for plain setting ***
-        double heightShift = 1e3;  /// -> 공중에 있는 것도 데리고 옴
-        double temp = 0.0;
-        for (int i = 0; i < numLegs_; i++){
-            dhal_->getFramePosition(footJointFrames_[i], footPos_[i]);
-            dhal_->getFrameOrientation(footJointFrames_[i], footOrientation_[i]);
-            edgePosWorld_ = footOrientation_[i].e() * edgePosLocal_;
-            for (int j=0; j<numEdges_; j++){
-                edgePosWorld_.col(j) += footPos_[i].e();
-                temp = edgePosWorld_.col(j)(2) - 0.01 - heightMap_->getHeight(edgePosWorld_.col(j)(0), edgePosWorld_.col(j)(1)); /// but, 돌아가면 땅에 푹 파일겨
-                if (temp < heightShift){heightShift = temp;}
-            }
+    double heightShift = 1e3;  /// -> 공중에 있는 것도 데리고 옴
+    double temp = 0.0;
+    for (int i = 0; i < numLegs_; i++){
+        dhal_->getFramePosition(footJointFrames_[i], footPos_[i]);
+        dhal_->getFrameOrientation(footJointFrames_[i], footOrientation_[i]);
+        edgePosWorld_ = footOrientation_[i].e() * edgePosLocal_;
+        for (int j=0; j<numEdges_; j++){
+            edgePosWorld_.col(j) += footPos_[i].e();
+            temp = edgePosWorld_.col(j)(2) - 0.01 - heightMap_->getHeight(edgePosWorld_.col(j)(0), edgePosWorld_.col(j)(1)); /// but, 돌아가면 땅에 푹 파일겨
+            if (temp < heightShift){heightShift = temp;}
         }
-        gcNoise_(2) -= heightShift;
-        dhal_->setState(gcNoise_, gvNoise_);
     }
+    gcNoise_(2) -= heightShift;
+    dhal_->setState(gcNoise_, gvNoise_);
+
     updateObservation();
 
     for (auto& vec : genForceTargetHist_) { vec.setZero(); }
@@ -365,11 +364,15 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// simulation
     double avgReward = 0.0;
     barrierReward_ = 0.0;
+
+    double delayRandomValue = uniDist_(gen_);
+    int delayIdx = (delayRandomValue < -1.0/3) ? 0 : (delayRandomValue < 1.0/3) ? 1 : 2;
     for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
-                /// compute target torque
-        computeTorque();
-        dhal_->setGeneralizedForce(genForceTargetHist_[0]); /// 2ms delay (torque command in PC -> actual torque in real robot)
-                /// simpulation
+      /// compute target torque
+      computeTorque();
+      dhal_->setGeneralizedForce(genForceTargetHist_[delayIdx]); /// 2ms x (2~4) tick delay (torque command in PC -> actual torque in real robot)
+//      dhal_->setGeneralizedForce(genForceTargetHist_[0]); /// 2ms x max tick delay (torque command in PC -> actual torque in real robot)
+      /// simpulation
       if(server_) server_->lockVisualizationServerMutex();
       world_->integrate();
       if(server_) server_->unlockVisualizationServerMutex();
@@ -750,7 +753,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           phaseSin_.setZero();
       }
 
-      obDouble_ <<
+      obDouble_ << rot_.e().row(2).transpose(),                                 /// body orientation. 3
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
@@ -786,7 +789,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       Eigen::Vector3d temp; /// ref foot to body com
       temp << 0.0, 0.0, -0.70;
-      valueObDouble_ <<
+      valueObDouble_ << rot_.e().row(2).transpose(),                                /// body orientation. 3
               bodyAngularVel_,                                                      /// body angular velocity. 3
               gc_(7)-gcInit_(7),
               gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
@@ -812,8 +815,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
               gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
               jointFrictions_(0)/2e1,
-              jointFrictions_.tail(2)/4e0,                                           /// 3 joint friction
-              rot_.e().row(2).transpose()*2e0;                                       /// body orientation. 3
+              jointFrictions_.tail(2)/4e0;                                           /// 3 joint friction
 
               /// convert it to float
       ob = valueObDouble_.cast<float>();

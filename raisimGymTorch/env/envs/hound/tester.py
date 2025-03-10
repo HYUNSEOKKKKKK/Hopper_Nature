@@ -39,7 +39,7 @@ act_dim = env.num_acts
 est_dim = env.num_est
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2025-03-04-12-31-16/full_2000.pt"
-weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-05-20-42-48/full_5500.pt")
+weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-06-01-54-07/full_6000.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -100,14 +100,14 @@ else:
             obs = env.observe(False)
             est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
             value_obs = env.value_observe(False) # obs + true state
-            print(value_obs[:,-est_dim:])
-            print(est_out)
+            # print(value_obs[:,-est_dim:])
+            # print(est_out)
             value_obs = env.value_observe(False) # obs + true state
             # print("===========")
             # print(est_out)
             # print(value_obs[:,-est_dim:])
             action_ll = loaded_graph.architecture(torch.from_numpy(np.hstack((obs,est_out))).cpu())
-        print(action_ll)
+        # print(action_ll)
         reward_ll, dones, _= env.step(action_ll.cpu().detach().numpy())
         reward_ll_sum = reward_ll_sum + reward_ll[0]
         if dones or step == max_steps - 1:
