@@ -35,7 +35,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     numEdges_ = 4;
     actionDim_ = 3;
     obDim_ = 42;
-    estDim_ = 17;
+    estDim_ = 14;
     valueObDim_ = obDim_ + estDim_;
 
     /// initialize
@@ -145,7 +145,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::VectorXd>(9,Eigen::VectorXd::Zero(actionDim_));
     jointVelHist_ = std::vector<Eigen::VectorXd>(9,Eigen::VectorXd::Zero(actionDim_));
-    genForceTargetHist_ = std::vector<Eigen::VectorXd>(5,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms _ 1 tick 으로 설정 -> 1~4 tick delay
+    genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms _ 1 tick 으로 설정 -> 1~2 tick delay
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
     phase_ = 0.0;
@@ -366,11 +366,11 @@ class ENVIRONMENT : public RaisimGymEnv {
     barrierReward_ = 0.0;
 
     double delayRandomValue = uniDist_(gen_);
-    int delayIdx = (delayRandomValue < -1.0/3) ? 0 : (delayRandomValue < 1.0/3) ? 1 : 2;
+    int delayIdx = (delayRandomValue < 0.0) ? 0 : 1;
     for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
       /// compute target torque
       computeTorque();
-      dhal_->setGeneralizedForce(genForceTargetHist_[delayIdx]); /// 2ms x (2~4) tick delay (torque command in PC -> actual torque in real robot)
+      dhal_->setGeneralizedForce(genForceTargetHist_[delayIdx]); /// 2ms x (1~2) tick delay (torque command in PC -> actual torque in real robot)
 //      dhal_->setGeneralizedForce(genForceTargetHist_[0]); /// 2ms x max tick delay (torque command in PC -> actual torque in real robot)
       /// simpulation
       if(server_) server_->lockVisualizationServerMutex();
@@ -757,18 +757,18 @@ class ENVIRONMENT : public RaisimGymEnv {
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
-          gv_(6),
-          gv_.tail(2),                                                          /// joint velocity 3
+          gv_(6)/2e1,
+          gv_.tail(2)/2e1,                                                      /// joint velocity 3
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
-          jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6], /// joint History 9 (0.18, 0.12, 0.6)
-          jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                /// joint History 9 (0.18, 0.12, 0.6)
+          jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
+          jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
 
-
+//        std::cout << "obdouble_: " << obDouble_.head(10).transpose() << std::endl;
       double noise = 0.0;
       // for (int i=0; i<obDim_; i++){
       //    if (i<3)       {noise = 0.03;}  /// body orientation
@@ -793,29 +793,29 @@ class ENVIRONMENT : public RaisimGymEnv {
               bodyAngularVel_,                                                      /// body angular velocity. 3
               gc_(7)-gcInit_(7),
               gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
-              gv_(6),
-              gv_.tail(2),                                                          /// joint velocity 3
+              gv_(6)/2e1,
+              gv_.tail(2)/2e1,                                                      /// joint velocity 3
 
               prevTarget_- actionMean_,                                             /// previous action 3
               prevPrevTarget_- actionMean_,                                         /// preprevious action 3
-              jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6], /// joint History 9 (0.18, 0.12, 0.6)
-              jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                /// joint History 9 (0.18, 0.12, 0.6)
+              jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
+              jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
               command_,                                                             /// command 3
               phaseSin_,                                                            /// phase encoding 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
               bodyLinearVel_,                                                       /// body linear velocity. 3
-              (footToTerrain_(0) + footToTerrain_(2)) * 1e1,
-              (footToTerrain_(4) + footToTerrain_(6)) * 1e1,                        /// heel & toe height 2
+              (footToTerrain_(0) + footToTerrain_(2)) * 5e0,
+              (footToTerrain_(4) + footToTerrain_(6)) * 5e0,                        /// heel & toe height 2
               static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
               static_cast<double>(bodyContact_)/4.0,                                /// 1 body contact num
               (rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)) - temp)*2.0,  /// 3 relative foot position with respect to the body COM, expressed in the body frame 3
 //              rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)) - temp,
 //              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
               (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
-              gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
-              jointFrictions_(0)/2e1,
-              jointFrictions_.tail(2)/4e0;                                           /// 3 joint friction
+              gv_.segment(7,2)/2e1;                                                 /// 2 ankle output vel
+//              jointFrictions_(0)/2e1,
+//              jointFrictions_.tail(2)/4e0;                                           /// 3 joint friction
 
               /// convert it to float
       ob = valueObDouble_.cast<float>();
