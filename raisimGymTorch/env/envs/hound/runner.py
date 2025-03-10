@@ -102,7 +102,7 @@ scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[1000
 # if mode == 'retrain':
 #     load_param(weight_path, env, actor, critic, barrier_critic, estimator, ppo.optimizer, saver.data_dir)
 
-for update in range(20001):
+for update in range(10001):
     start = time.time()
     env.reset()
     reward_sum = 0
@@ -145,7 +145,7 @@ for update in range(20001):
         env.turn_off_visualization()
 
         env.reset()
-        # env.save_scaling(saver.data_dir, str(update)) # WITH Obs Normalization
+        # env.save_scaling(saver.data_dir, str(update))  # WITH Obs Normalization
 
     # actual training
     for step in range(n_steps):

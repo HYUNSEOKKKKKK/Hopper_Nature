@@ -39,7 +39,7 @@ act_dim = env.num_acts
 est_dim = env.num_est
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2025-03-04-12-31-16/full_2000.pt"
-weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-10-15-50-21/full_5500.pt")
+weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-10-23-08-17/full_3500.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -73,7 +73,7 @@ else:
 
     for name, param in loaded_graph.named_parameters():
         print(f"{name}: weights => {param.data}")
-    env.load_scaling(weight_dir, int(iteration_number))
+    # env.load_scaling(weight_dir, int(iteration_number))  # WITH Obs Normalization
     env.turn_on_visualization()
 
     # max_steps = 1000000

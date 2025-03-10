@@ -34,7 +34,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     numLegs_ = 1;
     numEdges_ = 4;
     actionDim_ = 3;
-    obDim_ = 42;
+//    obDim_ = 42;
+    obDim_ = 24; // without history (pos error, joint vel)
     estDim_ = 14;
     valueObDim_ = obDim_ + estDim_;
 
@@ -762,8 +763,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
-          jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-          jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
+//          jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
+//          jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
@@ -798,8 +799,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
               prevTarget_- actionMean_,                                             /// previous action 3
               prevPrevTarget_- actionMean_,                                         /// preprevious action 3
-              jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-              jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
+//              jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
+//              jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
               command_,                                                             /// command 3
               phaseSin_,                                                            /// phase encoding 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
