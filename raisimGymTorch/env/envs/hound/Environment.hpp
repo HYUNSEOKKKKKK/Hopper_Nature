@@ -23,7 +23,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    dhal_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hop_verParallelAnkleLinks_ver20250304/Hop_verParallelAnkleLinks.urdf");
+    dhal_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hop_verParallelAnkleLinks_ver20250304/Hop_verParallelAnkleLinks_20250311.urdf");
     dhal_->setName("dhal");
     dhal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -34,8 +34,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     numLegs_ = 1;
     numEdges_ = 4;
     actionDim_ = 3;
-//    obDim_ = 42;
-    obDim_ = 24; // without history (pos error, joint vel)
+    obDim_ = 42;
+//    obDim_ = 24; // without history (pos error, joint vel)
     estDim_ = 14;
     valueObDim_ = obDim_ + estDim_;
 
@@ -49,7 +49,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// this is nominal configuration of robot
     gcInit_.segment(0,7) << 0.0,0.0,0.73,   0.9887711, 0.0, -0.1494381, 0.0;
     gcInit_.segment(7,3) << 0.4, -0.1, 0.0; // knee, ankle output (passive)
-    gcInit_.tail(6) << 0.727173, 0.00244346, 0.506211, 0.0015708, 0.659643, 0.392726; // universal passive, ankle input (active)
+    gcInit_.tail(6) << 0.727265, -0.002499, 0.505897, 0.001567, 0.628833, 0.346578; // universal passive, ankle input (active)
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
@@ -763,8 +763,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
-//          jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-//          jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
+          jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
+          jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
@@ -799,8 +799,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
               prevTarget_- actionMean_,                                             /// previous action 3
               prevPrevTarget_- actionMean_,                                         /// preprevious action 3
-//              jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-//              jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
+              jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
+              jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
               command_,                                                             /// command 3
               phaseSin_,                                                            /// phase encoding 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
