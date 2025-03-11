@@ -36,7 +36,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     actionDim_ = 3;
     obDim_ = 42;
 //    obDim_ = 24; // without history (pos error, joint vel)
-    estDim_ = 14;
+    estDim_ = 16;
     valueObDim_ = obDim_ + estDim_;
 
     /// initialize
@@ -107,7 +107,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     visualizationOn_ = false;
 
     /// set limit for log barrier function
-    limitJointPos_.row(0) << -2.2, 2.2; // knee
+    limitJointPos_.row(0) << 0.0, 2.2; // knee
     limitJointPos_.row(1) << -0.873, 0.698; // ankle pitch [-50, 40]
 //    limitJointPos_.row(2) << -0.5236, 0.5236; // ankle roll [-30,30] -> hardward limit
             limitJointPos_.row(2) << -0.4, 0.4; // ankle roll [-22,22] -> more conservative
@@ -124,6 +124,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitFootContact_ << -0.3,2;
     limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
     limitBodyContact_ << -1.0,1.0;
+    limitCOMpos_ << -0.06, 0.06; /// only enforced standingMode
 
     /// initialize
     command_.setZero();
@@ -142,6 +143,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     footPosWeight_.setZero();
     terminalStack_ = 0;
     prevTerminal_ = false;
+    comPos_.setZero();
+    comToFootLocalFrame_.setZero();
 
     /// initialize history
     jointPosErrorHist_ = std::vector<Eigen::VectorXd>(9,Eigen::VectorXd::Zero(actionDim_));
@@ -484,23 +487,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("smoothness1", (pTarget_ - prevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
       rewards_.record("baseMotion", 0.4*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
-//      if (rewards_.getReward("smoothness2") < -1e2){
-//          std::cout << "smoothness2 reward: " << rewards_.getReward("smoothness2") << ", smoothness2 value: " << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm() << std::endl;
-//          std::cout << "smoothenss2 joint: " << (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).transpose() << std::endl;
-//          std::cout << "phase: " << sin(phase_/gait_hz_ * 2*3.141592) << " , command: " << command_.transpose() << " , standing mode: " << standingMode_ << std::endl;
-////          std::cout << "pTarget_-actionMean_       : " << (pTarget_-actionMean_).transpose() << std::endl;
-////          std::cout << "prevTarget_-actionMean_    : " << (prevTarget_-actionMean_).transpose() << std::endl;
-////          std::cout << "prevPrevTarget_-actionMean_: " << (prevPrevTarget_-actionMean_).transpose() << std::endl;
-////                std::cout << "standingmode: " << standingMode_ << std::endl;
-//      }
-      /// task space foot pos regulation -> not used
-//      Eigen::Vector3d tempVec;
-//      double tempReward = 0.0;
-//      for(int index_leg = 0; index_leg < numLegs_; index_leg++){
-//          tempVec = (footPos_[index_leg].e() - gc_.head(3));
-//          tempVec = rot_.e().transpose() *  tempVec.eval();
-//          tempReward += footPosWeight_.cwiseProduct(tempVec-refBodyToFoot_[index_leg].e()).squaredNorm();
-//      }
+
       /// pos vel acc regulation -> put only for output part (knee, ankle output (passive))
       jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
       rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.segment(7,actionDim_)-gcInit_.segment(7,actionDim_))).squaredNorm());
@@ -508,26 +495,25 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("jointVel", (jointRegulatingWeight_.cwiseProduct(gv_.segment(6,actionDim_))).squaredNorm());
       rewards_.record("jointAcc", (jointRegulatingWeight_.cwiseProduct((gv_.segment(6,actionDim_) - preJointVel_))).squaredNorm());
 
+
       /// force regulation -> put only for active part (knee, ankle input (active))
       jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
       Eigen::Vector3d tempForce;
       tempForce(0) = genForceTargetHist_[0](6); // knee
       tempForce.tail(2) = genForceTargetHist_[0].tail(2); // knee
       rewards_.record("torque", (jointRegulatingWeight_.cwiseProduct(tempForce).squaredNorm()));
-//      if (rewards_.getReward("torque") < -1e0){
-//          std::cout << "torque reward: " << rewards_.getReward("torque") << std::endl;
-//          std::cout << "tempForce : " << tempForce.transpose() << std::endl;
-//          std::cout << "pTarget_-actionMean_: " << (pTarget_-actionMean_).transpose() << std::endl;
-//      }
 
       /// body contact reward
-      rewards_.record("bodyContact",(double) bodyContact_);
+      rewards_.record("bodyContact",(double)bodyContact_);
+      /// com pos regularization
+      rewards_.record("comPos",comToFootLocalFrame_.head(2).squaredNorm()*(double)standingMode_);
 
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
       negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("jointPos") + rewards_.getReward("footPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque")
-              + rewards_.getReward("footSlip") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion"));
+              + rewards_.getReward("footSlip") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion")
+              + rewards_.getReward("comPos"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -565,7 +551,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
 
       /// compute barrier reward
-      double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0, barrierBodyContact = 0.0;
+      double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0, barrierFootContact = 0.0, barrierFootClearance = 0.0, barrierBodyContact = 0.0, barrierCOMpos = 0.0;
       double tempReward = 0.0;
       /// Log Barrier - limit_joint_pos
       for (int index_joint=0;index_joint<actionDim_;index_joint++){
@@ -612,6 +598,13 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// Log Barrier - limit_body_contact
       relaxedLogBarrier(0.5, limitBodyContact_(0), limitBodyContact_(1),-bodyContact_,tempReward);
       barrierBodyContact += tempReward;
+      /// Log Barrier - limit_COM_pos
+      if (standingMode_){
+          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
+          barrierCOMpos += tempReward;
+          relaxedLogBarrier(0.02, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
+          barrierCOMpos += tempReward;
+      }
 
       double logClip = -500.0;
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
@@ -623,9 +616,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
       rewards_.record("barrierBodyContact", barrierBodyContact);
+      rewards_.record("barrierCOMpos", barrierCOMpos);
 
 
-      float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel + barrierFootContact + barrierFootClearance + barrierBodyContact));
+      float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel
+              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierCOMpos));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
@@ -663,14 +658,18 @@ class ENVIRONMENT : public RaisimGymEnv {
     for(int i = 0; i < numLegs_; i++) {
       dhal_->getFramePosition(footJointFrames_[i], footPos_[i]);
       dhal_->getFrameVelocity(footJointFrames_[i], footVel_[i]);
-                dhal_->getFrameOrientation(footJointFrames_[i], footOrientation_[i]);
-                /// currently, works for one leg
-        edgePosWorld_ = footOrientation_[i].e() * edgePosLocal_;
-        for (int j=0; j<numEdges_; j++) {
-            edgePosWorld_.col(j) += footPos_[i].e();
-        }
+      dhal_->getFrameOrientation(footJointFrames_[i], footOrientation_[i]);
+      /// currently, works for one leg
+      edgePosWorld_ = footOrientation_[i].e() * edgePosLocal_;
+      for (int j=0; j<numEdges_; j++) {
+          edgePosWorld_.col(j) += footPos_[i].e();
+      }
 //      dhal_->getFramePosition(hipJointFrames_[i], hipJointPos_[i]);
     }
+    /// to enforce comPos to foot center
+    comPos_ = dhal_->getCOM();
+    comToFootLocalFrame_ = footOrientation_[0].e().transpose()*(comPos_.e()-footPos_[0].e());
+//    std::cout << "comToFootLocalFrame_: " << comToFootLocalFrame_.head(2).transpose() << std::endl;
 
     /// foot contact update
     footContact_ = 0;
@@ -814,7 +813,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 //              rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)) - temp,
 //              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
               (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
-              gv_.segment(7,2)/2e1;                                                 /// 2 ankle output vel
+              gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
+              comToFootLocalFrame_.head(2);                                         /// 2 com pos
 //              jointFrictions_(0)/2e1,
 //              jointFrictions_.tail(2)/4e0;                                           /// 3 joint friction
 
@@ -922,9 +922,12 @@ class ENVIRONMENT : public RaisimGymEnv {
   std::vector<std::string> footJointFrames_;
   std::vector<std::string> hipJointFrames_;
   int footContact_;
-    int bodyContact_; // 1
-    std::vector<raisim::Vec<3>> footPos_,footVel_, hipJointPos_, refBodyToFoot_;
-        std::vector <raisim::Mat<3,3>> footOrientation_;
+  int bodyContact_; // 1
+  std::vector<raisim::Vec<3>> footPos_,footVel_, hipJointPos_, refBodyToFoot_;
+  std::vector<raisim::Mat<3,3>> footOrientation_;
+  raisim::Vec<3> comPos_;
+  Eigen::Matrix<double,3,1> comToFootLocalFrame_;
+
   double phase_;
   double gait_hz_;
   Eigen::Matrix<double,1,1> footContactDouble_; // gait (numLegs_,1)
@@ -950,6 +953,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,1,2> limitFootClearance_;
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing
   Eigen::Matrix<double,1,2> limitBodyContact_; // for gait enforcing
+  Eigen::Matrix<double,1,2> limitCOMpos_; // for gait enforcing
   ///
   std::vector<Eigen::VectorXd> jointPosErrorHist_, jointVelHist_;
   std::vector<Eigen::VectorXd> genForceTargetHist_;
