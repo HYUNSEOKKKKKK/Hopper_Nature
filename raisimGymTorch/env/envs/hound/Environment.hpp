@@ -107,7 +107,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     visualizationOn_ = false;
 
     /// set limit for log barrier function
-    limitJointPos_.row(0) << 0.0, 2.2; // knee
+    limitJointPos_.row(0) << -2.2, 2.2; // knee
     limitJointPos_.row(1) << -0.873, 0.698; // ankle pitch [-50, 40]
 //    limitJointPos_.row(2) << -0.5236, 0.5236; // ankle roll [-30,30] -> hardward limit
             limitJointPos_.row(2) << -0.4, 0.4; // ankle roll [-22,22] -> more conservative
@@ -841,9 +841,16 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      curriculum_ = 0.0;
+      if (curriculum_<2.0){
+          curriculum_ = (double)iter_ * (1.0/500.0); /// 500 iter -> 1.0
+      }else{
+          curriculum_ = (double)(iter_-1000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
+          curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
+      }
+      curriculum_ /= 3.0;
+
       world_->removeObject(heightMap_);
-      heightMap_ = HeightMapSample(world_.get(),0,curriculum_,gen_,uniDist_);
+      heightMap_ = HeightMapSample(world_.get(),iter_%2,curriculum_,gen_,uniDist_);
   }
 
   void setSeed(int seed) {gen_.seed(seed);}
