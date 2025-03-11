@@ -125,7 +125,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitFootContact_ << -0.3,2;
     limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
     limitBodyContact_ << -1.0,1.0;
-    limitCOMpos_ << -0.06, 0.06; /// only enforced standingMode
+    limitCOMpos_ << -0.04, 0.04; /// only enforced standingMode
 
     /// initialize
     command_.setZero();
@@ -601,9 +601,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       barrierBodyContact += tempReward;
       /// Log Barrier - limit_COM_pos
       if (standingMode_){
-          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
+          relaxedLogBarrier(0.01, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
           barrierCOMpos += tempReward;
-          relaxedLogBarrier(0.02, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
+          relaxedLogBarrier(0.01, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
           barrierCOMpos += tempReward;
       }
 
@@ -784,8 +784,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       obDoubleLpf_.head(36) = alpha*obDoubleLpf_.head(36) + (1-alpha)*obDouble_.head(36);
       obDoubleLpf_.tail(6) = obDouble_.tail(6);
     /// convert it to float
-//    ob = obDouble_.cast<float>();
-    ob = obDoubleLpf_.cast<float>();
+    ob = obDouble_.cast<float>();
+//    ob = obDoubleLpf_.cast<float>();
   }
 
   void valueObserve(Eigen::Ref<EigenVec> ob) final { /// obs + (true) estimated_state
