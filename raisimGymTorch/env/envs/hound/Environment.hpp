@@ -67,6 +67,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// MUST BE DONE FOR ALL ENVIRONMENTS
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
     obDouble_.setZero(obDim_);
+    obDoubleLpf_.setZero(obDim_);
     valueObDouble_.setZero(valueObDim_);
             estDouble_.setZero(estDim_);
 
@@ -274,7 +275,6 @@ class ENVIRONMENT : public RaisimGymEnv {
             }
             if (standingMode_) {gvNoise_(i) *= 1.5;}
         }
-
         subStep();
     }
     dhal_->setState(gcNoise_,gvNoise_);
@@ -309,6 +309,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
         footContactPhase_.setZero();
         footClearance_.setZero();
+        obDoubleLpf_.setZero();
     }
 
     /// even though not reset, these values should be reset -> empirical result
@@ -779,8 +780,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       //    obDouble_(i) += uniDist_(gen_) * noise * 0.1;
       //}
 
+      double alpha = 0.5;
+      obDoubleLpf_.head(36) = alpha*obDoubleLpf_.head(36) + (1-alpha)*obDouble_.head(36);
+      obDoubleLpf_.tail(6) = obDouble_.tail(6);
     /// convert it to float
-    ob = obDouble_.cast<float>();
+//    ob = obDouble_.cast<float>();
+    ob = obDoubleLpf_.cast<float>();
   }
 
   void valueObserve(Eigen::Ref<EigenVec> ob) final { /// obs + (true) estimated_state
@@ -911,7 +916,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   Eigen::Matrix<double,3,3> rotConversion_;
   raisim::Mat<3,3> rot_;
-  Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_, estDouble_;
+  Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_, estDouble_, obDoubleLpf_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
   std::vector<size_t> footIndices_, exceptionIndices_;
     /// collision reward
