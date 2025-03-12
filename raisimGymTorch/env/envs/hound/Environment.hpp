@@ -319,9 +319,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     terminalStack_ = 0;
     prevTerminal_ = false;
     /// random joint friction
-    jointFrictions_(0) = 10.0 + 5.0 * uniDist_(gen_);
-    jointFrictions_(1) = 1.5 + 1.5 * uniDist_(gen_);
-    jointFrictions_(2) = 1.5 + 1.5 * uniDist_(gen_);
+    jointFrictions_(0) = 3.5 + 3.5 * uniDist_(gen_);
+    jointFrictions_(1) = 0.5 + 0.5 * uniDist_(gen_);
+    jointFrictions_(2) = 0.5 + 0.5 * uniDist_(gen_);
   }
 
   void subStep() {
@@ -512,7 +512,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
-      negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("jointPos") + rewards_.getReward("footPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque")
+      negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque")
               + rewards_.getReward("footSlip") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion")
               + rewards_.getReward("comPos"));
       rewards_.record("negReward2", negReward); /// only for recording
@@ -601,9 +601,9 @@ class ENVIRONMENT : public RaisimGymEnv {
       barrierBodyContact += tempReward;
       /// Log Barrier - limit_COM_pos
       if (standingMode_){
-          relaxedLogBarrier(0.01, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
+          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
           barrierCOMpos += tempReward;
-          relaxedLogBarrier(0.01, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
+          relaxedLogBarrier(0.02, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
           barrierCOMpos += tempReward;
       }
 
@@ -784,8 +784,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       obDoubleLpf_.head(36) = alpha*obDoubleLpf_.head(36) + (1-alpha)*obDouble_.head(36);
       obDoubleLpf_.tail(6) = obDouble_.tail(6);
     /// convert it to float
-    ob = obDouble_.cast<float>();
-//    ob = obDoubleLpf_.cast<float>();
+//    ob = obDouble_.cast<float>();
+    ob = obDoubleLpf_.cast<float>();
   }
 
   void valueObserve(Eigen::Ref<EigenVec> ob) final { /// obs + (true) estimated_state
@@ -846,13 +846,8 @@ class ENVIRONMENT : public RaisimGymEnv {
   void curriculumUpdate() {
       /// for each iteration
       iter_ ++;
-      if (curriculum_<2.0){
-          curriculum_ = (double)iter_ * (1.0/500.0); /// 500 iter -> 1.0
-      }else{
-          curriculum_ = (double)(iter_-1000) * (1.0/1500.0) + 2.0; /// 1500 iter -> 1.0
-          curriculum_ = (curriculum_ > 3.0) ? 3.0 : curriculum_;
-      }
-      curriculum_ /= 3.0;
+      curriculum_ = (double)(iter_)/1000.0; /// 1500 iter -> 1.0
+      curriculum_ = (curriculum_ > 0.2) ? 0.2 : curriculum_;
 
       world_->removeObject(heightMap_);
       heightMap_ = HeightMapSample(world_.get(),iter_%2,curriculum_,gen_,uniDist_);
