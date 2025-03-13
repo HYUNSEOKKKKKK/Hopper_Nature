@@ -154,8 +154,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
     phase_ = 0.0;
-//    gait_hz_ = 0.7; // v1.7
-    gait_hz_ = 0.8;
+    gait_hz_ = 0.7;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -582,7 +581,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierJointVel += tempReward;
       }
       /// Log Barrier - limit_target_vel
-      relaxedLogBarrier(0.6,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
+      relaxedLogBarrier(0.6*2.0/3.0,limitTargetVel_(0)*2.0/3.0,limitTargetVel_(1)*2.0/3.0,bodyLinearVel_(0)-command_(0),tempReward);
       barrierTargetVel += tempReward;
       relaxedLogBarrier(0.6,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
       barrierTargetVel += tempReward;
