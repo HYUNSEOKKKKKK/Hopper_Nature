@@ -122,7 +122,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       limitBaseMotion_.row(1) << -0.6,0.6; // roll
     limitJointVel_ << -6,6; // max vel limit is 9
     limitTargetVel_ << -0.4,0.4;
-    limitFootContact_ << -0.3,2;
+//    limitFootContact_ << -0.3,2;
+    limitFootContact_ << -0.6,2; // v2.1 temp
     limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
     limitBodyContact_ << -1.0,1.0;
     limitCOMpos_ << -0.04, 0.04; /// only enforced standingMode
@@ -154,7 +155,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
     phase_ = 0.0;
-    gait_hz_ = 0.7;
+//    gait_hz_ = 0.7;
+    gait_hz_ = 0.6; // v2.1 temp
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
