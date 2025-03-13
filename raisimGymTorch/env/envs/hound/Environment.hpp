@@ -198,6 +198,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// joint regulating weight
       jointRegulatingWeight_.setZero(actionDim_);
       jointRegulatingWeight_ << 0.5, 2.0, 2.0; // knee, ankle pitch, ankle roll
+
+      ///
+      auto temp = dhal_->getMassMatrix();
+      nominalMass_.push_back(dhal_->getMass()[0]); // trunk + thigh
+      nominalMass_.push_back(dhal_->getMass()[1]); // calf
+      nominalMass_.push_back(dhal_->getMass()[3]); // foot
   }
 
   void init() final { }
@@ -323,6 +329,15 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointFrictions_(1) = 0.5 + 0.5 * uniDist_(gen_);
     jointFrictions_(2) = 0.5 + 0.5 * uniDist_(gen_);
     jointFrictions_ /= 1e1;
+    /// randomization for mass
+    dhal_->getMass()[0] = nominalMass_[0] * (1+uniDist_(gen_)*0.05); // 0.95~1.05, trunk + thigh
+    dhal_->getMass()[1] = nominalMass_[1] * (1+uniDist_(gen_)*0.05); // 0.95~1.05, calf
+    dhal_->getMass()[3] = nominalMass_[2] * (1+uniDist_(gen_)*0.05); // 0.95~1.05, foot
+
+//    std::cout << "dhal_->getMass()[0]: " << dhal_->getMass()[0] << std::endl;
+//    std::cout << "dhal_->getMass()[1]: " << dhal_->getMass()[1] << std::endl;
+//    std::cout << "dhal_->getMass()[2]: " << dhal_->getMass()[2] << std::endl;
+//    std::cout << "dhal_->getMass()[3]: " << dhal_->getMass()[3] << std::endl;
   }
 
   void subStep() {
@@ -394,12 +409,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
     barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
     /// scale down
-      avgReward /= 3e1;
-      barrierReward_ /= 3e1;
+    avgReward /= 5e1;
+    barrierReward_ /= 5e1;
 
-//      std::cout << footContact_ << ", " << footContactPhase_ << std::endl;
-
-      updateHistory();
+    updateHistory();
 
     return avgReward;
   }
@@ -493,7 +506,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// pos vel acc regulation -> put only for output part (knee, ankle output (passive))
       jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
       rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.segment(7,actionDim_)-gcInit_.segment(7,actionDim_))).squaredNorm());
-      jointRegulatingWeight_ << 0.5, 1.5, 1.5; // knee, ankle pitch, ankle roll
+      jointRegulatingWeight_ << 0.5, 2.0, 2.0; // knee, ankle pitch, ankle roll
       rewards_.record("jointVel", (jointRegulatingWeight_.cwiseProduct(gv_.segment(6,actionDim_))).squaredNorm());
       rewards_.record("jointAcc", (jointRegulatingWeight_.cwiseProduct((gv_.segment(6,actionDim_) - preJointVel_))).squaredNorm());
 
@@ -581,7 +594,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierJointVel += tempReward;
       }
       /// Log Barrier - limit_target_vel
-      relaxedLogBarrier(0.6*2.0/3.0,limitTargetVel_(0)*2.0/3.0,limitTargetVel_(1)*2.0/3.0,bodyLinearVel_(0)-command_(0),tempReward);
+      relaxedLogBarrier(0.6,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
       barrierTargetVel += tempReward;
       relaxedLogBarrier(0.6,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
       barrierTargetVel += tempReward;
@@ -604,7 +617,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (standingMode_){
           relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
           barrierCOMpos += tempReward;
-          relaxedLogBarrier(0.02, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
+          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
           barrierCOMpos += tempReward;
       }
 
@@ -820,7 +833,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
               (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
               gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
-              comToFootLocalFrame_.head(2);                                         /// 2 com pos
+              comToFootLocalFrame_.head(2)*5e0;                                     /// 2 com pos
 //              jointFrictions_(0)/2e1,
 //              jointFrictions_.tail(2)/4e0;                                           /// 3 joint friction
 
@@ -917,6 +930,8 @@ class ENVIRONMENT : public RaisimGymEnv {
   std::vector<size_t> footIndices_, exceptionIndices_;
     /// collision reward
     std::vector<size_t> bodyIndices_;
+    /// mass randomization
+    std::vector<double> nominalMass_;
 
   /// additional
   Eigen::Vector3d command_;                     // vx, vy, w
@@ -966,8 +981,8 @@ class ENVIRONMENT : public RaisimGymEnv {
   double yawNoise_;
   ///
   std::vector<raisim::Visuals*> arrows_;
-    std::vector<raisim::Visuals*> visualEdge_;
-    raisim::HeightMap* heightMap_;
+  std::vector<raisim::Visuals*> visualEdge_;
+  raisim::HeightMap* heightMap_;
   /// curriculum
   double curriculum_;
   int iter_;

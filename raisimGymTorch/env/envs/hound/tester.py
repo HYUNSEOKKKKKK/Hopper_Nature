@@ -39,7 +39,7 @@ act_dim = env.num_acts
 est_dim = env.num_est
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2025-03-04-12-31-16/full_2000.pt"
-weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-13-01-58-05/full_4000.pt")
+weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-13-13-15-49/full_4000.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -97,9 +97,7 @@ else:
             env.set_command(np.random.uniform(0.6, 0.6, 1),0.,0.0)
         time.sleep(0.010)
         with torch.no_grad():
-            print("----------_")
             obs = env.observe(False)
-            print(obs[:,:10])
             est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
             value_obs = env.value_observe(False) # obs + true state
             value_obs = env.value_observe(False) # obs + true state
