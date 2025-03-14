@@ -154,8 +154,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
     phase_ = 0.0;
-//    gait_hz_ = 0.80;
-    gait_hz_ = 0.70; // v 2.2
+    gait_hz_ = 0.80;
+//    gait_hz_ = 0.70; // v 2.2
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -854,13 +854,13 @@ class ENVIRONMENT : public RaisimGymEnv {
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
-          gv_(6)/2e1,
-          gv_.tail(2)/2e1,                                                      /// joint velocity 3
+          gv_(6),
+          gv_.tail(2),                                                      /// joint velocity 3
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
           jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-          jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
+          jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],     /// joint History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1

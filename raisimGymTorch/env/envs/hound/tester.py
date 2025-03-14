@@ -73,7 +73,7 @@ else:
 
     for name, param in loaded_graph.named_parameters():
         print(f"{name}: weights => {param.data}")
-    # env.load_scaling(weight_dir, int(iteration_number))  # WITH Obs Normalization
+    env.load_scaling(weight_dir, int(iteration_number))  # WITH Obs Normalization
     env.turn_on_visualization()
 
     # max_steps = 1000000
