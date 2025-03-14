@@ -44,7 +44,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     gv_.setZero(gvDim_); gvInit_.setZero(); gvNoise_.setZero();
     pTarget_.setZero(); prevTarget_.setZero(); prevPrevTarget_.setZero(); preJointVel_.setZero();
     jointFrictions_.setZero();
-    jointFrictionsCompensation_.setZero();
 
     /// this is nominal configuration of robot
     gcInit_.segment(0,7) << 0.0,0.0,0.73,   0.9887711, 0.0, -0.1494381, 0.0;
@@ -155,7 +154,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
     phase_ = 0.0;
-    gait_hz_ = 0.80;
+//    gait_hz_ = 0.80;
+    gait_hz_ = 0.70; // v 2.2
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -418,7 +418,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void computeTorque(){
         genForceTargetHist_.erase(genForceTargetHist_.begin());
-        Eigen::Vector3d tempForce;
+        Eigen::VectorXd tempForce(actionDim_);
         tempForce(0) = jointPgain_(0)*(pTarget_(0)-gc_(7))
                        + jointDgain_(0)*(-gv_(6)); // knee
         tempForce.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2))
@@ -428,20 +428,97 @@ class ENVIRONMENT : public RaisimGymEnv {
           double jTorque = tempForce(i);
           jTorque = (jTorque>0) ? std::min(jointFrictions_(i), jTorque) : std::max(-jointFrictions_(i), jTorque);
           tempForce(i) -= jTorque;
-//          tempForce(i) += jointFrictionsCompensation_(i); /// joint friction compensation
         }
+
+        /// MOR related
+//        getTorqueMOR(tempForce);
+
+        ///
         genForceTarget_.setZero();
         genForceTarget_(6) = tempForce(0);
         genForceTarget_.tail(2) = tempForce.tail(2);
-
-//        genForceTarget_.setZero();
-//        genForceTarget_(6) = jointPgain_(0)*(pTarget_(0)-gc_(7))
-//                             + jointDgain_(0)*(-gv_(6)); // knee
-//        genForceTarget_.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2))
-//                           + jointDgain_.tail(2).cwiseProduct(-gv_.tail(2)); // ankle input (active)
-
         genForceTargetHist_.push_back(genForceTarget_);
   }
+
+//  void getTorqueMOR(Eigen::VectorXd tempForce){
+//      //compute motor input vel & torque
+//
+//      motor_torque = tempForce
+//      gv_motor.block(0,0,3,1) = convJointVelocity2MotorVelocity*gv_.block(6,0,3,1);
+//      gv_motor.block(3,0,3,1) = convJointVelocity2MotorVelocity*gv_.block(9,0,3,1);
+//      gv_motor.block(6,0,3,1) = convJointVelocity2MotorVelocity*gv_.block(12,0,3,1);
+//      gv_motor.block(9,0,3,1) = convJointVelocity2MotorVelocity*gv_.block(15,0,3,1);
+//
+//      motor_torque.block(0,0,3,1) = convJointTorque2MotorTorque*jointTorque.block(6,0,3,1);
+//      motor_torque.block(3,0,3,1) = convJointTorque2MotorTorque*jointTorque.block(9,0,3,1);
+//      motor_torque.block(6,0,3,1) = convJointTorque2MotorTorque*jointTorque.block(12,0,3,1);
+//      motor_torque.block(9,0,3,1) = convJointTorque2MotorTorque*jointTorque.block(15,0,3,1);
+//
+//      /// 2nd method
+//      double upperBound = 0.0;
+//      double lowerBound = 0.0;
+//      for (int i_leg = 0; i_leg < 4; i_leg++){
+//          for (int jointType = 0; jointType<3; jointType++){
+//              double motorVel1, motorVel2, motorVel3, motorVel4, motorVel5;
+//              motorVel1 = (tau_max(jointType) + intercept(jointType))/inclination(jointType);
+//              motorVel2 = intercept(jointType)/inclination(jointType);
+//              motorVel3 = temp_V(jointType);
+//              motorVel4 = -motorVel2;
+//              motorVel5 = -motorVel1;
+//              double motorVel = gv_motor(3*i_leg+jointType);
+//              double motorTorque = motor_torque(3*i_leg+jointType);
+//              if (motorVel > motorVel1 && motorVel < motorVel2){
+//                  if (motorTorque <= 0){
+//                      upperBound = 1e-4;
+//                      lowerBound = -1e-4;
+//                  }
+//                  else{
+//                      upperBound = tau_max(jointType);
+//                      lowerBound = inclination(jointType)*motorVel - intercept(jointType);
+////        lowerBound = 0.0;
+//                  }
+//              }
+//              else if (motorVel >= motorVel2 && motorVel < -motorVel3){
+//                  upperBound = tau_max(jointType);
+//                  lowerBound = inclination(jointType)*motorVel - intercept(jointType);
+//              }
+//              else if(motorVel >= -motorVel3 && motorVel < motorVel3){
+//                  upperBound = tau_max(jointType);
+//                  lowerBound = -tau_max(jointType);
+//              }
+//              else if(motorVel >= motorVel3 && motorVel < motorVel4){
+//                  upperBound = inclination(jointType)*motorVel + intercept(jointType);
+//                  lowerBound = -tau_max(jointType);
+//              }
+//              else if(motorVel >= motorVel4 && motorVel < motorVel5){
+//                  if (motorTorque >= 0){
+//                      upperBound = 1e-4;
+//                      lowerBound = -1e-4;
+//                  }
+//                  else{
+//                      upperBound = inclination(jointType)*motorVel + intercept(jointType);
+////        upperBound = 0.0;
+//                      lowerBound = -tau_max(jointType);
+//                  }
+//              }
+//              else{
+////      upperBound = tau_max(jointType);
+////      lowerBound = -tau_max(jointType);
+//                  upperBound = 1e-4;
+//                  lowerBound = -1e-4;
+//              }
+//              // limit motor torque with boundaries
+//              if (motorTorque > upperBound){
+//                  motor_torque(3*i_leg+jointType) = upperBound;
+//              } else if(motorTorque < lowerBound){
+//                  motor_torque(3*i_leg+jointType) = lowerBound;
+//              }
+//          }
+//          finalJointTorque.segment(3*i_leg,3) = convMotorTorque2JointTorque*motor_torque.segment(3*i_leg,3);
+//      }
+//      MORconstrainedJointTorque.head(6).setZero();
+//      MORconstrainedJointTorque.tail(12) = finalJointTorque;
+//    }
 
   float getBarrierReward() final {
             return barrierReward_;
@@ -924,7 +1001,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::VectorXd gc_, gv_, genForceTarget_;
   Eigen::Vector<double,16> gcInit_, gcNoise_;
   Eigen::Vector<double,15> gvInit_, gvNoise_, subStepPgain_,subStepDgain_;
-  Eigen::Vector<double,3> pTarget_, prevTarget_, prevPrevTarget_, jointFrictions_, jointFrictionsCompensation_;
+  Eigen::Vector<double,3> pTarget_, prevTarget_, prevPrevTarget_, jointFrictions_;
   Eigen::Vector<double,5> preJointVel_; // knee, ankle output, ankle input (1+2+2)
   Eigen::Vector<double,3> jointPgain_, jointDgain_;
 
