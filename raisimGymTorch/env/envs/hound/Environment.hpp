@@ -118,12 +118,12 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointPos_.col(1) -= tempJointPos*0.05;
 
     limitBodyHeight_ << 0.30, 1.10;
-    limitBaseMotion_.row(0) << -1.0,1.0; // z, pitch
-      limitBaseMotion_.row(1) << -0.6,0.6; // roll
-    limitJointVel_ << -6,6; // max vel limit is 9
-    limitTargetVel_ << -0.4,0.4;
-//    limitFootContact_ << -0.3,2;
-    limitFootContact_ << -0.6,2; // v2.1 temp
+    limitBaseMotion_.row(0) << -1.2,1.2; // z, pitch
+    limitBaseMotion_.row(1) << -0.8,0.8; // roll
+    limitJointVel_.row(0) << -6,6;       //  for knee (10.11)
+    limitJointVel_.row(1) << -8,8;       // for ankle (18)
+    limitTargetVel_ << -0.6,0.6;
+    limitFootContact_ << -0.3,2;
     limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
     limitBodyContact_ << -1.0,1.0;
     limitCOMpos_ << -0.04, 0.04; /// only enforced standingMode
@@ -155,8 +155,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
     phase_ = 0.0;
-//    gait_hz_ = 0.7;
-    gait_hz_ = 0.6; // v2.1 temp
+    gait_hz_ = 0.80;
 
     /// heightMap_ initialization
     heightMap_ = HeightMapSample(world_.get(),0,0.,gen_,uniDist_);
@@ -197,10 +196,6 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// rot conversion to initial base pos
       rotConversion_ << 0.9393727,  0.0000000,  0.3428978, 0.0000000,  1.0000000,  0.0000000, -0.3428978,  0.0000000,  0.9393727; // 0.35 rad pitch rot
 
-      /// joint regulating weight
-      jointRegulatingWeight_.setZero(actionDim_);
-      jointRegulatingWeight_ << 0.5, 2.0, 2.0; // knee, ankle pitch, ankle roll
-
       ///
       auto temp = dhal_->getMassMatrix();
       nominalMass_.push_back(dhal_->getMass()[0]); // trunk + thigh
@@ -234,7 +229,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         do {
             double maxCommand = 0.4 + comCurriculum * 0.6; // 평지 lin x max 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
-            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
+//            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
         } while (command_.norm() < 0.2);
     }
 
@@ -410,9 +405,11 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
     barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
-    /// scale down
-    avgReward /= 5e1;
-    barrierReward_ /= 5e1;
+            /// scale down
+      avgReward /= 2e1;
+      barrierReward_ /= 2e1;
+
+//      std::cout << footContact_ << ", " << footContactPhase_ << std::endl;
 
     updateHistory();
 
@@ -473,13 +470,13 @@ class ENVIRONMENT : public RaisimGymEnv {
   void standingReward(){
       /// for standingMode
       if (!standingMode_){
-          limitBaseMotion_.row(0) << -1.0,1.0;
-          limitBaseMotion_.row(1) << -0.6,0.6;
+          limitBaseMotion_.row(0) << -1.2,1.2;
+          limitBaseMotion_.row(1) << -0.8,0.8;
           standingSmoothness_ = 1.0;
           footPosWeight_ << 0.6,1.0,0.4;
       } else {
-          limitBaseMotion_.row(0) << -0.4,0.4;
-          limitBaseMotion_.row(1) << -0.2,0.2;
+          limitBaseMotion_.row(0) << -0.8,0.8;
+          limitBaseMotion_.row(1) << -0.4,0.4;
           standingSmoothness_ = 1.0;
           footPosWeight_ << 1.0,1.0,1.0;
       }
@@ -506,19 +503,22 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("baseMotion", 0.4*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
 
       /// pos vel acc regulation -> put only for output part (knee, ankle output (passive))
-      jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
-      rewards_.record("jointPos", (jointRegulatingWeight_.cwiseProduct(gc_.segment(7,actionDim_)-gcInit_.segment(7,actionDim_))).squaredNorm());
-      jointRegulatingWeight_ << 0.5, 2.0, 2.0; // knee, ankle pitch, ankle roll
-      rewards_.record("jointVel", (jointRegulatingWeight_.cwiseProduct(gv_.segment(6,actionDim_))).squaredNorm());
-      rewards_.record("jointAcc", (jointRegulatingWeight_.cwiseProduct((gv_.segment(6,actionDim_) - preJointVel_))).squaredNorm());
+      Eigen::Vector<double,5> tempJoint, tempJointWeight;
+      tempJoint << gc_.segment(7,actionDim_) - gcInit_.segment(7,actionDim_) , gc_.tail(2) - gcInit_.tail(2);
+      tempJointWeight << 0.5, 1.0, 1.0, 1.0, 1.0; // knee, ankle pitch, ankle roll, ankle input L, ankle input R
+      rewards_.record("jointPos", (tempJointWeight.cwiseProduct(tempJoint)).squaredNorm());
 
+      tempJoint << gv_.segment(6,actionDim_), gv_.tail(2);
+      tempJointWeight << 0.5, 1.5, 1.5, 1.5, 1.5; // knee, ankle pitch, ankle roll, ankle input L, ankle input R
+      rewards_.record("jointVel", (tempJointWeight.cwiseProduct(tempJoint)).squaredNorm());
+      rewards_.record("jointAcc", (tempJointWeight.cwiseProduct(tempJoint - preJointVel_)).squaredNorm());
 
       /// force regulation -> put only for active part (knee, ankle input (active))
-      jointRegulatingWeight_ << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
-      Eigen::Vector3d tempForce;
+      Eigen::Vector3d tempForce, tempForceWeight;
+      tempForceWeight << 0.5, 1.0, 1.0; // knee, ankle pitch, ankle roll
       tempForce(0) = genForceTargetHist_[0](6); // knee
       tempForce.tail(2) = genForceTargetHist_[0].tail(2); // knee
-      rewards_.record("torque", (jointRegulatingWeight_.cwiseProduct(tempForce).squaredNorm()));
+      rewards_.record("torque", (tempForceWeight.cwiseProduct(tempForce).squaredNorm()));
 
       /// body contact reward
       rewards_.record("bodyContact",(double)bodyContact_);
@@ -552,7 +552,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.12;
+          double desiredFootZPosition = 0.16;
           for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
@@ -586,21 +586,24 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// Log Barrier - limit_base_motion
       relaxedLogBarrier(1.0,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyLinearVel_(2),tempReward);
       barrierBaseMotion += tempReward;
-              relaxedLogBarrier(1.0,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyAngularVel_(0),tempReward);
-              barrierBaseMotion += tempReward;
-              relaxedLogBarrier(0.6,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(1),tempReward);
-              barrierBaseMotion += tempReward;
+      relaxedLogBarrier(1.0,limitBaseMotion_(0,0),limitBaseMotion_(0,1),bodyAngularVel_(0),tempReward);
+      barrierBaseMotion += tempReward;
+      relaxedLogBarrier(0.6,limitBaseMotion_(1,0),limitBaseMotion_(1,1),bodyAngularVel_(1),tempReward);
+      barrierBaseMotion += tempReward;
+
       /// Log Barrier - limit_joint_vel
-      for (int i=0;i<actionDim_;i++){
-          relaxedLogBarrier(2.0,limitJointVel_(0),limitJointVel_(1),gv_(6+i),tempReward);
-          barrierJointVel += tempReward;
+      relaxedLogBarrier(2.0,limitJointVel_(0,0),limitJointVel_(0,1),gv_(6),tempReward); barrierJointVel += tempReward; // knee
+      for (int i=0;i<2;i++){
+          relaxedLogBarrier(2.0,limitJointVel_(1,0),limitJointVel_(1,1),gv_(7+i),tempReward); barrierJointVel += tempReward; // ankle passive
+          relaxedLogBarrier(2.0,limitJointVel_(1,0),limitJointVel_(1,1),gv_(13+i),tempReward); barrierJointVel += tempReward; // ankle active
       }
+
       /// Log Barrier - limit_target_vel
-      relaxedLogBarrier(0.4,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
+      relaxedLogBarrier(0.6,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(0)-command_(0),tempReward);
       barrierTargetVel += tempReward;
-      relaxedLogBarrier(0.4,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
+      relaxedLogBarrier(0.6,limitTargetVel_(0),limitTargetVel_(1),bodyLinearVel_(1)-command_(1),tempReward);
       barrierTargetVel += tempReward;
-      relaxedLogBarrier(0.4,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
+      relaxedLogBarrier(0.6,limitTargetVel_(0),limitTargetVel_(1),bodyAngularVel_(2)-command_(2),tempReward);
       barrierTargetVel += tempReward;
       /// Log Barrier - limit_foot_contact
       for (int i=0;i<numLegs_;i++){
@@ -609,7 +612,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
       /// Log Barrier - limit_foot_clearance
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.01,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
+          relaxedLogBarrier(0.02,limitFootClearance_(0),limitFootClearance_(1),footClearance_(i),tempReward);
           barrierFootClearance += tempReward;
       }
       /// Log Barrier - limit_body_contact
@@ -663,7 +666,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void updateObservation() {
     /// update previous footVel
-    preJointVel_ = gv_.segment(6,actionDim_);
+    preJointVel_ << gv_.segment(6,actionDim_), gv_.tail(2);
     /// update state
     dhal_->getState(gc_, gv_);
     raisim::Vec<4> quat;
@@ -921,9 +924,9 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::VectorXd gc_, gv_, genForceTarget_;
   Eigen::Vector<double,16> gcInit_, gcNoise_;
   Eigen::Vector<double,15> gvInit_, gvNoise_, subStepPgain_,subStepDgain_;
-  Eigen::Vector<double,3> pTarget_, prevTarget_, prevPrevTarget_, preJointVel_, jointFrictions_, jointFrictionsCompensation_;
+  Eigen::Vector<double,3> pTarget_, prevTarget_, prevPrevTarget_, jointFrictions_, jointFrictionsCompensation_;
+  Eigen::Vector<double,5> preJointVel_; // knee, ankle output, ankle input (1+2+2)
   Eigen::Vector<double,3> jointPgain_, jointDgain_;
-  Eigen::VectorXd jointRegulatingWeight_;
 
   Eigen::Matrix<double,3,3> rotConversion_;
   raisim::Mat<3,3> rot_;
@@ -966,7 +969,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Matrix<double,3,2> limitJointPos_;
   Eigen::Matrix<double,1,2> limitBodyHeight_;
   Eigen::Matrix<double,2,2> limitBaseMotion_; // z vel, roll,pitch vel
-  Eigen::Matrix<double,1,2> limitJointVel_;
+  Eigen::Matrix<double,2,2> limitJointVel_;
   Eigen::Matrix<double,1,2> limitTargetVel_;
   Eigen::Matrix<double,1,2> limitFootClearance_;
   Eigen::Matrix<double,1,2> limitFootContact_; // for gait enforcing

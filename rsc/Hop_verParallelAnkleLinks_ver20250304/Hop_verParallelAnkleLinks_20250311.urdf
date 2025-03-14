@@ -60,7 +60,7 @@
         <child link="Calf"/>
         <axis xyz="0 1 0"/>
         <dynamics rotor_inertia="0.36880" damping="0" friction="0"/>
-        <limit effort="600.0" velocity="9.0" lower="0" upper="2.26893"/>
+        <limit effort="600.0" velocity="10.11" lower="0" upper="2.26893"/> <!--65.1V based-->
     </joint>
     <link name="Calf">
         <visual>
@@ -257,7 +257,7 @@
         <child link="Left_Ankle_Link_Input"/>
         <axis xyz="0 1 0"/>
         <dynamics rotor_inertia="0.0128" damping="0" friction="0"/>
-        <limit effort="150.0" velocity="9.0"/>
+        <limit effort="150.0" velocity="18.3"/> <!--65.1V based-->
     </joint>
     <link name="Left_Ankle_Link_Input">
         <visual>
@@ -280,7 +280,7 @@
         <child link="Right_Ankle_Link_Input"/>
         <axis xyz="0 1 0"/>
         <dynamics rotor_inertia="0.0128" damping="0" friction="0"/>
-        <limit effort="150.0" velocity="9.0"/>
+        <limit effort="150.0" velocity="18.3"/> <!--65.1V based-->
     </joint>
     <link name="Right_Ankle_Link_Input">
         <visual>
