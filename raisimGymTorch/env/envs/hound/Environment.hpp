@@ -53,7 +53,9 @@ class ENVIRONMENT : public RaisimGymEnv {
     gc_ = gcInit_;
 
     /// set pd gains
-    pGain_ = 50.0; dGain_ = 5.0;
+    pGain_ = 50.0;
+//    dGain_ = 5.0;
+    dGain_ = 3.0; // v2.32temp
     jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_); // knee, ankle input (active)
     jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_);
     dhal_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
@@ -229,7 +231,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     }else{
         standingMode_ = false;
         do {
-            double maxCommand = 0.4 + comCurriculum * 0.6; // 평지 lin x max 1.5
+            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
             command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
 //            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
         } while (command_.norm() < 0.2);
@@ -237,12 +239,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
 //    world_->setDefaultMaterial(mu_, 0, 0);
-//    world_->setMaterialPairProp("default","rubber",mu_, 0.6+0.1*uniDist_(gen_), 0.001); // restitution [0.5,0.7]
-    /// curriculum
-    double restitution_curriculum = (double)(iter_)/2000.0;
-    restitution_curriculum = (restitution_curriculum > 1.0) ? 1.0 : restitution_curriculum;
-    restitution_curriculum = restitution_curriculum*0.5 + 0.1 + 0.1*uniDist_(gen_); // [0.0,0.2] -> [0.5, 0.7] (2000 iter)
-    world_->setMaterialPairProp("default","rubber",mu_, restitution_curriculum, 0.001); // restitution [0.5,0.7]
+    world_->setMaterialPairProp("default","rubber",mu_, 0.6+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
 
     /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
     bool reset = true;
