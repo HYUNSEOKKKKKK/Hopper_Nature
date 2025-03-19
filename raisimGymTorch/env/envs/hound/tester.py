@@ -97,7 +97,7 @@ else:
             env.set_command(np.random.uniform(0.0, 0.0, 1),0.0,0.0)
         elif (step-50)%400 == 0:
             env.set_command(np.random.uniform(0.6, 0.6, 1),0.0,0.0)
-        time.sleep(0.040)
+        time.sleep(0.010)
         with torch.no_grad():
             obs = env.observe(False)
             est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
