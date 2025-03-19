@@ -53,9 +53,11 @@ class ENVIRONMENT : public RaisimGymEnv {
     gc_ = gcInit_;
 
     /// set pd gains
-    pGain_ = 50.0;
+//    pGain_ = 50.0;
+    pGain_ = 30.0; // v2.32temp3
 //    dGain_ = 5.0;
-    dGain_ = 3.0; // v2.32temp
+//    dGain_ = 3.0; // v2.32temp
+    dGain_ = 1.0; // v2.32temp3
     jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_); // knee, ankle input (active)
     jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_);
     jointVelLpf_.setZero(); // for PD control, joint vel LPF
@@ -226,8 +228,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //            double initializeCurriculum = 1.0; /// no curriculum
 
     /// with standing mode
-//    if (uniDist_(gen_) > 0.8) { // 10 %
-    if (uniDist_(gen_) > 0.6) { // 20 %
+    if (uniDist_(gen_) > 0.8) { // 10 %
         standingMode_ = true;
         command_.setZero();
     }else{
@@ -428,14 +429,14 @@ class ENVIRONMENT : public RaisimGymEnv {
         genForceTargetHist_.erase(genForceTargetHist_.begin());
         Eigen::VectorXd tempForce(actionDim_);
         /// without jointVelLpf_ (original PD control)
-//        tempForce(0) = jointPgain_(0)*(pTarget_(0)-gc_(7))
-//                       + jointDgain_(0)*(-gv_(6)); // knee
-//        tempForce.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2))
-//                            + jointDgain_.tail(2).cwiseProduct(-gv_.tail(2)); // ankle input (active)
+        tempForce(0) = jointPgain_(0)*(pTarget_(0)-gc_(7))
+                       + jointDgain_(0)*(-gv_(6)); // knee
+        tempForce.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2))
+                            + jointDgain_.tail(2).cwiseProduct(-gv_.tail(2)); // ankle input (active)
         /// with jointVelLpf_
-        tempForce(0) = jointPgain_(0)*(pTarget_(0)-gc_(7)); // knee
-        tempForce.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2)); // ankle input (active)
-        tempForce += jointDgain_.cwiseProduct(-jointVelLpf_);
+//        tempForce(0) = jointPgain_(0)*(pTarget_(0)-gc_(7)); // knee
+//        tempForce.tail(2) = jointPgain_.tail(2).cwiseProduct(pTarget_.tail(2)-gc_.tail(2)); // ankle input (active)
+//        tempForce += jointDgain_.cwiseProduct(-jointVelLpf_);
         /// joint friction (static friction, torque 잡아먹는 효과)
         for (int i = 0; i < actionDim_; i++){
           double jTorque = tempForce(i);
@@ -697,7 +698,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       barrierTargetVel += tempReward;
       /// Log Barrier - limit_foot_contact
       for (int i=0;i<numLegs_;i++){
-          relaxedLogBarrier(0.08,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
+          relaxedLogBarrier(0.06,limitFootContact_(0),limitFootContact_(1),footContactDouble_(i),tempReward);
           barrierFootContact += tempReward;
       }
       /// Log Barrier - limit_foot_clearance

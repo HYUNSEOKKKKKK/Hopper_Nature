@@ -50,7 +50,7 @@ else:
     print("Loaded weight from {}\n".format(weight_path))
     start = time.time()
 
-    env.set_terrain(1,0.2,0.7)
+    env.set_terrain(0,0.0,0.7)
     env.set_initial(0)
 
     env.reset()
@@ -92,9 +92,9 @@ else:
                                     np.random.uniform(-0., 0., 1),
                                     np.random.uniform(-0., 0., 1))
 
-        if step % 200 == 0:
-            env.reset()
-        env.set_command(np.random.uniform(-0.6, -0.6, 1),0.0,0.0)
+        # if step % 200 == 0:
+        #     env.reset()
+        env.set_command(np.random.uniform(-0.4, -0.4, 1),0.0,0.0)
         time.sleep(0.010)
         with torch.no_grad():
             obs = env.observe(False)
