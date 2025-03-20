@@ -6,7 +6,7 @@ import shutil
 import torch
 
 # weight path
-full_path = "/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-18-15-52-15/full_6000.pt"
+full_path = "/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-20-02-34-46/full_6000.pt"
 full = torch.load(full_path)
 iteration = full_path.rsplit('/')[-1].rsplit('_')[-1].rsplit('.')[0]
 scale_path = '/'.join(full_path.rsplit('/')[:-1])
@@ -51,7 +51,7 @@ for w in estimator.items():
 estimator_txt.write(content[:-2])
 
 # for obs
-# scale_files = {scale_path + "/mean" + iteration + ".csv": dir_path + "/mean" + iteration + ".csv",
-#                scale_path + "/var" + iteration + ".csv": dir_path + "/var" + iteration + ".csv"}
-# for source_file, target_file in scale_files.items():
-#     shutil.copy(source_file, target_file)
+scale_files = {scale_path + "/mean" + iteration + ".csv": dir_path + "/mean" + iteration + ".csv",
+               scale_path + "/var" + iteration + ".csv": dir_path + "/var" + iteration + ".csv"}
+for source_file, target_file in scale_files.items():
+    shutil.copy(source_file, target_file)
