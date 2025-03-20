@@ -860,13 +860,13 @@ class ENVIRONMENT : public RaisimGymEnv {
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
-          gv_(6)/2e1,
-          gv_.tail(2)/2e1,                                                      /// joint velocity 3
+          gv_(6),
+          gv_.tail(2),                                                          /// joint velocity 3
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
           jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-          jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
+          jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                 /// joint History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
@@ -890,7 +890,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     ob = obDoubleLpf_.cast<float>();
   }
 
-  void valueObserve(Eigen::Ref<EigenVec> ob) final { /// obs + (true) estimated_state
+  void valueObserve(Eigen::Ref<EigenVec> ob) final {
+  /// obs (currently, not used for learning, please refer runner.py) + (true) estimated_state
       if (standingMode_){
           phaseSin_.setZero();
       }
@@ -900,13 +901,13 @@ class ENVIRONMENT : public RaisimGymEnv {
               bodyAngularVel_,                                                      /// body angular velocity. 3
               gc_(7)-gcInit_(7),
               gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
-              gv_(6)/2e1,
-              gv_.tail(2)/2e1,                                                      /// joint velocity 3
+              gv_(6),
+              gv_.tail(2),                                                          /// joint velocity 3
 
               prevTarget_- actionMean_,                                             /// previous action 3
               prevPrevTarget_- actionMean_,                                         /// preprevious action 3
               jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-              jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
+              jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                 /// joint History 9 (0.18, 0.12, 0.6)
               command_,                                                             /// command 3
               phaseSin_,                                                            /// phase encoding 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
