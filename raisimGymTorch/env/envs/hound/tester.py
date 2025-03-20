@@ -50,7 +50,7 @@ else:
     print("Loaded weight from {}\n".format(weight_path))
     start = time.time()
 
-    env.set_terrain(1,0.2,0.7)
+    env.set_terrain(0,0.0,0.7)
     env.set_initial(0)
 
     env.reset()

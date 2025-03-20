@@ -118,7 +118,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointPos_.col(0) += tempJointPos*0.05;
     limitJointPos_.col(1) -= tempJointPos*0.05;
 
-    limitBodyHeight_ << 0.30, 1.10;
+//    limitBodyHeight_ << 0.30, 1.10;
+    limitBodyHeight_ << 0.50, 1.10;
     limitBaseMotion_.row(0) << -1.2,1.2; // z, pitch
     limitBaseMotion_.row(1) << -0.8,0.8; // roll
     limitJointVel_.row(0) << -6,6;       //  for knee (10.11)
