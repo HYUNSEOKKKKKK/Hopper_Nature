@@ -145,12 +145,12 @@ for update in range(10001):
         env.turn_off_visualization()
 
         env.reset()
-        env.save_scaling(saver.data_dir, str(update))  # WITH Obs Normalization
+        # env.save_scaling(saver.data_dir, str(update))  # WITH Obs Normalization
 
     # actual training
     for step in range(n_steps):
-        # obs = env.observe(False)  # WITHOUT Obs Normalization
-        obs = env.observe()     # WITH Obs Normalization
+        obs = env.observe(False)  # WITHOUT Obs Normalization
+        # obs = env.observe()     # WITH Obs Normalization
         est_out = estimator.predict(torch.from_numpy(obs).to(device)).cpu().numpy()
         value_obs = env.value_observe(False) # obs + true state
         action = ppo.act(np.hstack((obs,est_out)))
@@ -163,8 +163,8 @@ for update in range(10001):
             reward_analyzer.add_reward_info(env.get_reward_info())
 
     # take st step to get value obs
-    # obs = env.observe(False)  # WITHOUT Obs Normalization
-    obs = env.observe()     # WITH Obs Normalization
+    obs = env.observe(False)  # WITHOUT Obs Normalization
+    # obs = env.observe()     # WITH Obs Normalization
     est_out = estimator.predict(torch.from_numpy(obs).to(device)).cpu().numpy()
     value_obs = env.value_observe(False)
     # ppo.update(actor_obs=np.hstack((obs,est_out)), value_obs=value_obs,log_this_iteration=update % 10 == 0, update=update)
