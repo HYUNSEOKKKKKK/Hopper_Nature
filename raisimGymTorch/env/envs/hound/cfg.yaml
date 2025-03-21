@@ -20,6 +20,7 @@ environment:
     smoothness1: -0.5
     smoothness2: -1.5 #-2.5
     bodyOri:     -2.0 #-0.5
+    footOri:     -2.0
     torque:      -5e-5 #-5e-5
 
     jointPos:   -8e-1 # arm, hip_rotation

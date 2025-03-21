@@ -112,7 +112,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointPos_.row(0) << 0.0, 2.2; // knee
     limitJointPos_.row(1) << -0.873, 0.698; // ankle pitch [-50, 40]
 //    limitJointPos_.row(2) << -0.5236, 0.5236; // ankle roll [-30,30] -> hardward limit
-            limitJointPos_.row(2) << -0.4, 0.4; // ankle roll [-22,22] -> more conservative
+    limitJointPos_.row(2) << -0.4, 0.4; // ankle roll [-22,22] -> more conservative
 
     Eigen::Matrix<double,3,1> tempJointPos = limitJointPos_.col(1)-limitJointPos_.col(0);
     limitJointPos_.col(0) += tempJointPos*0.05;
@@ -142,7 +142,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     standingRegulation_ = 0.0;
     phaseSin_.setZero();
     footObsNoise_.setZero();
-    standingSmoothness_ = 1.0;
     smoothnessWeight_.setZero(actionDim_);
     footPosWeight_.setZero();
     terminalStack_ = 0;
@@ -556,12 +555,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (!standingMode_){
           limitBaseMotion_.row(0) << -1.2,1.2;
           limitBaseMotion_.row(1) << -0.8,0.8;
-          standingSmoothness_ = 1.0;
           footPosWeight_ << 0.6,1.0,0.4;
       } else {
           limitBaseMotion_.row(0) << -0.8,0.8;
           limitBaseMotion_.row(1) << -0.4,0.4;
-          standingSmoothness_ = 1.0;
           footPosWeight_ << 1.0,1.0,1.0;
       }
   }
@@ -582,9 +579,16 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("footSlip", footSlip_.sum());
       if (rot_(8)>1.0){ rot_(8) = 1.0; } /// preventing acos nan
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
-      rewards_.record("smoothness1", (pTarget_ - prevTarget_).squaredNorm()  * standingSmoothness_);
-      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm()  * standingSmoothness_);
+      rewards_.record("smoothness1", (pTarget_ - prevTarget_).squaredNorm());
+      rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
       rewards_.record("baseMotion", 0.4*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
+      /// foot ori (to prevent toe standing in standingMode)
+      double footOri = 0.;
+      for (int i=0;i<numLegs_;i++){
+          if (footOrientation_[i](8)>1.0){ footOrientation_[i](8) = 1.0; } /// preventing acos nan
+          footOri += std::acos(footOrientation_[i](8)) * std::acos(footOrientation_[i](8));
+      }
+      rewards_.record("footOri", footOri * (double)standingMode_);
 
       /// pos vel acc regulation -> put only for output part (knee, ankle output (passive))
       Eigen::Vector<double,5> tempJoint, tempJointWeight;
@@ -913,17 +917,17 @@ class ENVIRONMENT : public RaisimGymEnv {
               phaseSin_,                                                            /// phase encoding 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
-              bodyLinearVel_,                                                       /// body linear velocity. 3
-              (footToTerrain_(0) + footToTerrain_(2)) * 5e0,
-              (footToTerrain_(4) + footToTerrain_(6)) * 5e0,                        /// heel & toe height 2
-              static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
-              static_cast<double>(bodyContact_)/4.0,                                /// 1 body contact num
-              (rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)) - temp)*2.0,  /// 3 relative foot position with respect to the body COM, expressed in the body frame 3
+              bodyLinearVel_*2.0,                                                   /// body linear velocity. 3
+              (footToTerrain_(0) + footToTerrain_(2)) * 1e1,
+              (footToTerrain_(4) + footToTerrain_(6)) * 1e1,                        /// heel & toe height 2
+              static_cast<double>(footContact_)/2.0,                                /// 1 foot contact num
+              static_cast<double>(bodyContact_)/2.0,                                /// 1 body contact num
+              (rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)) - temp)*4.0,  /// 3 relative foot position with respect to the body COM, expressed in the body frame 3
 //              rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)) - temp,
 //              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
-              (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
-              gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
-              comToFootLocalFrame_.head(2)*5e0;                                     /// 2 com pos
+              (gc_.segment(8,2)-gcInit_.segment(8,2))*4.0,                          /// 2 ankle output FK
+              gv_.segment(7,2)/1e1,                                                 /// 2 ankle output vel
+              comToFootLocalFrame_.head(2)*1e1;                                     /// 2 com pos
 //              jointFrictions_(0)/2e1,
 //              jointFrictions_.tail(2)/4e0;                                           /// 3 joint friction
 
@@ -1063,7 +1067,6 @@ class ENVIRONMENT : public RaisimGymEnv {
   ///
   std::vector<Eigen::VectorXd> jointPosErrorHist_, jointVelHist_;
   std::vector<Eigen::VectorXd> genForceTargetHist_;
-  double standingSmoothness_;
 
   /// initialize
   Eigen::Matrix<double,3,3> rotYawNoise_,rotTotalNoise_;
