@@ -19,8 +19,7 @@ class VectorizedEnvironment {
 
  public:
 
-//  explicit VectorizedEnvironment(std::string resourceDir, std::string cfg, bool normalizeObservation=true)
-  explicit VectorizedEnvironment(std::string resourceDir, std::string cfg, bool normalizeObservation=false)
+  explicit VectorizedEnvironment(std::string resourceDir, std::string cfg, bool normalizeObservation=true)
       : resourceDir_(resourceDir), cfgString_(cfg), normalizeObservation_(normalizeObservation) {
     Yaml::Parse(cfg_, cfg);
 
