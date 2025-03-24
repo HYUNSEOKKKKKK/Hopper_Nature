@@ -885,7 +885,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //        std::cout << "rot_  : " << rot_.e().row(2) << std::endl;
 //        std::cout << "filter: " << (filterRot_*rotConversion_).row(2) << std::endl;
 //      obDouble_ << rot_.e().row(2).transpose(),                                 /// body orientation. 3
-      obDouble_ << (filterRot_*rotConversion_).row(2),                                 /// body orientation. 3
+      obDouble_ << (filterRot_*rotConversion_).row(2).transpose(),              /// body orientation. 3
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
