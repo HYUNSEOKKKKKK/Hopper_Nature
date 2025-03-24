@@ -31,7 +31,7 @@ barrier_critic,
                  log_dir='run',
                  device='cpu',
                  shuffle_batch=True,
-                 gradient_penalty_coef = 5e-4):
+                 gradient_penalty_coef = 1e-3):
 
         # PPO components
         self.actor = actor
