@@ -58,8 +58,7 @@ class VectorizedEnvironment {
     }
 
     obDim_ = environments_[0]->getObDim();
-    valueObDim_ = environments_[0]->getValueObDimTest();
-                estDim_ = environments_[0]->getEstDim();
+    estDim_ = environments_[0]->getEstDim();
     actionDim_ = environments_[0]->getActionDim();
     RSFATAL_IF(obDim_ == 0 || actionDim_ == 0, "Observation/Action dimension must be defined in the constructor of each environment!")
 
@@ -81,19 +80,25 @@ class VectorizedEnvironment {
       env->reset();
   }
 
-  void observe(Eigen::Ref<EigenRowMajorMat> &ob, bool updateStatistics) {
-#pragma omp parallel for schedule(auto)
-    for (int i = 0; i < num_envs_; i++)
-      environments_[i]->observe(ob.row(i));
-
-    if (normalizeObservation_)
-      updateObservationStatisticsAndNormalize(ob, updateStatistics);
+  void actorObserve(Eigen::Ref<EigenRowMajorMat> &ob) {
+      #pragma omp parallel for schedule(auto)
+      for (int i = 0; i < num_envs_; i++)
+          environments_[i]->actorObserve(ob.row(i)); /// without normalization
   }
 
   void valueObserve(Eigen::Ref<EigenRowMajorMat> &ob, bool updateStatistics) {
-#pragma omp parallel for schedule(auto)
+    #pragma omp parallel for schedule(auto)
+    for (int i = 0; i < num_envs_; i++)
+      environments_[i]->valueObserve(ob.row(i));
+
+    if (normalizeObservation_)
+      updateObservationStatisticsAndNormalize(ob, updateStatistics); /// with normalization
+  }
+
+  void getState(Eigen::Ref<EigenRowMajorMat> &state) {
+      #pragma omp parallel for schedule(auto)
       for (int i = 0; i < num_envs_; i++)
-          environments_[i]->valueObserve(ob.row(i));
+          environments_[i]->getState(state.row(i)); /// without normalization
   }
 
   void step(Eigen::Ref<EigenRowMajorMat> &action,
@@ -157,8 +162,6 @@ class VectorizedEnvironment {
   }
 
   int getObDim() { return obDim_; }
-  int getValueObDim() { return valueObDim_; }
-
   int getEstDim() {return estDim_;}
 
   int getActionDim() { return actionDim_; }
@@ -217,7 +220,7 @@ class VectorizedEnvironment {
   std::vector<std::map<std::string, float>> rewardInformation_;
 
   int num_envs_ = 1;
-  int obDim_ = 0, valueObDim_ = 0, actionDim_ = 0, estDim_ = 0;
+  int obDim_ = 0, actionDim_ = 0, estDim_ = 0;
   bool recordVideo_=false, render_=false;
   std::string resourceDir_;
   Yaml::Node cfg_;

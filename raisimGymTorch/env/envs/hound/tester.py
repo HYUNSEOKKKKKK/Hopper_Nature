@@ -39,7 +39,7 @@ act_dim = env.num_acts
 est_dim = env.num_est
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/v2.32temp4.2_2025-03-20-02-21-18/full_4000.pt"
-weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-21-15-46-31/full_6000.pt")
+weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-20-16-46-35/full_6000.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -66,14 +66,13 @@ else:
 
     print("Visualizing and evaluating the policy: ", weight_path)
     loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
-    # loaded_graph = ppo_module.CustomMLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
     loaded_graph.load_state_dict(torch.load(weight_path)['actor_architecture_state_dict'])
     loaded_graph_est = ppo_module.MLP(cfg['architecture']['estimator_net'], torch.nn.LeakyReLU, ob_dim, est_dim)
     loaded_graph_est.load_state_dict(torch.load(weight_path)['estimator_architecture_state_dict'])
 
     for name, param in loaded_graph.named_parameters():
         print(f"{name}: weights => {param.data}")
-    env.load_scaling(weight_dir, int(iteration_number))  # WITH Obs Normalization
+    # env.load_scaling(weight_dir, int(iteration_number))  # WITH Obs Normalization
     env.turn_on_visualization()
 
     # max_steps = 1000000
@@ -89,18 +88,14 @@ else:
 
         # if step % 400 == 0:
         #     env.reset()
-        env.set_command(np.random.uniform(0.8,0.8, 1),0.0,0.6)
+        env.set_command(np.random.uniform(0.8,0.8, 1),0.0,-0.6)
         # elif (step-240)%400 == 0:
         #     env.set_command(np.random.uniform(0.0, 0.0, 1),0.0,0.0)
         time.sleep(0.010)
         with torch.no_grad():
-            obs = env.observe(False)
+            obs = env.actor_observe()
             est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
-            print(est_out)
-            value_obs = env.value_observe(False) # obs + true state
-            value_obs = env.value_observe(False) # obs + true state
             action_ll = loaded_graph.architecture(torch.from_numpy(np.hstack((obs,est_out))).cpu())
-            print(action_ll)
         reward_ll, dones, _= env.step(action_ll.cpu().detach().numpy())
         reward_ll_sum = reward_ll_sum + reward_ll[0]
         if dones or step == max_steps - 1:
