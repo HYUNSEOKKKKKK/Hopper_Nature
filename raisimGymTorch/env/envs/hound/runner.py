@@ -147,15 +147,16 @@ for update in range(10001):
 
     # actual training
     for step in range(n_steps):
-        # for forward simulation
+        # for actor obs
         obs = env.actor_observe()                # WITHOUT Obs Normalization
         est_out = estimator.predict(torch.from_numpy(obs).to(device)).cpu().numpy()
-        action = ppo.act(np.hstack((obs,est_out)))
-        reward, dones, barrier_reward = env.step(action)
-
         # for critic observation
         normalized_obs = env.value_observe(True) # WITH Obs Normalization
         true_state = env.get_state()
+        # forward simulation
+        action = ppo.act(np.hstack((obs,est_out)))
+        reward, dones, barrier_reward = env.step(action)
+
         ppo.step(value_obs=np.hstack((normalized_obs,true_state)), est_obs = obs,true_state=true_state, rews=reward, dones=dones, bar_rews=barrier_reward)
         # ppo.step(value_obs=np.hstack((obs,value_obs[:,-est_dim:])), est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones, bar_rews=barrier_reward)
 
