@@ -118,8 +118,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitJointPos_.col(0) += tempJointPos*0.05;
     limitJointPos_.col(1) -= tempJointPos*0.05;
 
-//    limitBodyHeight_ << 0.30, 1.10;
-    limitBodyHeight_ << 0.50, 1.10;
+    limitBodyHeight_ << 0.30, 1.10;
     limitBaseMotion_.row(0) << -1.2,1.2; // z, pitch
     limitBaseMotion_.row(1) << -0.8,0.8; // roll
     limitJointVel_.row(0) << -6,6;       //  for knee (10.11)
@@ -412,8 +411,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
     barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
             /// scale down
-      avgReward /= 1e1;
-      barrierReward_ /= 1e1;
+      avgReward /= 2e1;
+      barrierReward_ /= 2e1;
 
 //      std::cout << footContact_ << ", " << footContactPhase_ << std::endl;
 
@@ -583,12 +582,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("smoothness2", (pTarget_ - 2 * prevTarget_ + prevPrevTarget_).squaredNorm());
       rewards_.record("baseMotion", 0.4*pow(bodyLinearVel_(2),2) + 0.2*abs(bodyAngularVel_(0)) + 0.2*abs(bodyAngularVel_(1)));
       /// foot ori (to prevent toe standing in standingMode)
-      double footOri = 0.;
-      for (int i=0;i<numLegs_;i++){
-          if (footOrientation_[i](8)>1.0){ footOrientation_[i](8) = 1.0; } /// preventing acos nan
-          footOri += std::acos(footOrientation_[i](8)) * std::acos(footOrientation_[i](8));
-      }
-      rewards_.record("footOri", footOri * (double)standingMode_);
+//      double footOri = 0.;
+//      for (int i=0;i<numLegs_;i++){
+//          if (footOrientation_[i](8)>1.0){ footOrientation_[i](8) = 1.0; } /// preventing acos nan
+//          footOri += std::acos(footOrientation_[i](8)) * std::acos(footOrientation_[i](8));
+//      }
+//      rewards_.record("footOri", footOri * (double)standingMode_);
 
       /// pos vel acc regulation -> put only for output part (knee, ankle output (passive))
       Eigen::Vector<double,5> tempJoint, tempJointWeight;
@@ -865,13 +864,13 @@ class ENVIRONMENT : public RaisimGymEnv {
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
-          gv_(6),
-          gv_.tail(2),                                                          /// joint velocity 3
+          gv_(6)/2e1,
+          gv_.tail(2)/2e1,                                                      /// joint velocity 3
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
           jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-          jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                 /// joint History 9 (0.18, 0.12, 0.6)
+          jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
@@ -906,28 +905,28 @@ class ENVIRONMENT : public RaisimGymEnv {
               bodyAngularVel_,                                                      /// body angular velocity. 3
               gc_(7)-gcInit_(7),
               gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
-              gv_(6),
-              gv_.tail(2),                                                          /// joint velocity 3
+              gv_(6)/2e1,
+              gv_.tail(2)/2e1,                                                      /// joint velocity 3
 
               prevTarget_- actionMean_,                                             /// previous action 3
               prevPrevTarget_- actionMean_,                                         /// preprevious action 3
               jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-              jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                 /// joint History 9 (0.18, 0.12, 0.6)
+              jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
               command_,                                                             /// command 3
               phaseSin_,                                                            /// phase encoding 2
               static_cast<double>(standingMode_),                                   /// standingMode 1
 
-              bodyLinearVel_*2.0,                                                   /// body linear velocity. 3
-              (footToTerrain_(0) + footToTerrain_(2)) * 1e1,
-              (footToTerrain_(4) + footToTerrain_(6)) * 1e1,                        /// heel & toe height 2
-              static_cast<double>(footContact_)/2.0,                                /// 1 foot contact num
-              static_cast<double>(bodyContact_)/2.0,                                /// 1 body contact num
-              (rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)) - temp)*4.0,  /// 3 relative foot position with respect to the body COM, expressed in the body frame 3
+              bodyLinearVel_,                                                       /// body linear velocity. 3
+              (footToTerrain_(0) + footToTerrain_(2)) * 5e0,
+              (footToTerrain_(4) + footToTerrain_(6)) * 5e0,                        /// heel & toe height 2
+              static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
+              static_cast<double>(bodyContact_)/4.0,                                /// 1 body contact num
+              (rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)) - temp)*2.0,  /// 3 relative foot position with respect to the body COM, expressed in the body frame 3
 //              rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)) - temp,
 //              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
-              (gc_.segment(8,2)-gcInit_.segment(8,2))*4.0,                          /// 2 ankle output FK
-              gv_.segment(7,2)/1e1,                                                 /// 2 ankle output vel
-              comToFootLocalFrame_.head(2)*1e1;                                     /// 2 com pos
+              (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
+              gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
+              comToFootLocalFrame_.head(2)*5e0;                                     /// 2 com pos
 //              jointFrictions_(0)/2e1,
 //              jointFrictions_.tail(2)/4e0;                                           /// 3 joint friction
 

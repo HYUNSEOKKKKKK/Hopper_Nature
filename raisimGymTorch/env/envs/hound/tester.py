@@ -39,7 +39,7 @@ act_dim = env.num_acts
 est_dim = env.num_est
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/v2.32temp4.2_2025-03-20-02-21-18/full_4000.pt"
-weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-21-01-48-08/full_2000.pt")
+weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-21-15-46-31/full_6000.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -80,30 +80,27 @@ else:
     max_steps = 10000 ## 10 secs
 
     for step in range(max_steps):
-        if joystick == 1 :
-            if (step % 10 == 0):
-                command_x = max(-0.8, min(-pygame.joystick.Joystick(0).get_axis(4)*1.5, 1.2))
-                command_y = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(3), 0.6))
-                command_yaw = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(1), 0.6))
-                env.set_command(command_x,command_y,command_yaw)
-            else:
-                if step % 200 == 0:
-                    env.set_command(np.random.uniform(-1.0, 1.0, 1),
-                                    np.random.uniform(-0., 0., 1),
-                                    np.random.uniform(-0., 0., 1))
+        # if joystick == 1 :
+        #     if (step % 10 == 0):
+        #         command_x = max(-0.8, min(-pygame.joystick.Joystick(0).get_axis(3)*1.5, 0.8))
+        #         command_y = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(2), 0.6))
+        #         command_yaw = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(0), 0.6))
+        #         env.set_command(command_x,command_y,command_yaw)
 
-        if step % 400 == 0:
-            env.reset()
-            env.set_command(np.random.uniform(0.0,0.0, 1),0.0,0.6)
-        elif (step-240)%400 == 0:
-            env.set_command(np.random.uniform(0.0, 0.0, 1),0.0,0.0)
+        # if step % 400 == 0:
+        #     env.reset()
+        env.set_command(np.random.uniform(0.8,0.8, 1),0.0,0.6)
+        # elif (step-240)%400 == 0:
+        #     env.set_command(np.random.uniform(0.0, 0.0, 1),0.0,0.0)
         time.sleep(0.010)
         with torch.no_grad():
             obs = env.observe(False)
             est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
+            print(est_out)
             value_obs = env.value_observe(False) # obs + true state
             value_obs = env.value_observe(False) # obs + true state
             action_ll = loaded_graph.architecture(torch.from_numpy(np.hstack((obs,est_out))).cpu())
+            print(action_ll)
         reward_ll, dones, _= env.step(action_ll.cpu().detach().numpy())
         reward_ll_sum = reward_ll_sum + reward_ll[0]
         if dones or step == max_steps - 1:
