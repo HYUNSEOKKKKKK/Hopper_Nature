@@ -43,6 +43,7 @@ env.seed(cfg['seed'])
 
 # shortcuts
 ob_dim = env.num_obs
+value_ob_dim = env.num_value_obs
 est_dim = env.num_est
 act_dim = env.num_acts
 num_threads = cfg['environment']['num_threads']
@@ -53,7 +54,7 @@ total_steps = n_steps * env.num_envs
 
 avg_rewards = []
 
-actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim+est_dim, act_dim),
+actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim+est_dim   , act_dim),
 # actor = ppo_module.Actor(ppo_module.CustomMLP(cfg['architecture']['policy_net'], nn.LeakyReLU, ob_dim+est_dim, act_dim),
                          ppo_module.MultivariateGaussianDiagonalCovariance(act_dim,
                                                                            env.num_envs,
@@ -61,10 +62,10 @@ actor = ppo_module.Actor(ppo_module.MLP(cfg['architecture']['policy_net'], nn.Le
                                                                            NormalSampler(act_dim),
                                                                            cfg['seed']),
                          device)
-critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['value_net'], nn.LeakyReLU, ob_dim+est_dim, 1),
+critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['value_net'], nn.LeakyReLU, value_ob_dim, 1),
                            device)
 
-barrier_critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['barrier_value_net'], nn.LeakyReLU, ob_dim+est_dim, 1),
+barrier_critic = ppo_module.Critic(ppo_module.MLP(cfg['architecture']['barrier_value_net'], nn.LeakyReLU, value_ob_dim, 1),
                            device)
 
 estimator = ppo_module.Estimator(ppo_module.MLP(cfg['architecture']['estimator_net'], nn.LeakyReLU, ob_dim,est_dim),
@@ -130,7 +131,7 @@ for update in range(10001):
         for step in range(n_steps):
             with torch.no_grad():
                 frame_start = time.time()
-                obs = env.actor_observe()
+                obs = env.observe(False)
                 est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
                 action = loaded_graph.architecture(torch.from_numpy(np.hstack((obs,est_out))).cpu())
                 reward, dones, barrier_reward = env.step(action.cpu().detach().numpy())
@@ -143,33 +144,30 @@ for update in range(10001):
         env.turn_off_visualization()
 
         env.reset()
-        # env.save_scaling(saver.data_dir, str(update))  # WITH Obs Normalization (only required actor obs normalized)
+        env.save_scaling(saver.data_dir, str(update))  # WITH Obs Normalization
 
     # actual training
     for step in range(n_steps):
-        # for actor obs
-        obs = env.actor_observe()                # WITHOUT Obs Normalization
+        # obs = env.observe(False)  # WITHOUT Obs Normalization
+        obs = env.observe()     # WITH Obs Normalization (better) -> cause, value obs also use this one
         est_out = estimator.predict(torch.from_numpy(obs).to(device)).cpu().numpy()
-        # for critic observation
-        normalized_obs = env.value_observe(True) # WITH Obs Normalization
-        true_state = env.get_state()
-        # forward simulation
+        value_obs = env.value_observe(False) # obs (currently, not used) + true state
         action = ppo.act(np.hstack((obs,est_out)))
         reward, dones, barrier_reward = env.step(action)
-
-        ppo.step(value_obs=np.hstack((normalized_obs,true_state)), est_obs = obs,true_state=true_state, rews=reward, dones=dones, bar_rews=barrier_reward)
-        # ppo.step(value_obs=np.hstack((obs,value_obs[:,-est_dim:])), est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones, bar_rews=barrier_reward)
-
+        # ppo.step(value_obs=value_obs, est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones, bar_rews=barrier_reward)
+        ppo.step(value_obs=np.hstack((obs,value_obs[:,-est_dim:])), est_obs = obs,true_state=value_obs[:,-est_dim:], rews=reward, dones=dones, bar_rews=barrier_reward)
         done_sum = done_sum + np.sum(dones)
         reward_sum = reward_sum + np.sum(reward)
         if (update % 100 == 0): # 평지, stair
             reward_analyzer.add_reward_info(env.get_reward_info())
 
     # take st step to get value obs
-    normalized_obs = env.value_observe(True) # WITH Obs Normalization
-    true_state = env.get_state()
-    ppo.update(actor_obs=[], value_obs=np.hstack((normalized_obs,true_state)),log_this_iteration=update % 10 == 0, update=update)
-    # ppo.update(actor_obs=np.hstack((obs,est_out)), value_obs=np.hstack((obs,value_obs[:,-est_dim:])),log_this_iteration=update % 10 == 0, update=update)
+    # obs = env.observe(False)  # WITHOUT Obs Normalization
+    obs = env.observe()     # WITH Obs Normalization
+    est_out = estimator.predict(torch.from_numpy(obs).to(device)).cpu().numpy()
+    value_obs = env.value_observe(False)
+    # ppo.update(actor_obs=np.hstack((obs,est_out)), value_obs=value_obs,log_this_iteration=update % 10 == 0, update=update)
+    ppo.update(actor_obs=np.hstack((obs,est_out)), value_obs=np.hstack((obs,value_obs[:,-est_dim:])),log_this_iteration=update % 10 == 0, update=update)
     average_ll_performance = reward_sum / total_steps
     average_dones = done_sum / total_steps
     avg_rewards.append(average_ll_performance)

@@ -17,11 +17,12 @@ class RaisimGymVecEnv:
         self.clip_obs = clip_obs
         self.wrapper = impl
         self.num_obs = self.wrapper.getObDim()
+        self.num_value_obs = self.wrapper.getValueObDim()
         self.num_est = self.wrapper.getEstDim()
         self.num_acts = self.wrapper.getActionDim()
-        self._raw_observation = np.zeros([self.num_envs, self.num_obs], dtype=np.float32)
-        self._normalized_observation = np.zeros([self.num_envs, self.num_obs], dtype=np.float32)
-        self._true_state = np.zeros([self.num_envs, self.num_est], dtype=np.float32)
+        self._observation = np.zeros([self.num_envs, self.num_obs], dtype=np.float32)
+        self._value_observation = np.zeros([self.num_envs, self.num_value_obs], dtype=np.float32)
+        self._estimation = np.zeros([self.num_envs, self.num_est], dtype=np.float32)
         self.actions = np.zeros([self.num_envs, self.num_acts], dtype=np.float32)
         self.log_prob = np.zeros(self.num_envs, dtype=np.float32)
         self._reward = np.zeros(self.num_envs, dtype=np.float32)
@@ -60,24 +61,20 @@ class RaisimGymVecEnv:
         self.var = np.loadtxt(var_file_name, dtype=np.float32)
         self.wrapper.setObStatistics(self.mean, self.var, self.count)
 
-    def save_scaling(self, dir_name, iteration): # only required for actor obs is normalized
+    def save_scaling(self, dir_name, iteration):
         mean_file_name = dir_name + "/mean" + iteration + ".csv"
         var_file_name = dir_name + "/var" + iteration + ".csv"
         self.wrapper.getObStatistics(self.mean, self.var, self.count)
         np.savetxt(mean_file_name, self.mean)
         np.savetxt(var_file_name, self.var)
 
-    def actor_observe(self):
-        self.wrapper.actorObserve(self._raw_observation)
-        return self._raw_observation
+    def observe(self, update_statistics=True):
+        self.wrapper.observe(self._observation, update_statistics)
+        return self._observation
 
     def value_observe(self, update_statistics=True):
-        self.wrapper.valueObserve(self._normalized_observation, update_statistics)
-        return self._normalized_observation
-
-    def get_state(self):
-        self.wrapper.getTrueState(self._true_state)
-        return self._true_state
+        self.wrapper.valueObserve(self._value_observation, update_statistics)
+        return self._value_observation
 
     def get_reward_info(self):
         return self.wrapper.getRewardInfo()

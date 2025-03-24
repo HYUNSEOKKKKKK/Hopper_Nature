@@ -36,6 +36,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     actionDim_ = 3;
     obDim_ = 42;
     estDim_ = 16;
+    valueObDim_ = obDim_ + estDim_;
 
     /// initialize
     gc_.setZero(gcDim_); gcInit_.setZero(); gcNoise_.setZero();
@@ -65,10 +66,10 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// MUST BE DONE FOR ALL ENVIRONMENTS
     actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
-    actorObDouble_.setZero(obDim_);
-    actorObDoubleLpf_.setZero(obDim_);
-    valueObDouble_.setZero(obDim_); /// normalize only for obs part (not tested for true state also)
-    trueStateDouble_.setZero(estDim_);
+    obDouble_.setZero(obDim_);
+    obDoubleLpf_.setZero(obDim_);
+    valueObDouble_.setZero(valueObDim_);
+            estDouble_.setZero(estDim_);
 
     /// action scaling
     actionMean_(0) = gcInit_(7);
@@ -315,7 +316,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         phase_ = 0.0 + uniDist_(gen_) * gait_hz_ * 0.3;
         footContactPhase_.setZero();
         footClearance_.setZero();
-        actorObDoubleLpf_.setZero();
+        obDoubleLpf_.setZero();
     }
 
     /// even though not reset, these values should be reset -> empirical result (prevTerminal 추가했으니 빼도 되지 않을까)
@@ -852,22 +853,22 @@ class ENVIRONMENT : public RaisimGymEnv {
                         }
   }
 
-  void actorObserve(Eigen::Ref<EigenVec> ob) final { /// without normalization
+  void observe(Eigen::Ref<EigenVec> ob) final {
       if (standingMode_){
           phaseSin_.setZero();
       }
 
-      actorObDouble_ << rot_.e().row(2).transpose(),                            /// body orientation. 3
+      obDouble_ << rot_.e().row(2).transpose(),                                 /// body orientation. 3
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
-          gv_(6)/2e1,
-          gv_.tail(2)/2e1,                                                      /// joint velocity 3
+          gv_(6),
+          gv_.tail(2),                                                          /// joint velocity 3
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
           jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
-          jointVelHist_[0]/2e1, jointVelHist_[3]/2e1, jointVelHist_[6]/2e1,     /// joint History 9 (0.18, 0.12, 0.6)
+          jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                 /// joint History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
@@ -883,15 +884,20 @@ class ENVIRONMENT : public RaisimGymEnv {
       //}
 
       double alpha = 0.5;
-      actorObDoubleLpf_.head(36) = alpha*actorObDoubleLpf_.head(36) + (1-alpha)*actorObDouble_.head(36);
-      actorObDoubleLpf_.tail(6) = actorObDouble_.tail(6);
-      ob = actorObDoubleLpf_.cast<float>();
+      obDoubleLpf_.head(36) = alpha*obDoubleLpf_.head(36) + (1-alpha)*obDouble_.head(36);
+      obDoubleLpf_.tail(6) = obDouble_.tail(6);
+    /// convert it to float
+//    ob = obDouble_.cast<float>();
+    ob = obDoubleLpf_.cast<float>();
   }
 
-  void valueObserve(Eigen::Ref<EigenVec> ob) final { /// with normalization -> critic obs
+  void valueObserve(Eigen::Ref<EigenVec> ob) final {
+  /// obs (currently, not used for learning, please refer runner.py) + (true) estimated_state
       if (standingMode_){
           phaseSin_.setZero();
       }
+      Eigen::Vector3d temp; /// ref foot to body com
+      temp << 0.0, 0.0, -0.70;
       valueObDouble_ << rot_.e().row(2).transpose(),                                /// body orientation. 3
               bodyAngularVel_,                                                      /// body angular velocity. 3
               gc_(7)-gcInit_(7),
@@ -905,18 +911,9 @@ class ENVIRONMENT : public RaisimGymEnv {
               jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                 /// joint History 9 (0.18, 0.12, 0.6)
               command_,                                                             /// command 3
               phaseSin_,                                                            /// phase encoding 2
-              static_cast<double>(standingMode_);                                   /// standingMode 1
+              static_cast<double>(standingMode_),                                   /// standingMode 1
 
-              /// convert it to float
-      ob = valueObDouble_.cast<float>();
-  }
-
-  void getState(Eigen::Ref<EigenVec> trueState) final { /// -> critic obs & true state for estimator network
-      /// true state for estimator network, so should be scaled to normalized value obs
-      Eigen::Vector3d temp; /// ref foot to body com
-      temp << 0.0, 0.0, -0.70;
-
-      trueStateDouble_ << bodyLinearVel_,                                           /// body linear velocity. 3
+              bodyLinearVel_,                                                       /// body linear velocity. 3
               (footToTerrain_(0) + footToTerrain_(2)) * 5e0,
               (footToTerrain_(4) + footToTerrain_(6)) * 5e0,                        /// heel & toe height 2
               static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
@@ -928,9 +925,9 @@ class ENVIRONMENT : public RaisimGymEnv {
               gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
               comToFootLocalFrame_.head(2)*5e0;                                     /// 2 com pos
 
-              /// conver to float
-      trueState = trueStateDouble_.cast<float>();
-  };
+              /// convert it to float
+      ob = valueObDouble_.cast<float>();
+  }
 
   bool isTerminalState(float& terminalReward) final {
     terminalReward = float(terminalRewardCoeff_);
@@ -1016,7 +1013,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   Eigen::Matrix<double,3,3> rotConversion_;
   raisim::Mat<3,3> rot_;
-  Eigen::VectorXd actionMean_, actionStd_, actorObDouble_, valueObDouble_, trueStateDouble_, actorObDoubleLpf_;
+  Eigen::VectorXd actionMean_, actionStd_, obDouble_, valueObDouble_, estDouble_, obDoubleLpf_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
   std::vector<size_t> footIndices_, exceptionIndices_;
     /// collision reward
