@@ -20,8 +20,7 @@ class VectorizedEnvironment {
  public:
 
   explicit VectorizedEnvironment(std::string resourceDir, std::string cfg, bool normalizeObservation=true)
-//  explicit VectorizedEnvironment(std::string resourceDir, std::string cfg, bool normalizeObservation=false)
-      : resourceDir_(resourceDir), cfgString_(cfg), normalizeObservation_(normalizeObservation) {
+      : resourceDir_(resourceDir), cfgString_(cfg), normalizeObservation_(normalizeObservation), normalizeState_(normalizeObservation) {
     Yaml::Parse(cfg_, cfg);
 
     if(&cfg_["render"])
@@ -58,8 +57,7 @@ class VectorizedEnvironment {
     }
 
     obDim_ = environments_[0]->getObDim();
-    valueObDim_ = environments_[0]->getValueObDimTest();
-                estDim_ = environments_[0]->getEstDim();
+    estDim_ = environments_[0]->getEstDim();
     actionDim_ = environments_[0]->getActionDim();
     RSFATAL_IF(obDim_ == 0 || actionDim_ == 0, "Observation/Action dimension must be defined in the constructor of each environment!")
 
@@ -72,6 +70,15 @@ class VectorizedEnvironment {
       delta_.setZero(obDim_);
       epsilon.setZero(obDim_);
       epsilon.setConstant(1e-8);
+    }
+    if (normalizeState_){
+       stateMean_.setZero(estDim_);
+       stateVar_.setOnes(estDim_);
+       stateRecentMean_.setZero(estDim_);
+       stateRecentVar_.setZero(estDim_);
+       stateDelta_.setZero(estDim_);
+       stateEpsilon.setZero(estDim_);
+       stateEpsilon.setConstant(1e-8);
     }
   }
 
@@ -90,10 +97,12 @@ class VectorizedEnvironment {
       updateObservationStatisticsAndNormalize(ob, updateStatistics);
   }
 
-  void valueObserve(Eigen::Ref<EigenRowMajorMat> &ob, bool updateStatistics) {
+  void getState(Eigen::Ref<EigenRowMajorMat> &state, bool updateStatistics) {
 #pragma omp parallel for schedule(auto)
       for (int i = 0; i < num_envs_; i++)
-          environments_[i]->valueObserve(ob.row(i));
+          environments_[i]->getState(state.row(i));
+      if (normalizeState_)
+          updateStateStatisticsAndNormalize(state, updateStatistics);
   }
 
   void step(Eigen::Ref<EigenRowMajorMat> &action,
@@ -157,8 +166,6 @@ class VectorizedEnvironment {
   }
 
   int getObDim() { return obDim_; }
-  int getValueObDim() { return valueObDim_; }
-
   int getEstDim() {return estDim_;}
 
   int getActionDim() { return actionDim_; }
@@ -194,6 +201,27 @@ class VectorizedEnvironment {
       ob.row(i) = (ob.row(i) - obMean_.transpose()).template cwiseQuotient<>((obVar_ + epsilon).cwiseSqrt().transpose());
   }
 
+  void updateStateStatisticsAndNormalize(Eigen::Ref<EigenRowMajorMat> &state, bool updateStatistics) {
+      if (updateStatistics) {
+          stateRecentMean_ = state.colwise().mean();
+          stateRecentVar_ = (state.rowwise() - stateRecentMean_.transpose()).colwise().squaredNorm() / num_envs_;
+
+          stateDelta_ = stateMean_ - stateRecentMean_;
+          for(int i=0; i<estDim_; i++)
+              stateDelta_[i] = stateDelta_[i]*stateDelta_[i];
+
+          float totCount = stateCount_ + num_envs_;
+
+          stateMean_ = stateMean_ * (stateCount_ / totCount) + stateRecentMean_ * (num_envs_ / totCount);
+          stateVar_ = (stateVar_ * stateCount_ + stateRecentVar_ * num_envs_ + stateDelta_ * (stateCount_ * num_envs_ / totCount)) / (totCount);
+          stateCount_ = totCount;
+      }
+
+#pragma omp parallel for schedule(auto)
+      for(int i=0; i<num_envs_; i++)
+          state.row(i) = (state.row(i) - stateMean_.transpose()).template cwiseQuotient<>((stateVar_ + stateEpsilon).cwiseSqrt().transpose());
+  }
+
   inline void perAgentStep(int agentId,
                            Eigen::Ref<EigenRowMajorMat> &action,
                            Eigen::Ref<EigenVec> &reward,
@@ -217,7 +245,7 @@ class VectorizedEnvironment {
   std::vector<std::map<std::string, float>> rewardInformation_;
 
   int num_envs_ = 1;
-  int obDim_ = 0, valueObDim_ = 0, actionDim_ = 0, estDim_ = 0;
+  int obDim_ = 0, actionDim_ = 0, estDim_ = 0;
   bool recordVideo_=false, render_=false;
   std::string resourceDir_;
   Yaml::Node cfg_;
@@ -225,11 +253,13 @@ class VectorizedEnvironment {
 
   /// observation running mean
   bool normalizeObservation_ = true;
-  EigenVec obMean_;
-  EigenVec obVar_;
-  float obCount_ = 1e-4;
+  bool normalizeState_ = true;
+  EigenVec obMean_, stateMean_;
+  EigenVec obVar_, stateVar_;
+  float obCount_ = 1e-4, stateCount_ = 1e-4;
   EigenVec recentMean_, recentVar_, delta_;
-  EigenVec epsilon;
+  EigenVec stateRecentMean_, stateRecentVar_, stateDelta_;
+  EigenVec epsilon, stateEpsilon;
 };
 
 
