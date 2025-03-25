@@ -41,12 +41,12 @@ def relaxed_barrier(alpha_lower, alpha_upper, x):
     return -y  # Multiply by -1 as per the last line in your code
 
 # Set parameters
-delta = 0.1
-alpha_lower = -1.0
-alpha_upper = 1.0
+delta = 0.4
+alpha_lower = -0.8
+alpha_upper = 0.8
 
 # Generate a range of x values
-x_values = np.linspace(-2.0, 2.0, 400)  # Avoiding x=alpha_lower directly as it goes to -inf in log
+x_values = np.linspace(-20.0, 20.0, 400)  # Avoiding x=alpha_lower directly as it goes to -inf in log
 y_values = [relaxed_log_barrier(delta, alpha_lower, alpha_upper, x) for x in x_values]
 # y_values = [relaxed_barrier(alpha_lower, alpha_upper, x) for x in x_values]
 # y_values = [np.exp(-0.1*x) for x in x_values]

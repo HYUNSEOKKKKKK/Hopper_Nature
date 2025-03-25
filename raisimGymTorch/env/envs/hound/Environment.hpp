@@ -614,14 +614,13 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// body contact reward
       rewards_.record("bodyContact",(double)bodyContact_);
       /// com pos regularization
-      rewards_.record("comPos",comToFootLocalFrame_.head(2).squaredNorm()*(double)standingMode_);
+//      rewards_.record("comPos",comToFootLocalFrame_.head(2).squaredNorm()*(double)standingMode_);
 
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
       negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque")
-              + rewards_.getReward("footSlip") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion")
-              + rewards_.getReward("comPos"));
+              + rewards_.getReward("footSlip") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -711,14 +710,14 @@ class ENVIRONMENT : public RaisimGymEnv {
       relaxedLogBarrier(0.5, limitBodyContact_(0), limitBodyContact_(1),-bodyContact_,tempReward);
       barrierBodyContact += tempReward;
       /// Log Barrier - limit_COM_pos
-//      if (standingMode_){
-//          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
-//          barrierCOMpos += tempReward;
-//          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
-//          barrierCOMpos += tempReward;
-//      }
+      if (standingMode_){
+          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
+          barrierCOMpos += tempReward;
+          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
+          barrierCOMpos += tempReward;
+      }
       /// Log Barrier - limit_impulse
-      relaxedLogBarrier(0.2, limitImpulse_(0), limitImpulse_(1),footNormalImpulse_,tempReward);
+      relaxedLogBarrier(0.4, limitImpulse_(0), limitImpulse_(1),footNormalImpulse_,tempReward);
       barrierImpulse += tempReward;
 
       ///
@@ -732,12 +731,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
       rewards_.record("barrierBodyContact", barrierBodyContact);
-//      rewards_.record("barrierCOMpos", barrierCOMpos);
+      rewards_.record("barrierCOMpos", barrierCOMpos);
       rewards_.record("barrierImpulse", barrierImpulse);
 
 
       float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel
-              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierImpulse));
+              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierCOMpos + barrierImpulse));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
@@ -867,10 +866,14 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   Eigen::VectorXd signedSqrt(const Eigen::VectorXd& v) {
-      Eigen::VectorXd result = v;  // Create a copy of the input vector to modify
-      for (int i = 0; i < result.size(); ++i) {
-          result(i) = std::copysign(std::sqrt(std::abs(result(i))), result(i));
-      }
+      Eigen::VectorXd result = v;
+      for (int i = 0; i < result.size(); ++i) { result(i) = std::copysign(std::sqrt(std::abs(result(i))), result(i)); }
+      return result;
+  }
+
+  Eigen::VectorXd signedSqrt2(const Eigen::VectorXd& v) {
+      Eigen::VectorXd result = v;
+      for (int i = 0; i < result.size(); ++i) { if (std::abs(result(i)) > 1) { result(i) = std::copysign(std::sqrt(std::abs(result(i))), result(i)); } }
       return result;
   }
 
@@ -884,14 +887,17 @@ class ENVIRONMENT : public RaisimGymEnv {
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
 //          gv_(6),
 //          gv_.tail(2),                                                          /// joint velocity 3
-          std::copysign(std::sqrt(std::abs(gv_(6))), gv_(6)),
-          signedSqrt(gv_.tail(2)),                                              /// scaled gv_
+//          std::copysign(std::sqrt(std::abs(gv_(6))), gv_(6)),
+//          signedSqrt(gv_.tail(2)),                                              /// scaled gv_
+          std::abs(gv_(6))>1? std::copysign(std::sqrt(std::abs(gv_(6))),gv_(6)):gv_(6),
+          signedSqrt2(gv_.tail(2)),                                              /// scaled2 gv_
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
           jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
 //          jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                 /// joint History 9 (0.18, 0.12, 0.6)
-          signedSqrt(jointVelHist_[0]), signedSqrt(jointVelHist_[3]), signedSqrt(jointVelHist_[6]), /// scaled joint vel History 9 (0.18, 0.12, 0.6)
+//          signedSqrt(jointVelHist_[0]), signedSqrt(jointVelHist_[3]), signedSqrt(jointVelHist_[6]), /// scaled joint vel History 9 (0.18, 0.12, 0.6)
+          signedSqrt2(jointVelHist_[0]), signedSqrt2(jointVelHist_[3]), signedSqrt2(jointVelHist_[6]), /// scaled joint vel History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
