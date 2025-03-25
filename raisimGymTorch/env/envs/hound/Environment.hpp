@@ -422,8 +422,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
     barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
             /// scale down
-      avgReward /= 1e1;
-      barrierReward_ /= 1e1;
+      avgReward /= 2e1;
+      barrierReward_ /= 2e1;
 
 //      std::cout << footContact_ << ", " << footContactPhase_ << std::endl;
 
