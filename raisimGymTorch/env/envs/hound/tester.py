@@ -88,7 +88,7 @@ else:
 
         if step % 400 == 0:
             env.reset()
-            env.set_command(np.random.uniform(0.6,0.6, 1),0.0,0.0)
+            env.set_command(np.random.uniform(-0.6,-0.6, 1),0.0,0.0)
         elif (step-240)%400 == 0:
             env.set_command(np.random.uniform(0.0, 0.0, 1),0.0,0.0)
         time.sleep(0.010)

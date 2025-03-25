@@ -7,34 +7,6 @@
 
 #include "raisim/RaisimServer.hpp"
 
-/// for IMU simulation
-static void QuatToRotation(const Eigen::Vector4d& quaternion, Eigen::Matrix3d& rotation)
-{
-    rotation(0) = quaternion[0] * quaternion[0] + quaternion[1] * quaternion[1] - quaternion[2] * quaternion[2] - quaternion[3] * quaternion[3];
-    rotation(1) = 2 * quaternion[0] * quaternion[3] + 2 * quaternion[1] * quaternion[2];
-    rotation(2) = 2 * quaternion[1] * quaternion[3] - 2 * quaternion[0] * quaternion[2];
-
-    rotation(3) = 2 * quaternion[1] * quaternion[2] - 2 * quaternion[0] * quaternion[3];
-    rotation(4) = quaternion[0] * quaternion[0] - quaternion[1] * quaternion[1] + quaternion[2] * quaternion[2] - quaternion[3] * quaternion[3];
-    rotation(5) = 2 * quaternion[0] * quaternion[1] + 2 * quaternion[2] * quaternion[3];
-
-    rotation(6) = 2 * quaternion[0] * quaternion[2] + 2 * quaternion[1] * quaternion[3];
-    rotation(7) = 2 * quaternion[2] * quaternion[3] - 2 * quaternion[0] * quaternion[1];
-    rotation(8) = quaternion[0] * quaternion[0] - quaternion[1] * quaternion[1] - quaternion[2] * quaternion[2] + quaternion[3] * quaternion[3];
-}
-
-static Eigen::Vector4d QuatProduct(const Eigen::Vector4d &a,
-                                   const Eigen::Vector4d &b)
-{
-    Eigen::Vector4d ab;
-    ab(0) = a(0)*b(0) - a(1)*b(1) - a(2)*b(2) - a(3)*b(3);
-    ab(1) = a(0)*b(1) + a(1)*b(0) + a(2)*b(3) - a(3)*b(2);
-    ab(2) = a(0)*b(2) - a(1)*b(3) + a(2)*b(0) + a(3)*b(1);
-    ab(3) = a(0)*b(3) + a(1)*b(2) - a(2)*b(1) + a(3)*b(0);
-
-    return ab;
-}
-
 raisim::HeightMap* HeightMapSample(raisim::World* world, int heightMapType, double curriculum, std::mt19937& gen, std::uniform_real_distribution<double>& uniDist){
     /// heightMapType:
     /// 0 -> plain with roughness (or square)

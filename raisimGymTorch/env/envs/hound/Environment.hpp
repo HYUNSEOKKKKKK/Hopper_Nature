@@ -35,8 +35,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     numEdges_ = 4;
     actionDim_ = 3;
     obDim_ = 42;
-    estDim_ = 16 + 3; // for true rot (v5.0)
-//    estDim_ = 16;
+    estDim_ = 16;
 
     /// initialize
     gc_.setZero(gcDim_); gcInit_.setZero(); gcNoise_.setZero();
@@ -202,12 +201,6 @@ class ENVIRONMENT : public RaisimGymEnv {
       nominalMass_.push_back(dhal_->getMass()[3]); // foot
 
       dhal_->getCollisionBody("Foot/0").setMaterial("rubber");
-
-      /// complementary filter
-      vel_prev_.setZero();
-      acc_prev_.setZero();
-      filterQuat_ << 1.,0.,0.,0.;
-      filterRot_ = rotConversion_.transpose();
   }
 
   void init() final { }
@@ -322,13 +315,6 @@ class ENVIRONMENT : public RaisimGymEnv {
         footContactPhase_.setZero();
         footClearance_.setZero();
         obDoubleLpf_.setZero();
-
-        /// complementary filter
-        vel_prev_.setZero();
-        acc_prev_.setZero();
-        filterQuat_ << gcNoise_(3)+uniDist_(gen_)*0.05, gcNoise_(4)+uniDist_(gen_)*0.05, gcNoise_(5), gcNoise_(6)+uniDist_(gen_)*0.05;
-        filterQuat_ = filterQuat_.normalized();
-        filterRot_ = rotConversion_.transpose();
     }
 
     /// even though not reset, these values should be reset -> empirical result (prevTerminal 추가했으니 빼도 되지 않을까)
@@ -351,6 +337,11 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    std::cout << "dhal_->getMass()[1]: " << dhal_->getMass()[1] << std::endl;
 //    std::cout << "dhal_->getMass()[2]: " << dhal_->getMass()[2] << std::endl;
 //    std::cout << "dhal_->getMass()[3]: " << dhal_->getMass()[3] << std::endl;
+
+    /// rotation bias
+    quat_.coeffs() << uniDist_(gen_)*0.03, uniDist_(gen_)*0.03, 0.0, 1.0; // max 0.084 rad -> 5 deg
+    quat_.normalize();
+    rotBiased_ = quat_;
   }
 
   void subStep() {
@@ -422,8 +413,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     avgReward /= (control_dt_ / simulation_dt_ + 1e-10);
     barrierReward_ /=(control_dt_ / simulation_dt_ + 1e-10);
             /// scale down
-      avgReward /= 2e1;
-      barrierReward_ /= 2e1;
+      avgReward /= 1e1;
+      barrierReward_ /= 1e1;
 
 //      std::cout << footContact_ << ", " << footContactPhase_ << std::endl;
 
@@ -770,11 +761,6 @@ class ENVIRONMENT : public RaisimGymEnv {
     raisim::Vec<4> quat;
     quat[0] = gc_[3]; quat[1] = gc_[4]; quat[2] = gc_[5]; quat[3] = gc_[6];
     raisim::quatToRotMat(quat, rot_);
-    /// simulate IMU (before change rot_)
-    Eigen::VectorXd imuSensorValue(6);
-    imuSensorValue = simulateIMU();
-    complementaryFilter(imuSensorValue);
-    ///
     rot_.e() = rot_.e() * rotConversion_; // R_wb * R_bc
     bodyLinearVel_ = rot_.e().transpose() * gv_.segment(0, 3);
     bodyAngularVel_ = rot_.e().transpose() * gv_.segment(3, 3);
@@ -882,10 +868,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       if (standingMode_){
           phaseSin_.setZero();
       }
-//        std::cout << "rot_  : " << rot_.e().row(2) << std::endl;
-//        std::cout << "filter: " << (filterRot_*rotConversion_).row(2) << std::endl;
-//      obDouble_ << rot_.e().row(2).transpose(),                                 /// body orientation. 3
-      obDouble_ << (filterRot_*rotConversion_).row(2).transpose(),              /// body orientation. 3
+      obDouble_ << (rot_.e()*rotBiased_).row(2).transpose(),                    /// body orientation. 3 (with bias)
           bodyAngularVel_,                                                      /// body angular velocity. 3
           gc_(7)-gcInit_(7),
           gc_.tail(2)-gcInit_.tail(2),                                          /// joint pos 3
@@ -934,8 +917,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //              rot_.e().transpose() * ((edgePosWorld_.col(2)+edgePosWorld_.col(3))/2.0 - gc_.head(3)) - temp,/// relative edge pos (heel, toe)
               (gc_.segment(8,2)-gcInit_.segment(8,2))*2.0,                          /// 2 ankle output FK
               gv_.segment(7,2)/2e1,                                                 /// 2 ankle output vel
-              comToFootLocalFrame_.head(2)*5e0,                                     /// 2 com pos
-              rot_.e().row(2).transpose();                                          /// body orientation. 3
+              comToFootLocalFrame_.head(2)*5e0;                                     /// 2 com pos
 
               /// convert it to float
       state = estState_.cast<float>();
@@ -1009,47 +991,6 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
   }
 
-  Eigen::VectorXd simulateIMU(){
-      Eigen::VectorXd IMUSensorValue(6);
-      Eigen::Vector3d gravity, acc_temp;
-      gravity << 0, 0, -9.80665;
-
-      IMUSensorValue.head(3) = rot_.e().transpose() * gv_.segment(3,3);
-
-      acc_temp = rot_.e().transpose() * ((gv_.head(3) - vel_prev_) / simulation_dt_ - gravity);
-      if ((acc_prev_ - acc_temp).norm() > 1000) {
-          IMUSensorValue.tail(3) = 0.99 * acc_prev_ + 0.01 * acc_temp;
-      } else {
-          IMUSensorValue.tail(3) = acc_temp;
-      }
-      vel_prev_ = gv_.head(3);
-      acc_prev_ = IMUSensorValue.tail(3);
-      return IMUSensorValue;
-  }
-
-  void complementaryFilter(Eigen::VectorXd IMUSensorValue){
-      Eigen::Vector3d gyro, acc;
-      gyro = IMUSensorValue.head(3);
-      acc = IMUSensorValue.tail(3);
-
-      // Estimated direction of gravity;
-      Eigen::Vector3d v;
-      v << 2 * (filterQuat_[1] * filterQuat_(3) - filterQuat_(0) * filterQuat_(2)),
-              2 * (filterQuat_[0] * filterQuat_[1] + filterQuat_[2] * filterQuat_[3]),
-              filterQuat_[0] * filterQuat_[0] - filterQuat_[1] * filterQuat_[1] - filterQuat_[2] * filterQuat_[2] + filterQuat_[3] * filterQuat_[3];
-
-      Eigen::Vector3d e = acc.normalized().cross(v);
-      Eigen::Vector3d gyro_modified = gyro + 0.3 * e;
-
-      Eigen::Vector4d q_dot =
-              0.5 * QuatProduct(filterQuat_, Eigen::Vector4d(0, gyro_modified(0), gyro_modified(1), gyro_modified(2)));
-
-      filterQuat_ += q_dot * simulation_dt_;
-      filterQuat_ = filterQuat_.normalized();
-
-      QuatToRotation(filterQuat_, filterRot_);
-  }
-
  private:
   int gcDim_, gvDim_, numLegs_, numEdges_;
   bool visualizable_ = false;
@@ -1064,7 +1005,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   Eigen::Vector<double,5> preJointVel_; // knee, ankle output, ankle input (1+2+2)
   Eigen::Vector<double,3> jointPgain_, jointDgain_;
 
-  Eigen::Matrix<double,3,3> rotConversion_;
+  Eigen::Matrix<double,3,3> rotConversion_, rotBiased_;
   raisim::Mat<3,3> rot_;
   Eigen::VectorXd actionMean_, actionStd_, obDouble_, estState_, obDoubleLpf_;
   Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
@@ -1131,10 +1072,6 @@ class ENVIRONMENT : public RaisimGymEnv {
   float barrierReward_;
   int terminalStack_;
   bool prevTerminal_;
-  /// for complementary filter
-  Eigen::Vector3d vel_prev_,acc_prev_;
-  Eigen::Matrix<double,4,1> filterQuat_; /// w, xyz
-  Eigen::Matrix<double,3,3> filterRot_;
 
   thread_local static std::mt19937 gen_;
   thread_local static std::normal_distribution<double> normDist_;
