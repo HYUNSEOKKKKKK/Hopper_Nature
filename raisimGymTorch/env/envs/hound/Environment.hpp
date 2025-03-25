@@ -723,6 +723,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       ///
       double logClip = -500.0;
       barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
+      barrierImpulse = fmax(barrierImpulse,logClip);             /// 여기 밖 부분은 gradient 안 받겠다
       rewards_.record("barrierJointPos", barrierJointPos);
       rewards_.record("barrierBodyHeight", barrierBodyHeight);
       rewards_.record("barrierBaseMotion", barrierBaseMotion);
