@@ -38,7 +38,7 @@ environment:
     barrierFootContact:   1e-1
     barrierFootClearance: 1e-1
     barrierBodyContact:   1e-1
-#    barrierCOMpos:        1e-1
+    barrierCOMpos:        1e-1
     barrierImpulse:       1e-1
 
     # total sum

@@ -44,9 +44,13 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointFrictions_.setZero();
 
     /// this is nominal configuration of robot
-    gcInit_.segment(0,7) << 0.0,0.0,0.73,   0.9887711, 0.0, -0.1494381, 0.0;
-    gcInit_.segment(7,3) << 0.4, -0.1, 0.0; // knee, ankle output (passive)
-    gcInit_.tail(6) << 0.727265, -0.002499, 0.505897, 0.001567, 0.628833, 0.346578; // universal passive, ankle input (active)
+//    gcInit_.segment(0,7) << 0.0,0.0,0.73,   0.9887711, 0.0, -0.1494381, 0.0;
+//    gcInit_.segment(7,3) << 0.4, -0.1, 0.0; // knee, ankle output (passive)
+//    gcInit_.tail(6) << 0.727265, -0.002499, 0.505897, 0.001567, 0.628833, 0.346578; // universal passive, ankle input (active)
+
+      gcInit_.segment(0,7) << 0.0,0.0,0.71,   0.9847265,0.0,-0.1741081,0.0;
+      gcInit_.segment(7,3) << 0.7, -0.35, 0.0; // knee, ankle output (passive)
+      gcInit_.tail(6) << 0.917012, 0.00244346, 0.728929, 0.0015708, 0.861556, 0.619949; // universal passive, ankle input (active)
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
@@ -124,7 +128,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     limitFootContact_ << -0.3,2;
     limitFootClearance_ << -0.08,1.0; // 어차피 desired_foot_clearance 를
     limitBodyContact_ << -1.0,1.0;
-    limitCOMpos_ << -0.04, 0.04; /// only enforced standingMode
+//    limitCOMpos_ << -0.04, 0.04; /// only enforced standingMode
+    limitCOMpos_ << -0.06, 0.06; /// only enforced standingMode
     limitImpulse_ << -0.8, 0.8;
 
     /// initialize
@@ -711,12 +716,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       relaxedLogBarrier(0.5, limitBodyContact_(0), limitBodyContact_(1),-bodyContact_,tempReward);
       barrierBodyContact += tempReward;
       /// Log Barrier - limit_COM_pos
-//      if (standingMode_){
-//          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
-//          barrierCOMpos += tempReward;
-//          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
-//          barrierCOMpos += tempReward;
-//      }
+      if (standingMode_){
+          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
+          barrierCOMpos += tempReward;
+          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
+          barrierCOMpos += tempReward;
+      }
       /// Log Barrier - limit_impulse
       relaxedLogBarrier(0.2, limitImpulse_(0), limitImpulse_(1),footNormalImpulse_,tempReward);
       barrierImpulse += tempReward;
@@ -732,12 +737,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
       rewards_.record("barrierBodyContact", barrierBodyContact);
-//      rewards_.record("barrierCOMpos", barrierCOMpos);
+      rewards_.record("barrierCOMpos", barrierCOMpos);
       rewards_.record("barrierImpulse", barrierImpulse);
 
 
       float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel
-              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierImpulse));
+              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierCOMpos + barrierImpulse));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
