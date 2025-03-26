@@ -17,17 +17,19 @@ environment:
 
     # neg reward (not reward coefficient, about range)
     footSlip:    -2.0
-    smoothness1: -0.5
-    smoothness2: -1.5 #-2.5
-    bodyOri:     -2.0 #-0.5
-    torque:      -5e-5 #-5e-5
+    smoothness1: -0.1
+    smoothness2: -0.5
+    bodyOri:     -0.5
+    torque:      -5e-5
 
-    jointPos:   -8e-1 # arm, hip_rotation
-    jointVel:    -5e-3
-    jointAcc:    -1e-2
+    jointPos:    -8e-1
+    jointVel:    -2e-3
+    jointAcc:    -2e-3
     baseMotion:  -2.0
-    bodyContact: -10.0
-    comPos:      -1e2
+    bodyContact: -2.0
+
+    comPos:      -2e1
+    footOri:     -0.5
 
     # relaxed
     barrierJointPos:      1e-1
@@ -40,6 +42,7 @@ environment:
     barrierBodyContact:   1e-1
     barrierCOMpos:        1e-1
     barrierImpulse:       1e-1
+    barrierSmoothness2:   1e-1
 
     # total sum
     negSumPos:          1.0 #1.0
