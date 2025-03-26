@@ -38,8 +38,8 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/v7.1_2025-03-26-03-27-50/full_3000.pt"
-# weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-26-02-54-00/full_1500.pt")
+# weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/v7.1_2025-03-26-03-27-50/full_3000.pt"
+weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-26-02-54-00/full_1500.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -88,7 +88,7 @@ else:
 
         if step % 400 == 0:
             env.reset()
-            env.set_command(np.random.uniform(0.6,0.6, 1),0.0,0.0)
+            env.set_command(np.random.uniform(-0.6,-0.6, 1),0.0,0.0)
         elif (step-240)%400 == 0:
             env.set_command(np.random.uniform(0.0, 0.0, 1),0.0,0.0)
         time.sleep(0.010)
