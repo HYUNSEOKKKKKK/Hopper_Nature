@@ -271,7 +271,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         quat_ = rotTotalNoise_;
         quat_.normalize();
         gcNoise_.segment(3,4) << quat_.coeffs().w(), quat_.coeffs().head(3);
-        gcNoise_(7) += (uniDist_(gen_) * 0.5 * ((standingMode_)? 1.2 : 1.0)+0.22); // knee
+        gcNoise_(7) += uniDist_(gen_) * 0.4; // knee
         gcNoise_(8) += uniDist_(gen_) * 0.3 * ((standingMode_)? 1.2 : 1.0); // ankle output pitch (passive)
         gcNoise_(9) += uniDist_(gen_) * 0.2 * ((standingMode_)? 1.2 : 1.0); // ankle output roll (passive)
 
@@ -719,12 +719,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       impulseCurriculum = (double)(iter_)/2000.0; /// 2000 iter -> 1.0
       impulseCurriculum = (impulseCurriculum > 1.0) ? 1.0 : impulseCurriculum;
       /// Log Barrier - limit_COM_pos
-//      if (standingMode_){
-//          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
-//          barrierCOMpos += tempReward;
-//          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
-//          barrierCOMpos += tempReward;
-//      }
+      if (standingMode_){
+          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
+          barrierCOMpos += tempReward;
+          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
+          barrierCOMpos += tempReward;
+      }
       /// Log Barrier - limit_impulse
       /// impulse curriculum, tighten from limitImpulse*10 -> limitImpulse (iter_ = 0 to iter_ = 2000)
       relaxedLogBarrier(0.2, limitImpulse_(0)*(10.0-9.0*impulseCurriculum), limitImpulse_(1)*(10.0-9.0*impulseCurriculum),footNormalImpulse_,tempReward);
@@ -736,7 +736,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       ///
       double logClip = -100.0;
       barrierTargetVel = fmax(barrierTargetVel,logClip);       /// 여기 밖 부분은 gradient 안 받겠다
-//      barrierCOMpos = fmax(barrierCOMpos,logClip);             /// 여기 밖 부분은 gradient 안 받겠다
+      barrierCOMpos = fmax(barrierCOMpos,logClip);             /// 여기 밖 부분은 gradient 안 받겠다
       barrierImpulse = fmax(barrierImpulse,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierSmoothness2 = fmax(barrierSmoothness2,logClip);   /// 여기 밖 부분은 gradient 안 받겠다
       rewards_.record("barrierJointPos", barrierJointPos);
@@ -747,12 +747,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
       rewards_.record("barrierBodyContact", barrierBodyContact);
-//      rewards_.record("barrierCOMpos", barrierCOMpos);
+      rewards_.record("barrierCOMpos", barrierCOMpos);
       rewards_.record("barrierImpulse", barrierImpulse);
       rewards_.record("barrierSmoothness2", barrierSmoothness2);
 
       float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel
-              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierImpulse + barrierSmoothness2));
+              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierImpulse + barrierCOMpos + barrierSmoothness2));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
@@ -895,7 +895,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void observe(Eigen::Ref<EigenVec> ob) final {
       if (standingMode_){
-          phaseSin_.setZero();
+//          phaseSin_.setZero();
+          phaseSin_ << 0., 1.;
       }
       obDouble_ << (rot_.e()*rotBiased_).row(2).transpose(),                    /// body orientation. 3 (with bias)
           bodyAngularVel_,                                                      /// body angular velocity. 3
