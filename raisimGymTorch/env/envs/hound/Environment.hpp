@@ -717,7 +717,7 @@ class ENVIRONMENT : public RaisimGymEnv {
           barrierCOMpos += tempReward;
       }
       /// Log Barrier - limit_impulse
-      relaxedLogBarrier(0.4, limitImpulse_(0), limitImpulse_(1),footNormalImpulse_,tempReward);
+      relaxedLogBarrier(0.2, limitImpulse_(0), limitImpulse_(1),footNormalImpulse_,tempReward);
       barrierImpulse += tempReward;
 
       ///
