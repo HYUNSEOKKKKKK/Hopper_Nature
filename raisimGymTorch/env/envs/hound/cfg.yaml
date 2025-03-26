@@ -27,7 +27,7 @@ environment:
     jointAcc:    -1e-2
     baseMotion:  -2.0
     bodyContact: -10.0
-#    comPos:      -1e2
+    comPos:      -1e2
 
     # relaxed
     barrierJointPos:      1e-1
@@ -38,7 +38,7 @@ environment:
     barrierFootContact:   1e-1
     barrierFootClearance: 1e-1
     barrierBodyContact:   1e-1
-    barrierCOMpos:        1e-1
+#    barrierCOMpos:        1e-1
     barrierImpulse:       1e-1
 
     # total sum

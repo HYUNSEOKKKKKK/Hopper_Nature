@@ -614,13 +614,14 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// body contact reward
       rewards_.record("bodyContact",(double)bodyContact_);
       /// com pos regularization
-//      rewards_.record("comPos",comToFootLocalFrame_.head(2).squaredNorm()*(double)standingMode_);
+      rewards_.record("comPos",comToFootLocalFrame_.head(2).squaredNorm()*(double)standingMode_);
 
       /// sum
       float posReward, negReward;
       posReward = (float)(rewards_.getReward("comAngularVel") + rewards_.getReward("comLinearVel"));
       negReward = (float)(rewards_.getReward("bodyOri") + rewards_.getReward("jointPos") + rewards_.getReward("jointVel") + rewards_.getReward("jointAcc") + rewards_.getReward("torque")
-              + rewards_.getReward("footSlip") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion"));
+              + rewards_.getReward("footSlip") + rewards_.getReward("smoothness1") + rewards_.getReward("smoothness2") + rewards_.getReward("bodyContact") + rewards_.getReward("baseMotion")
+              + rewards_.getReward("comPos"));
       rewards_.record("negReward2", negReward); /// only for recording
 
       return (float)(std::exp(0.2 * negReward) * posReward);
@@ -710,19 +711,18 @@ class ENVIRONMENT : public RaisimGymEnv {
       relaxedLogBarrier(0.5, limitBodyContact_(0), limitBodyContact_(1),-bodyContact_,tempReward);
       barrierBodyContact += tempReward;
       /// Log Barrier - limit_COM_pos
-      if (standingMode_){
-          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
-          barrierCOMpos += tempReward;
-          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
-          barrierCOMpos += tempReward;
-      }
+//      if (standingMode_){
+//          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
+//          barrierCOMpos += tempReward;
+//          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
+//          barrierCOMpos += tempReward;
+//      }
       /// Log Barrier - limit_impulse
       relaxedLogBarrier(0.2, limitImpulse_(0), limitImpulse_(1),footNormalImpulse_,tempReward);
       barrierImpulse += tempReward;
 
       ///
       double logClip = -500.0;
-      barrierJointPos = fmax(barrierJointPos,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierImpulse = fmax(barrierImpulse,logClip);             /// 여기 밖 부분은 gradient 안 받겠다
       rewards_.record("barrierJointPos", barrierJointPos);
       rewards_.record("barrierBodyHeight", barrierBodyHeight);
@@ -732,12 +732,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
       rewards_.record("barrierBodyContact", barrierBodyContact);
-      rewards_.record("barrierCOMpos", barrierCOMpos);
+//      rewards_.record("barrierCOMpos", barrierCOMpos);
       rewards_.record("barrierImpulse", barrierImpulse);
 
 
       float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel
-              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierCOMpos + barrierImpulse));
+              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierImpulse));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
