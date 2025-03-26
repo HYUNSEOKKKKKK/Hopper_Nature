@@ -720,17 +720,19 @@ class ENVIRONMENT : public RaisimGymEnv {
       /// Log Barrier - limit_body_contact
       relaxedLogBarrier(0.5, limitBodyContact_(0), limitBodyContact_(1),-bodyContact_,tempReward);
       barrierBodyContact += tempReward;
-      /// Log Barrier - limit_COM_pos
-      if (standingMode_){
-          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
-          barrierCOMpos += tempReward;
-          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
-          barrierCOMpos += tempReward;
-      }
-      /// Log Barrier - limit_impulse
+
+      /// curriculum
       double impulseCurriculum = 0.0;
       impulseCurriculum = (double)(iter_)/2000.0; /// 2000 iter -> 1.0
       impulseCurriculum = (impulseCurriculum > 1.0) ? 1.0 : impulseCurriculum;
+      /// Log Barrier - limit_COM_pos
+      if (standingMode_){
+          relaxedLogBarrier(0.02, limitCOMpos_(0)*(5.0-4.0*impulseCurriculum), limitCOMpos_(1)*(5.0-4.0*impulseCurriculum), comToFootLocalFrame_(0), tempReward);
+          barrierCOMpos += tempReward;
+          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)*(5.0-4.0*impulseCurriculum)/2.0, limitCOMpos_(1)*(5.0-4.0*impulseCurriculum)/2.0, comToFootLocalFrame_(1), tempReward);
+          barrierCOMpos += tempReward;
+      }
+      /// Log Barrier - limit_impulse
       /// impulse curriculum, tighten from limitImpulse*10 -> limitImpulse (iter_ = 0 to iter_ = 2000)
       relaxedLogBarrier(0.2, limitImpulse_(0)*(10.0-9.0*impulseCurriculum), limitImpulse_(1)*(10.0-9.0*impulseCurriculum),footNormalImpulse_,tempReward);
       barrierImpulse += tempReward;
