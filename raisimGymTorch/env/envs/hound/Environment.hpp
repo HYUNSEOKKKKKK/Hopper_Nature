@@ -219,8 +219,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     }
 
     /// curriculum factor
-    double comCurriculum = (double)iter_ * 1.0/1500; /// command curriculum
-    comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
+//    double comCurriculum = (double)iter_ * 1.0/1500; /// command curriculum
+//    comCurriculum = (comCurriculum > 1.0) ? 1.0 : comCurriculum; // [0,1.0]
             double initializeCurriculum = (double)iter_ * 1.0/1000; /// initialize curriculum
             initializeCurriculum = (initializeCurriculum > 1.0) ? 1.0 : initializeCurriculum;
 //            double initializeCurriculum = 1.0; /// no curriculum
@@ -233,8 +233,10 @@ class ENVIRONMENT : public RaisimGymEnv {
     }else{
         standingMode_ = false;
         do {
-            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
-            command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+//            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
+            double maxCommand = 0.8; // 평지 lin x max 1.5
+//            command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+            command_ << maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
 //            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
         } while (command_.norm() < 0.2);
     }
@@ -719,12 +721,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       impulseCurriculum = (double)(iter_)/2000.0; /// 2000 iter -> 1.0
       impulseCurriculum = (impulseCurriculum > 1.0) ? 1.0 : impulseCurriculum;
       /// Log Barrier - limit_COM_pos
-      if (standingMode_){
-          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
-          barrierCOMpos += tempReward;
-          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
-          barrierCOMpos += tempReward;
-      }
+//      if (standingMode_){
+//          relaxedLogBarrier(0.02, limitCOMpos_(0), limitCOMpos_(1), comToFootLocalFrame_(0), tempReward);
+//          barrierCOMpos += tempReward;
+//          relaxedLogBarrier(0.02/2.0, limitCOMpos_(0)/2.0, limitCOMpos_(1)/2.0, comToFootLocalFrame_(1), tempReward);
+//          barrierCOMpos += tempReward;
+//      }
       /// Log Barrier - limit_impulse
       /// impulse curriculum, tighten from limitImpulse*10 -> limitImpulse (iter_ = 0 to iter_ = 2000)
       relaxedLogBarrier(0.2, limitImpulse_(0)*(10.0-9.0*impulseCurriculum), limitImpulse_(1)*(10.0-9.0*impulseCurriculum),footNormalImpulse_,tempReward);
@@ -736,7 +738,7 @@ class ENVIRONMENT : public RaisimGymEnv {
       ///
       double logClip = -100.0;
       barrierTargetVel = fmax(barrierTargetVel,logClip);       /// 여기 밖 부분은 gradient 안 받겠다
-      barrierCOMpos = fmax(barrierCOMpos,logClip);             /// 여기 밖 부분은 gradient 안 받겠다
+//      barrierCOMpos = fmax(barrierCOMpos,logClip);             /// 여기 밖 부분은 gradient 안 받겠다
       barrierImpulse = fmax(barrierImpulse,logClip);           /// 여기 밖 부분은 gradient 안 받겠다
       barrierSmoothness2 = fmax(barrierSmoothness2,logClip);   /// 여기 밖 부분은 gradient 안 받겠다
       rewards_.record("barrierJointPos", barrierJointPos);
@@ -747,12 +749,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("barrierFootContact", barrierFootContact);
       rewards_.record("barrierFootClearance", barrierFootClearance);
       rewards_.record("barrierBodyContact", barrierBodyContact);
-      rewards_.record("barrierCOMpos", barrierCOMpos);
+//      rewards_.record("barrierCOMpos", barrierCOMpos);
       rewards_.record("barrierImpulse", barrierImpulse);
       rewards_.record("barrierSmoothness2", barrierSmoothness2);
 
       float logBarReward =  (float)(1e-1*(barrierJointPos + barrierBodyHeight + barrierBaseMotion + barrierJointVel + barrierTargetVel
-              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierImpulse + barrierCOMpos + barrierSmoothness2));
+              + barrierFootContact + barrierFootClearance + barrierBodyContact + barrierImpulse + barrierSmoothness2));
           rewards_.record("relaxedLog", logBarReward); /// relaxed log barrier
       return  logBarReward;
   }
@@ -895,8 +897,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
   void observe(Eigen::Ref<EigenVec> ob) final {
       if (standingMode_){
-//          phaseSin_.setZero();
-          phaseSin_ << 0., 1.;
+          phaseSin_.setZero();
       }
       obDouble_ << (rot_.e()*rotBiased_).row(2).transpose(),                    /// body orientation. 3 (with bias)
           bodyAngularVel_,                                                      /// body angular velocity. 3
