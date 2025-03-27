@@ -236,7 +236,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 //            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
             double maxCommand = 0.8; // 평지 lin x max 1.5
 //            command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
-            command_ << maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+            command_ << -maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
 //            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
         } while (command_.norm() < 0.2);
     }
