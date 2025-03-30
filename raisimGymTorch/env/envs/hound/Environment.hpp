@@ -994,7 +994,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               (footToTerrain_(0) + footToTerrain_(2)) * 5e0,
               (footToTerrain_(4) + footToTerrain_(6)) * 5e0,                        /// heel & toe height 2
 //              static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
-              footCornerContact_.transpose().cast<double>(),                        /// 4 foot corner contact
+              footCornerContact_.cast<double>(),                                    /// 4 foot corner contact
               static_cast<double>(bodyContact_)/4.0,                                /// 1 body contact num
               (rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)) - temp)*2.0,  /// 3 relative foot position with respect to the body COM, expressed in the body frame 3
 //              rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)) - temp,
