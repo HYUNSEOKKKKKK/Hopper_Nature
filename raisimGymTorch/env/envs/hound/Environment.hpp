@@ -35,7 +35,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     numEdges_ = 4;
     actionDim_ = 3;
     obDim_ = 42;
-    estDim_ = 16;
+    estDim_ = 16+3;
 
     /// initialize
     gc_.setZero(gcDim_); gcInit_.setZero(); gcNoise_.setZero();
@@ -132,6 +132,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// initialize
     command_.setZero();
     footContact_ = 0;
+    footCornerContact_.setZero();
     footNormalImpulse_ = 0.0;
     bodyContact_ = 0;
     footVel_.resize(numLegs_); footPos_.resize(numLegs_), hipJointPos_.resize(numLegs_), refBodyToFoot_.resize(numLegs_), footOrientation_.resize(numLegs_);
@@ -177,8 +178,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
       edgePosLocal_.col(0) << -0.12, -0.05, -0.015-0.065;
       edgePosLocal_.col(1) << -0.12, 0.05, -0.015-0.065;
-      edgePosLocal_.col(2) << 0.12, -0.05, -0.015-0.065;
-      edgePosLocal_.col(3) << 0.12, 0.05, -0.015-0.065;
+      edgePosLocal_.col(2) << 0.08, -0.05, -0.015-0.065; /// toe
+      edgePosLocal_.col(3) << 0.08, 0.05, -0.015-0.065;  /// toe
 
       for (int i=0; i<4; i++){
           for (int j= 0; j<2; j++){
@@ -206,6 +207,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       nominalMass_.push_back(dhal_->getMass()[3]); // foot
 
       dhal_->getCollisionBody("Foot/0").setMaterial("rubber");
+
+      /// foorCorners
+      footCorners_.push_back(Eigen::Vector3d{ 0.08, 0.05, -0.015-0.065});
+      footCorners_.push_back(Eigen::Vector3d{ 0.08,-0.05, -0.015-0.065});
+      footCorners_.push_back(Eigen::Vector3d{-0.12, 0.05, -0.015-0.065});
+      footCorners_.push_back(Eigen::Vector3d{-0.12,-0.05, -0.015-0.065});
   }
 
   void init() final { }
@@ -235,8 +242,8 @@ class ENVIRONMENT : public RaisimGymEnv {
         do {
 //            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
             double maxCommand = 0.8; // 평지 lin x max 1.5
-//            command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
-            command_ << -maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+            command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+//            command_ << -maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
 //            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
         } while (command_.norm() < 0.2);
     }
@@ -647,7 +654,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               else { footContactDouble_(i) = -1.0 * footContactPhase_(i); }
           }
           /// footClearance_ -> limit_foot_clearance 에 있도록 (-0.12,0.12) -> foot 드는 거 enforcing
-          double desiredFootZPosition = 0.16;
+          double desiredFootZPosition = 0.12;
           for (int i=0; i<numLegs_; i++){
               if (footContactPhase_(i) < -0.6) { /// during swing, 전체시간의 33 %
                   footClearance_(i) =
@@ -806,19 +813,10 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    std::cout << "comToFootLocalFrame_: " << comToFootLocalFrame_.head(2).transpose() << std::endl;
 
     /// foot contact update
-    footContact_ = 0;
-    footNormalImpulse_ = 0.0;
-    for(auto& contact: dhal_->getContacts()){
-        for (size_t i=0; i<numLegs_; i++){
-            if(contact.getlocalBodyIndex() == footIndices_[i]){
-                footNormalImpulse_ += contact.getImpulse().e()(2);
-                footContact_ += 1;
-            }
-        }
-    }
+    updateFootContact();
 
-            /// body contact update (only used for true state)
-            bodyContact_ = 0;
+     /// body contact update (only used for true state)
+     bodyContact_ = 0;
       for(auto& contact: dhal_->getContacts()){
           for (size_t i=0; i<2; i++){
               if(contact.getlocalBodyIndex() == bodyIndices_[i]){
@@ -830,6 +828,57 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// update foot terrain
     updateFootToTerrain();
+  }
+
+  void updateFootContact(){
+      /// all foot area including toe
+//      footContact_ = 0;
+//      footNormalImpulse_ = 0.0;
+//      for(auto& contact: dhal_->getContacts()){
+//          for (size_t i=0; i<numLegs_; i++){
+//              if(contact.getlocalBodyIndex() == footIndices_[i]){
+//                  footNormalImpulse_ += contact.getImpulse().e()(2);
+//                  footContact_ += 1;
+//              }
+//          }
+//      }
+
+    /// excluding toe
+      footContact_ = 0;
+      footCornerContact_.setZero();
+      footNormalImpulse_ = 0.0;
+      for(auto& contact: dhal_->getContacts()){
+          for (size_t i=0; i<numLegs_; i++){
+              if(contact.getlocalBodyIndex() == footIndices_[i]){
+                  Eigen::Vector3d footCornerContact = footOrientation_[i].e().transpose()*(contact.getPosition().e()-footPos_[i].e()); // local(in ankle frame) position of contact
+                  int footContactLocationNum = -1;
+                  if (footCornerContact(2)<0){
+                      if (footCornerContact(0)>0){ // front
+                          if (footCornerContact(1)>0){ // left
+                              footContactLocationNum = 0; // FL
+                          }else{ // right
+                              footContactLocationNum = 1; // FR
+                          }
+                      }else{ // back
+                          if (footCornerContact(1)>0){ // left
+                              footContactLocationNum = 2; // RL
+                          }else{ // right
+                              footContactLocationNum = 3; // RR
+                          }
+                      }
+                      footContact_ += 1;
+//                      std::cout << footContactLocationNum << " , foot relative pos: " << footCornerContact.transpose() << std::endl;
+                  }
+                  if (footContactLocationNum>=0 and (footCornerContact-footCorners_[footContactLocationNum]).norm()< 0.01){
+                      footCornerContact_(footContactLocationNum) = 1;
+                  }
+
+                  footNormalImpulse_ += contact.getImpulse().e()(2);
+//                  footContact_ += 1;
+              }
+          }
+      }
+//    std::cout << "footContact_ : " << footContact_ << " , footCornerContact_ : " << footCornerContact_.transpose() << std::endl;
   }
 
   void updateFootToTerrain(){
@@ -944,7 +993,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       estState_ << bodyLinearVel_,                                                       /// body linear velocity. 3
               (footToTerrain_(0) + footToTerrain_(2)) * 5e0,
               (footToTerrain_(4) + footToTerrain_(6)) * 5e0,                        /// heel & toe height 2
-              static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
+//              static_cast<double>(footContact_)/4.0,                                /// 1 foot contact num
+              footCornerContact_.transpose().cast<double>(),                        /// 4 foot corner contact
               static_cast<double>(bodyContact_)/4.0,                                /// 1 body contact num
               (rot_.e().transpose() * (footPos_[0].e() - gc_.head(3)) - temp)*2.0,  /// 3 relative foot position with respect to the body COM, expressed in the body frame 3
 //              rot_.e().transpose() * ((edgePosWorld_.col(0)+edgePosWorld_.col(1))/2.0 - gc_.head(3)) - temp,
@@ -1054,6 +1104,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   std::vector<std::string> footJointFrames_;
   std::vector<std::string> hipJointFrames_;
   int footContact_;
+  Eigen::Vector4i footCornerContact_;
   double footNormalImpulse_;
   int bodyContact_; // 1
   std::vector<raisim::Vec<3>> footPos_,footVel_, hipJointPos_, refBodyToFoot_;
@@ -1092,6 +1143,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   ///
   std::vector<Eigen::VectorXd> jointPosErrorHist_, jointVelHist_;
   std::vector<Eigen::VectorXd> genForceTargetHist_;
+  std::vector<Eigen::Vector3d> footCorners_;
 
   /// initialize
   Eigen::Matrix<double,3,3> rotYawNoise_,rotTotalNoise_;

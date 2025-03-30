@@ -86,11 +86,11 @@ else:
         #         command_yaw = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(0), 0.6))
         #         env.set_command(command_x,command_y,command_yaw)
 
-        if step % 400 == 0:
-            env.reset()
-            env.set_command(np.random.uniform(-0.6,-0.6, 1),0.0,0.0)
-        elif (step-240)%400 == 0:
-            env.set_command(np.random.uniform(0.0, 0.0, 1),0.0,0.0)
+        # if step % 400 == 0:
+        #     env.reset()
+        #     env.set_command(np.random.uniform(-0.6,-0.6, 1),0.0,0.0)
+        # elif (step-240)%400 == 0:
+        env.set_command(np.random.uniform(0.6, 0.6, 1),0.0,0.0)
         time.sleep(0.010)
         with torch.no_grad():
             obs = env.observe(False)
