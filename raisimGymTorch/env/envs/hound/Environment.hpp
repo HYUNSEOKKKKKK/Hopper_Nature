@@ -151,8 +151,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     comToFootLocalFrame_.setZero();
 
     /// initialize history
-    jointPosErrorHist_ = std::vector<Eigen::VectorXd>(9,Eigen::VectorXd::Zero(actionDim_));
-    jointVelHist_ = std::vector<Eigen::VectorXd>(9,Eigen::VectorXd::Zero(actionDim_));
+    jointPosErrorHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
+    jointVelHist_ = std::vector<Eigen::VectorXd>(18,Eigen::VectorXd::Zero(actionDim_));
     genForceTargetHist_ = std::vector<Eigen::VectorXd>(3,Eigen::VectorXd::Zero(gvDim_));  /// delay 는 2 ms _ 1 tick 으로 설정 -> 1~2 tick delay
     genForceTarget_.setZero(gvDim_);
     /// initialize gait
@@ -668,6 +668,7 @@ class ENVIRONMENT : public RaisimGymEnv {
               footClearance_(i) = 0.0; // max reward (not enforcing clearance)
           }
       }
+//      std::cout << "footContactDouble: " << footContactDouble_ << " , phase: " << footContactPhase_ << " , contact: " << footContact_ << std::endl;
 
       /// compute barrier reward
       double barrierJointPos = 0.0, barrierBodyHeight = 0.0, barrierBaseMotion = 0.0, barrierJointVel = 0.0, barrierTargetVel = 0.0,
@@ -866,15 +867,15 @@ class ENVIRONMENT : public RaisimGymEnv {
                               footContactLocationNum = 3; // RR
                           }
                       }
-                      footContact_ += 1;
+//                      footContact_ += 1; /// including toe
 //                      std::cout << footContactLocationNum << " , foot relative pos: " << footCornerContact.transpose() << std::endl;
                   }
                   if (footContactLocationNum>=0 and (footCornerContact-footCorners_[footContactLocationNum]).norm()< 0.01){
                       footCornerContact_(footContactLocationNum) = 1;
+                      footContact_ += 1; /// excluding toe
                   }
 
-                  footNormalImpulse_ += contact.getImpulse().e()(2);
-//                  footContact_ += 1;
+                  footNormalImpulse_ += contact.getImpulse().e()(2);\
               }
           }
       }
@@ -961,10 +962,10 @@ class ENVIRONMENT : public RaisimGymEnv {
 
           prevTarget_ - actionMean_,                                            /// previous action 3
           prevPrevTarget_ - actionMean_,                                        /// preprevious action 3
-          jointPosErrorHist_[0], jointPosErrorHist_[3], jointPosErrorHist_[6],  /// joint History 9 (0.18, 0.12, 0.6)
+          jointPosErrorHist_[0], jointPosErrorHist_[6], jointPosErrorHist_[12],  /// joint History 9 (0.18, 0.12, 0.6)
 //          jointVelHist_[0], jointVelHist_[3], jointVelHist_[6],                 /// joint History 9 (0.18, 0.12, 0.6)
 //          signedSqrt(jointVelHist_[0]), signedSqrt(jointVelHist_[3]), signedSqrt(jointVelHist_[6]), /// scaled joint vel History 9 (0.18, 0.12, 0.6)
-          signedSqrt2(jointVelHist_[0]), signedSqrt2(jointVelHist_[3]), signedSqrt2(jointVelHist_[6]), /// scaled joint vel History 9 (0.18, 0.12, 0.6)
+          signedSqrt2(jointVelHist_[0]), signedSqrt2(jointVelHist_[6]), signedSqrt2(jointVelHist_[12]), /// scaled joint vel History 9 (0.18, 0.12, 0.6)
           command_,                                                             /// command 3
           phaseSin_,                                                            /// phase encoding 2
           static_cast<double>(standingMode_);                                   /// standingMode 1
