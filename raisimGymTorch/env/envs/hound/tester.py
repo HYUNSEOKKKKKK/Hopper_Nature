@@ -39,7 +39,7 @@ act_dim = env.num_acts
 est_dim = env.num_est
 
 # weight_path = "/home/gijeong/workspace/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/v7.1_2025-03-26-03-27-50/full_3000.pt"
-weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-27-15-45-38/full_6000.pt")
+weight_path = ("/media/gijeong/T7/raisimGymTorch/data/dhal_one_leg/2025-03-30-23-09-58/full_1000.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
@@ -86,11 +86,11 @@ else:
         #         command_yaw = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(0), 0.6))
         #         env.set_command(command_x,command_y,command_yaw)
 
-        # if step % 400 == 0:
-        #     env.reset()
-        #     env.set_command(np.random.uniform(-0.6,-0.6, 1),0.0,0.0)
-        # elif (step-240)%400 == 0:
-        env.set_command(np.random.uniform(0.6, 0.6, 1),0.0,0.0)
+        if step % 400 == 0:
+            env.reset()
+            env.set_command(np.random.uniform(-0.6,-0.6, 1),0.0,0.0)
+        elif (step-240)%400 == 0:
+            env.set_command(np.random.uniform(0.0, 0.0, 1),0.0,0.0)
         time.sleep(0.010)
         with torch.no_grad():
             obs = env.observe(False)
