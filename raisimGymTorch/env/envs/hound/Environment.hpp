@@ -23,7 +23,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    dhal_ = world_->addArticulatedSystem(resourceDir_+"../hound/rsc/Hop_verParallelAnkleLinks_ver20250304/Hop_verParallelAnkleLinks_20250311.urdf");
+    dhal_ = world_->addArticulatedSystem(resourceDir_+"/../Hopper_Nature/rsc/Hop_verParallelAnkleLinks_ver20250304/Hop_verParallelAnkleLinks_20250311.urdf");
     dhal_->setName("dhal");
     dhal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -52,10 +52,16 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     /// set pd gains
     pGain_ = 50.0;
+    pGainAnkle_ = 30.0;
 //    dGain_ = 5.0;
-    dGain_ = 3.0; // v2.32temp
-    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_); // knee, ankle input (active)
-    jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_);
+    dGain_ = 3.0; // knee
+    dGainAnkle_ = 1.5;
+    jointPgain_.setZero();
+    jointPgain_(0) = pGain_;
+    jointPgain_.tail(2).setConstant(pGainAnkle_);
+    jointDgain_.setZero();
+    jointDgain_(0) = dGain_;
+    jointDgain_.tail(2).setConstant(dGainAnkle_);
     dhal_->setPdGains(Eigen::VectorXd::Zero(gvDim_), Eigen::VectorXd::Zero(gvDim_));
     dhal_->setGeneralizedForce(Eigen::VectorXd::Zero(gvDim_));
     /// set pd gains for sub-step
@@ -218,8 +224,12 @@ class ENVIRONMENT : public RaisimGymEnv {
   void init() final { }
 
   void reset() final {
-    jointPgain_.setZero(); jointPgain_.tail(actionDim_).setConstant(pGain_ + pGain_*0.1*uniDist_(gen_));
-    jointDgain_.setZero(); jointDgain_.tail(actionDim_).setConstant(dGain_ + dGain_*0.1*uniDist_(gen_));
+    jointPgain_.setZero();
+    jointPgain_(0) = pGain_ + pGain_*0.1*uniDist_(gen_);
+    jointPgain_.tail(2).setConstant(pGainAnkle_ + pGainAnkle_*0.1*uniDist_(gen_));
+    jointDgain_.setZero();
+    jointDgain_(0) = dGain_ + dGain_*0.1*uniDist_(gen_);
+    jointDgain_.tail(2).setConstant(dGainAnkle_ + dGainAnkle_*0.1*uniDist_(gen_));
     /// foot obs noise
     for (int i=0;i<(3*numLegs_);i++){
       footObsNoise_(i) = 0.02 * uniDist_(gen_);
@@ -1082,7 +1092,7 @@ class ENVIRONMENT : public RaisimGymEnv {
   double terminalRewardCoeff_ = -1e1;
   raisim::ArticulatedSystem* dhal_;
 
-  double pGain_, dGain_;
+  double pGain_, pGainAnkle_, dGain_, dGainAnkle_;
   Eigen::VectorXd gc_, gv_, genForceTarget_;
   Eigen::Vector<double,16> gcInit_, gcNoise_;
   Eigen::Vector<double,15> gvInit_, gvNoise_, subStepPgain_,subStepDgain_;
@@ -1172,4 +1182,3 @@ thread_local std::mt19937 raisim::ENVIRONMENT::gen_;
 thread_local std::normal_distribution<double> raisim::ENVIRONMENT::normDist_(0.0,1.0);
 thread_local std::uniform_real_distribution<double> raisim::ENVIRONMENT::uniDist_(-1.0,1.0);
 }
-
