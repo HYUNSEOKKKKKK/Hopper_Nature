@@ -23,7 +23,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    dhal_ = world_->addArticulatedSystem(resourceDir_+"/../Hopper_Nature/rsc/Hop_verParallelAnkleLinks_ver20250304/Hop_verParallelAnkleLinks_20250311.urdf");
+    dhal_ = world_->addArticulatedSystem(resourceDir_+"/../Hopper_Nature/rsc/Hop2_Parallel_20260820/Hop2_Parallel_20260820.urdf");
     dhal_->setName("dhal");
     dhal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
