@@ -38,19 +38,19 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-weight_path = ("/home/hyunseok/raisim_ws/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2026-09-04-16-38-39/full_10000.pt")
+weight_path = ("/home/hyunseok/raisim_ws/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2026-09-15-02-20-35/full_10000.pt")
 #weight_path = ("/home/hyunseok/raisim_ws/raisimLib/Hopper_Nature/raisimGymTorch/data/dhal_one_leg/2026-09-04-02-04-02/full_10000.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
 command_schedule = [
-    (3.0, 0.00, 0.00, 0.00),
-    (3.0, 0.50, 0.00, 0.00),
     (2.0, 0.00, 0.00, 0.00),
-    (3.0, -0.40, 0.00, 0.00),
-    (2.5, 0.00, 0.00, 0.30),
-    (2.5, 0.00, 0.00, -0.30),
-    (3.0, 0.50, 0.00, 0.25),
+    (2.0, 0.70, 0.00, 0.00),
+    (2.0, 0.00, 0.00, 0.00),
+    (2.0, -0.50, 0.00, 0.00),
+    (2.0, 0.00, 0.00, 0.30),
+    (2.0, 0.00, 0.00, -0.30),
+    (2.0, 0.70, 0.00, 0.25),
 ]
 cycle_duration = sum(phase[0] for phase in command_schedule)
 

@@ -23,7 +23,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    dhal_ = world_->addArticulatedSystem(resourceDir_+"/../Hopper_Nature/rsc/Hop2_Parallel_20260820/Hop2_Parallel_20260820.urdf");
+    dhal_ = world_->addArticulatedSystem(resourceDir_+"/../Hopper_Nature/rsc/Hop2_Parallel_20260911/Hop2_Parallel_20260911.urdf");
     dhal_->setName("dhal");
     dhal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -212,7 +212,11 @@ class ENVIRONMENT : public RaisimGymEnv {
       nominalMass_.push_back(dhal_->getMass()[1]); // calf
       nominalMass_.push_back(dhal_->getMass()[3]); // foot
 
-      dhal_->getCollisionBody("Foot/0").setMaterial("rubber");
+      /// 발의 collision body 전부 (sole 박스 "Foot/0" + 앞쪽 toe 박스 "Foot/1") 같은 재질로.
+      /// toe 만 default 재질로 남으면 restitution 0 / 마찰 randomize 미적용이라 접촉이 비대칭이 됨.
+      for (auto& col : dhal_->getCollisionBodies()) {
+          if (col.localIdx == dhal_->getBodyIdx("Foot")) { col.setMaterial("rubber"); }
+      }
 
       /// foorCorners
       footCorners_.push_back(Eigen::Vector3d{ 0.08, 0.05, -0.015-0.065});
@@ -252,15 +256,15 @@ class ENVIRONMENT : public RaisimGymEnv {
         do {
 //            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
             double maxCommand = 0.8; // 평지 lin x max 1.5
-//            command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
-            command_ << -maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+            command_ << maxCommand * uniDist_(gen_), 0.6 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+//            command_ << -maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
 //            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
         } while (command_.norm() < 0.2);
     }
 
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
 //    world_->setDefaultMaterial(mu_, 0, 0);
-    world_->setMaterialPairProp("default","rubber",mu_, 0.6+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
+    world_->setMaterialPairProp("default","rubber",mu_, 0.3+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
 
     /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
     bool reset = true;

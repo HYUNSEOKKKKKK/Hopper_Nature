@@ -1,11 +1,11 @@
 seed: 1
-record_video: no
+record_video: yes
 
 environment:
   render: True
 # just testing commenting
   num_envs: 400
-  eval_every_n: 500
+  eval_every_n: 1000
   num_threads: 60
   simulation_dt: 0.002
   control_dt: 0.01
