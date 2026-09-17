@@ -264,7 +264,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
 //    world_->setDefaultMaterial(mu_, 0, 0);
-    world_->setMaterialPairProp("default","rubber",mu_, 0.3+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
+    world_->setMaterialPairProp("default","rubber",mu_, 0.1+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
 
     /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
     bool reset = true;
