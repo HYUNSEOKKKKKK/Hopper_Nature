@@ -1,0 +1,377 @@
+<robot name="DHAL" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!--
+      CALIBRATION WORKING COPY (2026-09-08) (NOT FINAL).
+      Confirmed data are applied as they are validated. Provisional assumptions are
+      marked locally. The uploaded Hop2_Parallel_20260820.zip remains untouched.
+    -->
+    <material name="black">
+        <color rgba="0.0 0.0 0.0 1.0"/>
+    </material>
+    <material name="blue">
+        <color rgba="0.0 0.0 0.8 1.0"/>
+    </material>
+    <material name="green">
+        <color rgba="0.0 0.8 0.0 1.0"/>
+    </material>
+    <material name="grey">
+        <color rgba="0.2 0.2 0.2 1.0"/>
+    </material>
+    <material name="silver">
+        <color rgba="0.913725490196 0.913725490196 0.847058823529 1.0"/>
+    </material>
+    <material name="orange">
+        <color rgba="1.0 0.423529411765 0.0392156862745 1.0"/>
+    </material>
+    <material name="brown">
+        <color rgba="0.870588235294 0.811764705882 0.764705882353 1.0"/>
+    </material>
+    <material name="red">
+        <color rgba="0.8 0.0 0.0 1.0"/>
+    </material>
+    <material name="white">
+        <color rgba="1.0 1.0 1.0 1.0"/>
+    </material>
+
+    <link name="Thigh">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Thigh_with_Link_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 -0.04 -0.14"/>
+            <geometry>
+                <box size="0.1 0.02 0.26"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0.06 -0.14"/>
+            <geometry>
+                <box size="0.1 0.06 0.26"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.001815 0.027609 -0.115412"/>
+            <mass value="4.29025"/>
+            <inertia ixx="0.077120" ixy="-0.000030" ixz="-0.001298" iyy="0.076206" iyz="-0.012889" izz="0.014845"/>
+        </inertial>
+    </link>
+
+    <joint name="00_knee_joint" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0 -0.2523"/>
+        <parent link="Thigh"/>
+        <child link="Calf"/>
+        <axis xyz="0 1 0"/>
+        <!-- PROVISIONAL D151 output-axis equivalent inertia:
+             motor/sun/encoder ring and two sun-locking LPSTAG pins at 20x;
+             carrier, four carrier-locking LPSTAG pins, and eight carrier-fixed
+             fasteners (4x M3_10 + 4x M4_12) at 5x;
+             four compound planets (26.4 mm orbit at 5x and spin at -10x),
+             the clean three-part output group and two output-fixed LPSTAG pins
+             at 1x, and the exact orbital term of eight MTA planet bearings at 5x.
+             Bearing race/cage/ball self-rotation and remaining output-side fasteners
+             remain pending; the mixed 201.80 g 4-C selection is excluded. -->
+        <dynamics rotor_inertia="0.37825873418" damping="0" friction="0"/>
+        <!-- PROVISIONAL measured motor-side envelope: the static test reached
+             27.5166 N*m (mean absolute CW/CCW endpoint) at 110 A and stopped
+             before the true peak. effort=550.3 N*m uses 27.5166*20 without
+             gearbox-efficiency derating;
+             velocity=10.11 rad/s retains the 65.1 V estimate pending speed/Kv data. -->
+        <limit effort="550.3" velocity="10.11" lower="0" upper="2.26893"/>
+    </joint>
+    <link name="Calf">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 -0.205"/>
+            <geometry>
+                <box size="0.1 0.048 0.32"/>
+            </geometry>
+        </collision>
+        <!-- PROVISIONAL CAD occurrence boundary: COM-centered SolidWorks tensor,
+             converted from positive-product notation into the URDF link frame. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.003950 0.000010 -0.144090"/>
+            <mass value="3.419690"/>
+            <inertia ixx="0.03144104616" ixy="-0.00000152892" ixz="-0.00075255670" iyy="0.03453173442" iyz="0.00085899137" izz="0.00474369522"/>
+        </inertial>
+    </link>
+
+    <joint name="01_ankle_pitch_joint" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0 -0.41"/>
+        <parent link="Calf"/>
+        <child link="Universal"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-0.872665" upper="0.698132"/>
+    </joint>
+    <link name="Universal">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Universal_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <!-- CONFIRMED four-bearing Universal assembly. SolidWorks default X/Y
+             map to URDF Y/X; the old ixx=0.00048 was a decimal-place error. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value="0.209567"/>
+            <inertia ixx="0.00004785009" ixy="0" ixz="0" iyy="0.00008903210" iyz="0" izz="0.00012365773"/>
+        </inertial>
+    </link>
+
+    <joint name="02_ankle_roll_joint" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="Universal"/>
+        <child link="Foot"/>
+        <axis xyz="1 0 0"/>
+        <limit lower="-0.523599" upper="0.523599"/>
+    </joint>
+    <link name="Foot">
+<!--        <visual>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--            <geometry>-->
+<!--                <mesh filename="URDF_Foot_verHopping1_Simplified.dae" scale="1 1 1"/>-->
+<!--            </geometry>-->
+<!--            <material name="grey"/>-->
+<!--        </visual>-->
+<!--        <collision>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 -0.065"/>-->
+<!--            <geometry>-->
+<!--&lt;!&ndash;                <box size="0.24 0.08 0.03"/>&ndash;&gt;-->
+<!--                <box size="0.265 0.10 0.03"/>-->
+<!--            </geometry>-->
+<!--        </collision>-->
+<!--        <inertial>-->
+<!--            <origin rpy="0 0 0" xyz="-0.014103 -0.0000 -0.044208"/>-->
+<!--&lt;!&ndash;            <mass value="0.899532"/>&ndash;&gt;-->
+<!--            <mass value="1.0"/>-->
+<!--&lt;!&ndash;            <inertia ixx="0.002914" ixy="0.000001" ixz="0.000081" iyy="0.005654" iyz="0" izz="0.003715"/>&ndash;&gt;-->
+<!--            <inertia ixx="0.0032" ixy="0.000001" ixz="0.0001" iyy="0.005654" iyz="0" izz="0.0040"/>-->
+<!--        </inertial>-->
+        <visual>
+            <origin rpy="0 0 0" xyz="-0.02 0 -0.065"/>
+            <geometry>
+                <box size="0.20 0.1 0.03"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <visual>
+            <origin rpy="0 -0.5 0" xyz="0.12 0 -0.045"/>
+            <geometry>
+                <box size="0.055 0.1 0.03"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="-0.02 0 -0.065"/>
+            <geometry>
+                <box size="0.20 0.1 0.03"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 -0.5 0" xyz="0.12 0 -0.045"/>
+            <geometry>
+                <box size="0.055 0.1 0.03"/>
+            </geometry>
+        </collision>
+        <!-- PROVISIONAL physical/CAD hybrid: measured foot_2+8 bolts = 0.837 kg;
+             unmeasured rigid parts retain CAD mass/distribution. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.00320582 -0.00032194 -0.03596666"/>
+            <mass value="1.041857"/>
+            <inertia ixx="0.00139245073" ixy="-0.00001843666" ixz="-0.00021646787" iyy="0.00564702944" iyz="-0.00001139993" izz="0.00584029057"/>
+        </inertial>
+    </link>
+
+    <joint name="03_left_ankle_link_pitch_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="-0.0640125 0.04 0.0112871"/>
+        <parent link="Foot"/>
+        <child link="Left_Dice"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+    <link name="Left_Dice">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_Dice_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value="0.037914"/>
+            <inertia ixx="0.000002" ixy="0" ixz="0" iyy="0.000004" iyz="0" izz="0.000004"/>
+        </inertial>
+    </link>
+
+    <joint name="04_left_ankle_link_roll_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="Left_Dice"/>
+        <child link="Left_Ankle_Link"/>
+        <axis xyz="1 0 0"/>
+    </joint>
+    <link name="Left_Ankle_Link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_S_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.000021 0 0.083422"/>
+            <mass value="0.134342"/>
+            <inertia ixx="0.001708" ixy="0" ixz="0" iyy="0.001714" iyz="0" izz="0.000010"/>
+        </inertial>
+    </link>
+
+    <joint name="05_right_ankle_link_pitch_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="-0.0640125 -0.04 0.0112871"/>
+        <parent link="Foot"/>
+        <child link="Right_Dice"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+    <link name="Right_Dice">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_Dice_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value="0.037914"/>
+            <inertia ixx="0.000002" ixy="0" ixz="0" iyy="0.000004" iyz="0" izz="0.000004"/>
+        </inertial>
+    </link>
+
+    <joint name="06_right_ankle_link_roll_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="Right_Dice"/>
+        <child link="Right_Ankle_Link"/>
+        <axis xyz="1 0 0"/>
+    </joint>
+    <link name="Right_Ankle_Link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_L_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.000017 0 0.137377"/>
+            <mass value="0.170375"/>
+            <inertia ixx="0.005596" ixy="0" ixz="0" iyy="0.005602" iyz="0" izz="0.000011"/>
+        </inertial>
+    </link>
+
+    <joint name="07_left_ankle_link_input_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="0 0.0255 -0.205"/>
+        <parent link="Calf"/>
+        <child link="Left_Ankle_Link_Input"/>
+        <axis xyz="0 1 0"/>
+        <!-- CONFIRMED CAD-equivalent 5.2:1 drivetrain: motor/sun/encoder ring,
+             4 planets, carrier/output, 4x M3_8 and 6x M3_6 output-fixed bolts.
+             Internal bearing-race rotation remains unmodeled. -->
+        <dynamics rotor_inertia="0.00611686196" damping="0" friction="0"/>
+        <!-- PROVISIONAL measured motor-side envelope: the static test reached
+             approximately 16.52 N*m (mean absolute endpoint) at 60 A; the true
+             peak was not established. effort=85.9 N*m uses 16.52*5.2 without
+             gearbox-efficiency derating;
+             velocity=18.3 rad/s retains the 65.1 V estimate pending speed/Kv data. -->
+        <limit effort="85.9" velocity="18.3"/>
+    </joint>
+    <link name="Left_Ankle_Link_Input">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_Input_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="green"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.024120 0.013430 -0.001640"/>
+            <mass value="0.118360"/>
+            <inertia ixx="0.00002370602" ixy="-0.00000732881" ixz="-0.00000462551" iyy="0.00009080315" iyz="0.00000161882" izz="0.00008559930"/>
+        </inertial>
+    </link>
+
+    <joint name="08_right_ankle_link_input_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="0 -0.0255 -0.09"/>
+        <parent link="Calf"/>
+        <child link="Right_Ankle_Link_Input"/>
+        <axis xyz="0 1 0"/>
+        <!-- CONFIRMED CAD-equivalent 5.2:1 drivetrain: motor/sun/encoder ring,
+             4 planets, carrier/output, 4x M3_8 and 6x M3_6 output-fixed bolts.
+             Internal bearing-race rotation remains unmodeled. -->
+        <dynamics rotor_inertia="0.00611686196" damping="0" friction="0"/>
+        <!-- PROVISIONAL measured motor-side envelope: the static test reached
+             approximately 16.52 N*m (mean absolute endpoint) at 60 A; the true
+             peak was not established. effort=85.9 N*m uses 16.52*5.2 without
+             gearbox-efficiency derating;
+             velocity=18.3 rad/s retains the 65.1 V estimate pending speed/Kv data. -->
+        <limit effort="85.9" velocity="18.3"/>
+    </joint>
+    <link name="Right_Ankle_Link_Input">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_Input_mir_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="green"/>
+        </visual>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.024120 -0.013430 -0.001640"/>
+            <mass value="0.118360"/>
+            <inertia ixx="0.00002370594" ixy="0.00000732874" ixz="-0.00000462550" iyy="0.00009080295" iyz="-0.00000161879" izz="0.00008559905"/>
+        </inertial>
+    </link>
+
+    <joint name="09_temp_weight_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0.1"/>
+        <parent link="Thigh"/>
+        <child link="Temp_Weight"/>
+    </joint>
+    <link name="Temp_Weight">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <sphere radius="0.1"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <sphere radius="0.1"/>
+            </geometry>
+        </collision>
+        <!-- PROVISIONAL three-group physical calibration in URDF-aligned CS1:
+             dumbbells stay at 3.000 kg; 0.063884 kg CAD hardware stays unchanged;
+             body_1+body_2 is scaled 0.110000 -> 0.316116 kg to match 3.380 kg. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.000068979276 0 0.045106208574"/>
+            <mass value="3.380000"/>
+            <inertia ixx="0.004181097751" ixy="0" ixz="0.000009332820" iyy="0.004174563808" iyz="0" izz="0.006073407112"/>
+        </inertial>
+    </link>
+
+        <!-- Active calibrated closure: measured center-to-center lengths 202 mm / 320 mm.
+             Forward-kinematics pin residual after rounding is below 1e-9 m. -->
+    <constraints nominal_config="0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.64057070, -0.00247525, 0.40891126, 0.00156250, 0.51048313, 0.23438469">
+        <pin body1="Left_Ankle_Link_Input" body2="Left_Ankle_Link" anchor="0.065 0.015 0.0"/>
+        <pin body1="Right_Ankle_Link_Input" body2="Right_Ankle_Link" anchor="0.065 -0.015 0.0"/>
+    </constraints>
+
+</robot>
