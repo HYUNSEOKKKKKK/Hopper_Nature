@@ -23,7 +23,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     world_ = std::make_unique<raisim::World>();
 
     /// add objects
-    dhal_ = world_->addArticulatedSystem(resourceDir_+"/../Hopper_Nature/rsc/Hop2_Parallel_20260911/Hop2_Parallel_20260911.urdf");
+    dhal_ = world_->addArticulatedSystem(resourceDir_+"/../Hopper_Nature/rsc/Hop2_Parallel_20260922/Hop2_Parallel_20260922.urdf");
     dhal_->setName("dhal");
     dhal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -267,7 +267,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
 //    world_->setDefaultMaterial(mu_, 0, 0);
-    world_->setMaterialPairProp("default","rubber",mu_, 0.2+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
+    world_->setMaterialPairProp("default","rubber",mu_, 0.3+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
     world_->setMaterialPairProp("default","toe",   mu_, 0.0, 0.001); // toe: sole 과 마찰 동일, restitution 만 여기서 조절
 
     /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
