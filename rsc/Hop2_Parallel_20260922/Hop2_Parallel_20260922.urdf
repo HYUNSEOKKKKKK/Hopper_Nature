@@ -1,0 +1,454 @@
+<robot name="DHAL" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!--
+      CURRENT CALIBRATED MODEL (2026-09-21): total link mass = 14.000 kg.
+      User-requested global proportional distribution of unresolved mass:
+      baseline total = 13.187198673293 kg; residual = 0.812801326707 kg;
+      every link mass and all six COM-centered inertia entries are multiplied
+      by 1.0616356321644795439547563032018071123483308513041.
+      COM positions and inertial-frame orientations are unchanged.
+      Physical-source comments below describe the PRE-NORMALIZATION baseline;
+      effective link masses include the globally allocated residual, even for
+      links whose baseline masses were measured. This is an assumed distribution.
+      Joint rotor_inertia is unchanged; no separate D110 +46 g is added.
+      Original measurements, baseline URDF, algorithm, and checks are retained
+      in calibration/. See README_CURRENT_20260921.md for current model status.
+      Remaining local provisional assumptions are not resolved by total-mass matching.
+    -->
+    <material name="black">
+        <color rgba="0.0 0.0 0.0 1.0"/>
+    </material>
+    <material name="blue">
+        <color rgba="0.0 0.0 0.8 1.0"/>
+    </material>
+    <material name="green">
+        <color rgba="0.0 0.8 0.0 1.0"/>
+    </material>
+    <material name="grey">
+        <color rgba="0.2 0.2 0.2 1.0"/>
+    </material>
+    <material name="silver">
+        <color rgba="0.913725490196 0.913725490196 0.847058823529 1.0"/>
+    </material>
+    <material name="orange">
+        <color rgba="1.0 0.423529411765 0.0392156862745 1.0"/>
+    </material>
+    <material name="brown">
+        <color rgba="0.870588235294 0.811764705882 0.764705882353 1.0"/>
+    </material>
+    <material name="red">
+        <color rgba="0.8 0.0 0.0 1.0"/>
+    </material>
+    <material name="white">
+        <color rgba="1.0 1.0 1.0 1.0"/>
+    </material>
+
+    <link name="Thigh">
+        <!-- LEGACY baseline distribution: Thigh repartition remains pending.
+             2026-09-16: received input assembly, long link, six M5 bolts,
+             two output-fixed CUG pins, and YT2015 bearing properties.
+             Reported assembly poses differ from the earlier STEP reference;
+             CUG4-10 <2> duplicated <3>, now corrected by the user;
+             physical output pins are <3>/<4> (2.10 g total).
+             Reconcile poses and rigid-body boundaries before repartition.
+             See calibration/thigh_partition_20260916.json and .md.
+             This historical partition note does not supply new baseline values. -->
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Thigh_with_Link_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 -0.04 -0.14"/>
+            <geometry>
+                <box size="0.1 0.02 0.26"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0.06 -0.14"/>
+            <geometry>
+                <box size="0.1 0.06 0.26"/>
+            </geometry>
+        </collision>
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 4.29025 kg; effective mass 4.554682270893658363 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.001815 0.027609 -0.115412"/>
+            <mass value="4.554682270893658363"/>
+            <inertia ixx="0.081873339952524662429791" ixy="-0.000031849068964934386319" ixz="-0.001378003050549494448053" iyy="0.080903004984726328126616" iyz="-0.013683421662967976842033" izz="0.015759980959481698830008"/>
+        </inertial>
+    </link>
+
+    <joint name="00_knee_joint" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0 -0.2523"/>
+        <parent link="Thigh"/>
+        <child link="Calf"/>
+        <axis xyz="0 1 0"/>
+        <!-- PROVISIONAL D151 output-axis equivalent inertia:
+             motor/sun/encoder ring and two sun-locking LPSTAG pins at 20x;
+             carrier, four carrier-locking LPSTAG pins, and eight carrier-fixed
+             fasteners (4x M3_10 + 4x M4_12) at 5x;
+             four compound planets (26.4 mm orbit at 5x and spin at -10x),
+             the clean three-part output group and two output-fixed LPSTAG pins
+             at 1x, and the exact orbital term of eight MTA planet bearings at 5x.
+             Bearing race/cage/ball self-rotation and remaining output-side fasteners
+             remain pending; the mixed 201.80 g 4-C selection is excluded. -->
+        <dynamics rotor_inertia="0.37825873418" damping="0" friction="0"/>
+        <!-- PROVISIONAL measured motor-side envelope: the static test reached
+             27.5166 N*m (mean absolute CW/CCW endpoint) at 110 A and stopped
+             before the true peak. effort=550.3 N*m uses 27.5166*20 without
+             gearbox-efficiency derating;
+             velocity=10.11 rad/s retains the 65.1 V estimate pending speed/Kv data. -->
+        <limit effort="550.3" velocity="10.11" lower="0" upper="2.26893"/>
+    </joint>
+    <link name="Calf">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 -0.205"/>
+            <geometry>
+                <box size="0.1 0.048 0.32"/>
+            </geometry>
+        </collision>
+        <!-- PROVISIONAL CAD occurrence boundary: COM-centered SolidWorks tensor,
+             converted from positive-product notation into the URDF link frame. -->
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 3.419690 kg; effective mass 3.630464754956549052 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.003950 0.000010 -0.144090"/>
+            <mass value="3.630464754956549052"/>
+            <inertia ixx="0.033378934915984182053857" ixy="-0.000001623155950728916064" ixz="-0.000798941007944114582816" iyy="0.036660119700712617369368" iyz="0.000911935846113782348799" izz="0.005036075873680319866446"/>
+        </inertial>
+    </link>
+
+    <joint name="01_ankle_pitch_joint" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0 -0.41"/>
+        <parent link="Calf"/>
+        <child link="Universal"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-0.872665" upper="0.698132"/>
+    </joint>
+    <link name="Universal">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Universal_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <!-- CONFIRMED four-bearing Universal assembly. SolidWorks default X/Y
+             map to URDF Y/X; the old ixx=0.00048 was a decimal-place error. -->
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 0.209567 kg; effective mass 0.222483794525813485 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value="0.222483794525813485"/>
+            <inertia ixx="0.000050799360546277240981" ixy="0.000000000000000000000000" ixz="0.000000000000000000000000" iyy="0.000094519649766431159205" iyz="0.000000000000000000000000" izz="0.000131279452360574527037"/>
+        </inertial>
+    </link>
+
+    <joint name="02_ankle_roll_joint" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="Universal"/>
+        <child link="Foot"/>
+        <axis xyz="1 0 0"/>
+        <limit lower="-0.523599" upper="0.523599"/>
+    </joint>
+    <link name="Foot">
+<!--        <visual>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--            <geometry>-->
+<!--                <mesh filename="URDF_Foot_verHopping1_Simplified.dae" scale="1 1 1"/>-->
+<!--            </geometry>-->
+<!--            <material name="grey"/>-->
+<!--        </visual>-->
+<!--        <collision>-->
+<!--            <origin rpy="0 0 0" xyz="0 0 -0.065"/>-->
+<!--            <geometry>-->
+<!--&lt;!&ndash;                <box size="0.24 0.08 0.03"/>&ndash;&gt;-->
+<!--                <box size="0.265 0.10 0.03"/>-->
+<!--            </geometry>-->
+<!--        </collision>-->
+<!--        <inertial>-->
+<!--            <origin rpy="0 0 0" xyz="-0.014103 -0.0000 -0.044208"/>-->
+<!--&lt;!&ndash;            <mass value="0.899532"/>&ndash;&gt;-->
+<!--            <mass value="1.0"/>-->
+<!--&lt;!&ndash;            <inertia ixx="0.002914" ixy="0.000001" ixz="0.000081" iyy="0.005654" iyz="0" izz="0.003715"/>&ndash;&gt;-->
+<!--            <inertia ixx="0.0032" ixy="0.000001" ixz="0.0001" iyy="0.005654" iyz="0" izz="0.0040"/>-->
+<!--        </inertial>-->
+        <visual>
+            <origin rpy="0 0 0" xyz="-0.02 0 -0.065"/>
+            <geometry>
+                <box size="0.20 0.1 0.03"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <visual>
+            <origin rpy="0 -0.5 0" xyz="0.12 0 -0.045"/>
+            <geometry>
+                <box size="0.055 0.1 0.03"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="-0.02 0 -0.065"/>
+            <geometry>
+                <box size="0.20 0.1 0.03"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 -0.5 0" xyz="0.12 0 -0.045"/>
+            <geometry>
+                <box size="0.055 0.1 0.03"/>
+            </geometry>
+        </collision>
+        <!-- CONFIRMED measurement scope: 0.837 kg includes foot_2, eight bolts,
+             and the attached tire/rubber outsole. Bolts alone weigh 0.048 kg;
+             0.789 kg therefore means foot_2 PLUS outsole, not the bare part.
+             Baseline Foot mass = 0.929141 - 0.724284 + 0.837 = 1.041857 kg.
+             Do not add outsole mass again. The 0.112716 kg CAD-to-measured
+             difference is not an independent measurement of outsole mass.
+             PROVISIONAL COM/tensor: earlier mass-distribution estimate retained.
+             Outsole distribution and CAD-report-to-link frame remain to be
+             reconciled; outsole presence alone does not determine a new COM.
+             Existing collision boxes retain their 6.35 mm sole allowance. -->
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 1.041857 kg; effective mass 1.106072514819988164 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.00320582 -0.00032194 -0.03596666"/>
+            <mass value="1.106072514819988164"/>
+            <inertia ixx="0.001478275311001441021050" ixy="-0.000019573015194101573429" ixz="-0.000229810004010748376538" iyy="0.005995087669385826906990" iyz="-0.000012102571892180815288" izz="0.006200260571306198569517"/>
+        </inertial>
+    </link>
+
+    <joint name="03_left_ankle_link_pitch_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="-0.0640125 0.04 0.0112871"/>
+        <parent link="Foot"/>
+        <child link="Left_Dice"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+    <link name="Left_Dice">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_Dice_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 0.037914 kg; effective mass 0.040250853357884077 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value="0.040250853357884077"/>
+            <inertia ixx="0.000002123271264328959088" ixy="0.000000000000000000000000" ixz="0.000000000000000000000000" iyy="0.000004246542528657918176" iyz="0.000000000000000000000000" izz="0.000004246542528657918176"/>
+        </inertial>
+    </link>
+
+    <joint name="04_left_ankle_link_roll_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="Left_Dice"/>
+        <child link="Left_Ankle_Link"/>
+        <axis xyz="1 0 0"/>
+    </joint>
+    <link name="Left_Ankle_Link">
+        <!-- 2026-09-14: V1 mesh endpoint separation matches supplied STEP and
+             physical measurement: 202 mm. Same mesh frame and scale as before. -->
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_S_verV1_simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <!-- MEASURED BASE-ROD MASS APPLIED AND CAD CHECKED (2026-09-21):
+             S rod = 0.123 kg; confirmed part: calf_link_S_1_verU1.
+             User corrected the earlier Drawing/Hopping name. New AISI 1045
+             SolidWorks part volume and inertia match the supplied STEP at
+             displayed precision; whole-assembly steel reports also reconcile
+             within propagated report rounding. Numerical calibration retained.
+             Only the base-rod mass contribution was replaced; other hardware
+             and separate Dice properties remain. Inertia uses measured mass
+             uniformly distributed over the confirmed CAD geometry.
+             Dice/bushing partition is still provisional; actual S45C grade is
+             not established by weighing. See
+             calibration/sl_steel_cad_confirmation_20260921.md. -->
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 0.215143242196 kg; effective mass 0.228403731934666190 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.000016013145 0 0.088949725571"/>
+            <mass value="0.228403731934666190"/>
+            <inertia ixx="0.001004905005479594235684" ixy="0.000000000201710770111251" ixz="0.000000240906600765323464" iyy="0.001011787890506102648756" iyz="0.000000009873211379129660" izz="0.000012140280947782373467"/>
+        </inertial>
+    </link>
+
+    <joint name="05_right_ankle_link_pitch_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="-0.0640125 -0.04 0.0112871"/>
+        <parent link="Foot"/>
+        <child link="Right_Dice"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+    <link name="Right_Dice">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_Dice_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 0.037914 kg; effective mass 0.040250853357884077 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value="0.040250853357884077"/>
+            <inertia ixx="0.000002123271264328959088" ixy="0.000000000000000000000000" ixz="0.000000000000000000000000" iyy="0.000004246542528657918176" iyz="0.000000000000000000000000" izz="0.000004246542528657918176"/>
+        </inertial>
+    </link>
+
+    <joint name="06_right_ankle_link_roll_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="Right_Dice"/>
+        <child link="Right_Ankle_Link"/>
+        <axis xyz="1 0 0"/>
+    </joint>
+    <link name="Right_Ankle_Link">
+        <!-- 2026-09-14: V1 mesh endpoint separation matches supplied STEP and
+             physical measurement: 320 mm. Same mesh frame and scale as before. -->
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_L_verV1_simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <!-- MEASURED BASE-ROD MASS APPLIED AND CAD CHECKED (2026-09-21):
+             L rod = 0.226 kg; confirmed part: calf_link_L_1_verU1.
+             User corrected the earlier Drawing/Hopping name. New AISI 1045
+             SolidWorks part volume and inertia match the supplied STEP at
+             displayed precision; whole-assembly steel reports also reconcile
+             within propagated report rounding. Numerical calibration retained.
+             Only the base-rod mass contribution was replaced; other hardware
+             and separate Dice properties remain. Inertia uses measured mass
+             uniformly distributed over the confirmed CAD geometry.
+             Dice/bushing partition is still provisional; actual S45C grade is
+             not established by weighing. See
+             calibration/sl_steel_cad_confirmation_20260921.md. -->
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 0.318143431097 kg; effective mass 0.337752402591640135 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.000006547015 0 0.146213079947"/>
+            <mass value="0.337752402591640135"/>
+            <inertia ixx="0.003477036078075869330548" ixy="0.000000000201710770111251" ixz="0.000000371262857965074656" iyy="0.003483918021917801133258" iyz="-0.000000000201710770111251" izz="0.000014107981033210779591"/>
+        </inertial>
+    </link>
+
+    <joint name="07_left_ankle_link_input_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="0 0.0255 -0.205"/>
+        <parent link="Calf"/>
+        <child link="Left_Ankle_Link_Input"/>
+        <axis xyz="0 1 0"/>
+        <!-- CONFIRMED CAD-equivalent 5.2:1 drivetrain: motor/sun/encoder ring,
+             4 planets, carrier/output, 4x M3_8 and 6x M3_6 output-fixed bolts.
+             Internal bearing-race rotation remains unmodeled. -->
+        <dynamics rotor_inertia="0.00611686196" damping="0" friction="0"/>
+        <!-- PROVISIONAL measured motor-side envelope: the static test reached
+             approximately 16.52 N*m (mean absolute endpoint) at 60 A; the true
+             peak was not established. effort=85.9 N*m uses 16.52*5.2 without
+             gearbox-efficiency derating;
+             velocity=18.3 rad/s retains the 65.1 V estimate pending speed/Kv data. -->
+        <limit effort="85.9" velocity="18.3"/>
+    </joint>
+    <link name="Left_Ankle_Link_Input">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_Input_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="green"/>
+        </visual>
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 0.118360 kg; effective mass 0.125655193422987799 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.024120 0.013430 -0.001640"/>
+            <mass value="0.125655193422987799"/>
+            <inertia ixx="0.000025167155528803795359" ixy="-0.000007780525837363359327" ixz="-0.000004910606232933121775" iyy="0.000096399859552776060702" iyz="0.000001718596994060502775" izz="0.000090875266968336933827"/>
+        </inertial>
+    </link>
+
+    <joint name="08_right_ankle_link_input_joint" type="continuous">
+        <origin rpy="0 0 0" xyz="0 -0.0255 -0.09"/>
+        <parent link="Calf"/>
+        <child link="Right_Ankle_Link_Input"/>
+        <axis xyz="0 1 0"/>
+        <!-- CONFIRMED CAD-equivalent 5.2:1 drivetrain: motor/sun/encoder ring,
+             4 planets, carrier/output, 4x M3_8 and 6x M3_6 output-fixed bolts.
+             Internal bearing-race rotation remains unmodeled. -->
+        <dynamics rotor_inertia="0.00611686196" damping="0" friction="0"/>
+        <!-- PROVISIONAL measured motor-side envelope: the static test reached
+             approximately 16.52 N*m (mean absolute endpoint) at 60 A; the true
+             peak was not established. effort=85.9 N*m uses 16.52*5.2 without
+             gearbox-efficiency derating;
+             velocity=18.3 rad/s retains the 65.1 V estimate pending speed/Kv data. -->
+        <limit effort="85.9" velocity="18.3"/>
+    </joint>
+    <link name="Right_Ankle_Link_Input">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="URDF_Calf_Link_Input_mir_verHopping1_Simplified.dae" scale="1 1 1"/>
+            </geometry>
+            <material name="green"/>
+        </visual>
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 0.118360 kg; effective mass 0.125655193422987799 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.024120 -0.013430 -0.001640"/>
+            <mass value="0.125655193422987799"/>
+            <inertia ixx="0.000025167070597953222200" ixy="0.000007780451522869107813" ixz="-0.000004910595616576800131" iyy="0.000096399647225649627806" iyz="-0.000001718565144991537841" izz="0.000090875001559428892707"/>
+        </inertial>
+    </link>
+
+    <joint name="09_temp_weight_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0.1"/>
+        <parent link="Thigh"/>
+        <child link="Temp_Weight"/>
+    </joint>
+    <link name="Temp_Weight">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <sphere radius="0.1"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <sphere radius="0.1"/>
+            </geometry>
+        </collision>
+        <!-- PROVISIONAL BASELINE three-group calibration in URDF-aligned CS1:
+             baseline dumbbells = 3.000 kg; baseline CAD hardware = 0.063884 kg;
+             body_1+body_2 is scaled 0.110000 -> 0.316116 kg to match 3.380 kg. -->
+        <!-- GLOBAL MASS NORMALIZATION 2026-09-21: baseline mass 3.380000 kg; effective mass 3.588328436715940859 kg.
+             All six COM-centered inertia entries scaled by the common factor. -->
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.000068979276 0 0.045106208574"/>
+            <mass value="3.588328436715940859"/>
+            <inertia ixx="0.004438802354024368683315" ixy="0.000000000000000000000000" ixz="0.000009908054260577297977" iyy="0.004431865687317037007350" iyz="0.000000000000000000000000" izz="0.006447745398740366016033"/>
+        </inertial>
+    </link>
+
+        <!-- Active calibrated closure: measured center-to-center lengths 202 mm / 320 mm.
+             Forward-kinematics pin residual after rounding is below 1e-9 m. -->
+    <constraints nominal_config="0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.64057070, -0.00247525, 0.40891126, 0.00156250, 0.51048313, 0.23438469">
+        <pin body1="Left_Ankle_Link_Input" body2="Left_Ankle_Link" anchor="0.065 0.015 0.0"/>
+        <pin body1="Right_Ankle_Link_Input" body2="Right_Ankle_Link" anchor="0.065 -0.015 0.0"/>
+    </constraints>
+
+</robot>
