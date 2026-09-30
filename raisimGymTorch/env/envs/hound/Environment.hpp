@@ -260,14 +260,14 @@ class ENVIRONMENT : public RaisimGymEnv {
 //            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
             double maxCommand = 0.8; // 평지 lin x max 1.5
 //            command_ << maxCommand * uniDist_(gen_), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
-            command_ << -maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.2 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
+            command_ << -maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
 //            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
         } while (command_.norm() < 0.2);
     }
 
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
 //    world_->setDefaultMaterial(mu_, 0, 0);
-    world_->setMaterialPairProp("default","rubber",mu_, 0.3+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
+    world_->setMaterialPairProp("default","rubber",mu_, 0.2+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
     world_->setMaterialPairProp("default","toe",   mu_, 0.0, 0.001); // toe: sole 과 마찰 동일, restitution 만 여기서 조절
 
     /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
@@ -600,15 +600,16 @@ class ENVIRONMENT : public RaisimGymEnv {
       rewards_.record("comAngularVel", std::exp(-5.0 * pow(command_(2) - bodyAngularVel_(2),2)));
       rewards_.record("comLinearVel", std::exp(-5.0 * (command_.head(2) - bodyLinearVel_.head(2)).squaredNorm()));
 
-      /// neg reward
+      // neg reward
       footSlip_.setZero();
       for (int i=0; i<numLegs_; i++){
           if (footContact_ > 1){
               footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
           }
       }
-
       rewards_.record("footSlip", footSlip_.sum());
+
+
       if (rot_(8)>1.0){ rot_(8) = 1.0; } /// preventing acos nan
       rewards_.record("bodyOri", std::acos(rot_(8)) * std::acos(rot_(8)));
       rewards_.record("smoothness1", (pTarget_ - prevTarget_).squaredNorm());

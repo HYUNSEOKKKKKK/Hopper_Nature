@@ -38,7 +38,7 @@ ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-weight_path = ("/home/hyunseok/raisim_ws/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2026-09-21-02-55-04/full_10000.pt")
+weight_path = ("/home/hyunseok/raisim_ws/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2026-09-28-00-40-51/full_7000.pt")
 #weight_path = ("/home/hyunseok/raisim_ws/raisimLib/Hopper_Nature/raisimGymTorch/data/dhal_one_leg/2026-09-04-02-04-02/full_10000.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
