@@ -1,0 +1,264 @@
+{
+  "status": "data_recorded_partition_pending_pose_reconciliation",
+  "date": "2026-09-16",
+  "numeric_urdf_changes_this_revision": false,
+  "source_convention": "SolidWorks positive products of inertia; negate off-diagonal L entries before treating them as a physical tensor. L is COM-centered, in the named report frame.",
+  "reports": {
+    "long_link": {
+      "components": [
+        "Thigh_link_verU1 / thigh_link_1_verU1<1>"
+      ],
+      "source_image": "329d366b-0291-440c-9bb2-6197a62b4546.png",
+      "frame": "Thigh_link_verU1 default",
+      "mass_g": 72.76,
+      "com_mm": [
+        0.01,
+        0.0,
+        0.0
+      ],
+      "L_g_mm2": [
+        207640.36,
+        0.0,
+        0.0,
+        203097.79,
+        0.0,
+        7009.88
+      ],
+      "principal_g_mm2": [
+        7009.88,
+        203097.79,
+        207640.36
+      ]
+    },
+    "input_assembly": {
+      "components": [
+        "thigh_link_input_frame_1_verU1<1>",
+        "thigh_link_input_frame_2_verU1<1>",
+        "thigh_link_2_verU1<1>",
+        "SOCKETFLATHEAD_M10_15<1>",
+        "thigh_link_input_frame_3_verU1<2>",
+        "thigh_link_3_verU1<1>"
+      ],
+      "source_image": "3341a438-4998-4929-a4a3-55f7bc22e5b2.png",
+      "frame": "Thigh_link_input_verU1 default",
+      "mass_g": 296.74,
+      "com_mm": [
+        -15.05,
+        0.11,
+        -6.03
+      ],
+      "L_g_mm2": [
+        185408.26,
+        -1133.51,
+        70187.16,
+        367151.5,
+        -1447.97,
+        303679.75
+      ],
+      "principal_g_mm2": [
+        152753.09,
+        336299.81,
+        367186.6
+      ]
+    },
+    "input_external_bolts": {
+      "components": [
+        "SOCKETHEAD_M5_12<1>",
+        "SOCKETHEAD_M5_12<2>",
+        "SOCKETHEAD_M5_12<3>",
+        "SOCKETHEAD_M5_12<4>",
+        "SOCKETHEAD_M5_12<5>",
+        "SOCKETHEAD_M5_12<6>"
+      ],
+      "source_image": "60348e32-1765-47cd-a26c-f428b1557865.png",
+      "frame": "Thigh_verX1 default, current screenshot pose",
+      "mass_g": 22.32,
+      "com_mm": [
+        -10.18,
+        -250.93,
+        7.69
+      ],
+      "L_g_mm2": [
+        16290.31,
+        0.0,
+        0.0,
+        8707.92,
+        -2520.85,
+        8657.78
+      ],
+      "principal_g_mm2": [
+        6161.87,
+        11203.83,
+        16290.31
+      ],
+      "origin_I_g_mm2": [
+        1422678.22,
+        57025.91,
+        -1748.73,
+        12343.66,
+        -45607.95,
+        1416038.85
+      ],
+      "owner_confirmed_by_user": "thigh_link_input_frame_2_verU1"
+    },
+    "output_cug_pins": {
+      "components": [
+        "CUG4-10<3>",
+        "CUG4-10<4>"
+      ],
+      "source_image": "b6ac422c-1fca-4cb8-b493-d0fbf7a323c6.png",
+      "frame": "Thigh_verX1 default, current screenshot pose",
+      "mass_g": 2.1,
+      "com_mm": [
+        25.79,
+        -258.7,
+        -8.27
+      ],
+      "L_g_mm2": [
+        1746.94,
+        -15.11,
+        0.0,
+        22.94,
+        0.0,
+        1765.84
+      ],
+      "principal_g_mm2": [
+        22.81,
+        1747.07,
+        1765.84
+      ],
+      "origin_I_g_mm2": [
+        142151.52,
+        -13998.24,
+        -446.96,
+        1560.28,
+        4483.33,
+        143421.13
+      ],
+      "owner_confirmed_by_user": "D151_K_output_1_verU1",
+      "speed_group": "gearbox output; not high-speed motor rotor",
+      "duplicate_resolution": {
+        "confirmed_by": "user, 2026-09-16",
+        "excluded_duplicate": "CUG4-10<2> duplicates CUG4-10<3>; user corrected the CAD",
+        "physical_components": [
+          "CUG4-10<3>",
+          "CUG4-10<4>"
+        ],
+        "physical_count": 2,
+        "total_mass_g": 2.1,
+        "numeric_urdf_mass_adjustment_kg": 0.0,
+        "reason": "The new Thigh repartition is not yet applied; the old STEP and latest report have different occurrence sets and poses. Do not subtract a duplicate from an unrelated legacy aggregate mass."
+      }
+    },
+    "yt_pair": {
+      "components": [
+        "YT2015<1>",
+        "YT2015<2>"
+      ],
+      "source_image": "ed187836-5d52-43a4-a8d7-397ed23e94c3.png",
+      "frame": "Thigh_verX1 default, current screenshot pose",
+      "mass_g": 47.0,
+      "com_mm": [
+        -0.5,
+        -341.36,
+        83.31
+      ],
+      "L_g_mm2": [
+        241229.73,
+        0.0,
+        0.0,
+        196110.85,
+        -90507.25,
+        46881.38
+      ],
+      "principal_g_mm2": [
+        4197.69,
+        238794.55,
+        241229.73
+      ],
+      "origin_I_g_mm2": [
+        6044312.16,
+        8022.02,
+        -1957.9,
+        522367.46,
+        -1427215.93,
+        5523730.7
+      ]
+    },
+    "yt_single": {
+      "components": [
+        "YT2015"
+      ],
+      "source_image": "a94d596f-4d4d-4fd3-b2f6-6404135fa879.png",
+      "frame": "YT2015 part default",
+      "mass_g": 23.5,
+      "mass_override": true,
+      "com_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "L_g_mm2": [
+        2098.84,
+        0.0,
+        0.0,
+        3316.44,
+        0.0,
+        2098.84
+      ],
+      "principal_g_mm2": [
+        2098.84,
+        2098.84,
+        3316.44
+      ],
+      "model_limitation": "Single annular solid with overridden mass. Does not resolve separate bearing race, cage, or roller inertia."
+    }
+  },
+  "assembly_evidence": {
+    "concentric_51": [
+      "Thigh_link_verU1/thigh_link_1_verU1<1>",
+      "Thigh_link_input_verU1/thigh_link_3_verU1<1>"
+    ],
+    "concentric_52": [
+      "thigh_frame_1_verU1<1>",
+      "Thigh_link_input_verU1/thigh_link_input_frame_3_verU1<2>"
+    ],
+    "both_rotation_locks_unchecked": true,
+    "physical_explanation_from_user": "thigh_link_3_verU1 is retained by thigh_link_2_verU1; YT2015 is the bearing enabling rotation at this connection. Treat this physical explanation as stronger evidence than CAD lock checkboxes.",
+    "internal_m10_already_in_input_mass": true,
+    "bolt_count_correction": "Six bolts, not three: patterned instances <2>, <3>, <4> supplement <1>, <5>, <6>.",
+    "inactive_mate_dialog_lengths_not_used": true,
+    "output_pin_duplicate_resolved": true
+  },
+  "mass_subtotals_kg": {
+    "input_assembly_plus_six_bolts": 0.31906,
+    "input_assembly_plus_six_bolts_plus_two_output_pins": 0.32116,
+    "long_link_plus_two_whole_bearings": 0.11976
+  },
+  "subtotal_limitations": [
+    "Subtotals are mass bookkeeping, not final rigid-body inertias.",
+    "The input/output subtotal excludes the rest of the D151 gearbox output group.",
+    "Assigning both whole bearings to the long link is a bearing mass-distribution approximation, not a resolved race-level model.",
+    "Do not add these masses on top of an assembly mass that already contains the same occurrences."
+  ],
+  "old_step_reference": {
+    "yt_pair_center_mm_in_Thigh": [
+      -0.5000000021723738,
+      -299.6549563606649,
+      47.47846236389336
+    ],
+    "yt_center_distance_mm": 141.30000000000004,
+    "CUG4_10_count_in_Thigh": 1,
+    "CUG4_10_origin_mm_in_Thigh": [
+      25.749999997827622,
+      -229.8621485945474,
+      -8.269120949739522
+    ],
+    "M5_12_count_in_Thigh": 6
+  },
+  "remaining_work": [
+    "Reconcile component poses before combining latest assembly-frame tensors with earlier whole-Thigh properties. Visible exploded geometry alone is not proof that mass properties used exploded positions.",
+    "Select and validate the knee linkage dynamics representation and avoid counting output-group inertia in both explicit moving bodies and rotor_inertia.",
+    "Current URDF Thigh numeric inertial block remains legacy and is not claimed to be calibrated."
+  ]
+}

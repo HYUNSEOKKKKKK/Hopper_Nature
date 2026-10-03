@@ -1,0 +1,28 @@
+{
+  "changed_numeric_links": [
+    "Left_Ankle_Link",
+    "Right_Ankle_Link"
+  ],
+  "reconstruction": [
+    {
+      "assembly": "S",
+      "com_error_m": 3.226308109560705e-13,
+      "inertia_error_kg_m2": 2.231071230540671e-15
+    },
+    {
+      "assembly": "L",
+      "com_error_m": 3.972845425711082e-13,
+      "inertia_error_kg_m2": 1.7785252437452215e-15
+    }
+  ],
+  "checks": {
+    "xml_parse": true,
+    "all_link_inertias_physical": true,
+    "only_S_L_COM_and_tensor_numerics_changed": true,
+    "joint_constraints_meshes_foot_geometry_preserved": true,
+    "simulator_run": false
+  },
+  "total_mass_kg": 12.958629,
+  "mass_gap_to_measured_14kg": 1.0413709999999998,
+  "urdf_sha256": "ae366438667a1665fbb78933f7ab2e0a00aebe8e11dab3f30b3b95604609a577"
+}

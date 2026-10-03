@@ -1,0 +1,115 @@
+{
+  "definition": "Housing-fixed gearbox-output-equivalent inertia, not experimentally identified rotor inertia. Knee output-to-joint linkage mapping remains pending.",
+  "D110": {
+    "terms": [
+      {
+        "item": "motor_sun_encoder_ring",
+        "intrinsic_inertia_kg_m2": 0.00022457,
+        "speed_ratio": 5.2,
+        "contribution": 0.006072372800000001
+      },
+      {
+        "item": "four_planet_spins",
+        "count": 4,
+        "intrinsic_inertia_kg_m2": 6.0091e-07,
+        "speed_ratio": -1.625,
+        "contribution": 6.347111875e-06
+      },
+      {
+        "item": "four_planet_orbits",
+        "count": 4,
+        "mass_each_kg": 0.01423,
+        "radius_m": 0.0156,
+        "speed_ratio": 1,
+        "contribution": 1.3852051199999998e-05
+      },
+      {
+        "item": "carrier_output_included_bolts",
+        "axis_inertia_kg_m2": 2.429e-05,
+        "speed_ratio": 1,
+        "contribution": 2.429e-05
+      }
+    ],
+    "sum": 0.006116861963075,
+    "xml_value": 0.00611686196,
+    "reproduction_error": 3.07500032381558e-12
+  },
+  "D151": {
+    "terms": [
+      {
+        "item": "motor_sun_encoder_ring",
+        "axis_inertia_kg_m2": 0.00092337086,
+        "speed_ratio": 20,
+        "contribution": 0.369348344
+      },
+      {
+        "item": "two_sun_LPSTAG_pins",
+        "axis_inertia_kg_m2": 7.178e-08,
+        "speed_ratio": 20,
+        "contribution": 2.8712e-05
+      },
+      {
+        "item": "carrier",
+        "axis_inertia_kg_m2": 0.00010902187,
+        "speed_ratio": 5,
+        "contribution": 0.00272554675
+      },
+      {
+        "item": "four_carrier_LPSTAG_pins",
+        "axis_inertia_kg_m2": 6.6246e-07,
+        "speed_ratio": 5,
+        "contribution": 1.65615e-05
+      },
+      {
+        "item": "eight_carrier_bolts",
+        "axis_inertia_kg_m2": 8.17968e-06,
+        "speed_ratio": 5,
+        "contribution": 0.000204492
+      },
+      {
+        "item": "two_V1_two_V2_planet_spins",
+        "V1_inertia_kg_m2": 4.16212e-06,
+        "V2_inertia_kg_m2": 4.16257e-06,
+        "count_each": 2,
+        "speed_ratio": -10,
+        "contribution": 0.001664938
+      },
+      {
+        "item": "four_planet_orbits",
+        "mass_each_kg": 0.04194,
+        "count": 4,
+        "radius_m": 0.0264,
+        "speed_ratio": 5,
+        "contribution": 0.0029230502399999994
+      },
+      {
+        "item": "clean_three_part_output",
+        "axis_inertia_kg_m2": 0.00027241642,
+        "speed_ratio": 1,
+        "contribution": 0.00027241642
+      },
+      {
+        "item": "two_output_LPSTAG_pins_not_CUG",
+        "axis_inertia_kg_m2": 1.35487e-06,
+        "speed_ratio": 1,
+        "contribution": 1.35487e-06
+      },
+      {
+        "item": "eight_MTA_bearings_orbit_only",
+        "combined_mass_kg": 0.0616,
+        "radius_m": 0.0264,
+        "speed_ratio": 5,
+        "contribution": 0.0010733183999999999
+      }
+    ],
+    "sum": 0.37825873418,
+    "xml_value": 0.37825873418,
+    "reproduction_error": 0.0
+  },
+  "limitations": [
+    "Bearing race/cage/rolling-element self-rotation incomplete",
+    "Gyroscopic and housing-relative coupling omitted",
+    "Knee linkage output-angle to joint-angle mapping pending",
+    "Avoid double-counting if explicit moving bodies replace aggregated model"
+  ]
+}

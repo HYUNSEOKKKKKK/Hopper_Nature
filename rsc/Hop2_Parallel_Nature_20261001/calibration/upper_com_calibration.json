@@ -1,0 +1,163 @@
+{
+  "status": "approximate three-axis two-scale upper COM calibration; support geometry and absolute Z datum are nominal",
+  "date": "2026-10-02",
+  "measured_upper_mass_kg": 2.528,
+  "mass_source": "independent larger-scale measurement; reaction sums do not replace 2.528 kg",
+  "frame": "Body_Nature URDF axes [X,Y,Z] = Body CAD [Z,X,Y]",
+  "support_midpoints_link_m": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.1625
+  },
+  "support_midpoint_status": "XY assumed symmetric about centered carrier CAD axes. Z midpoint=0.1625 m from CAD lower and upper contact-band centers 0.1125/0.2125 m. Actual centers of pressure not separately measured.",
+  "contact_geometry_status": "User reports XY spacing approximately 200 mm and Z spacing 100 mm, used as effective reaction-line spacing. Actual finite support contact positions are not independently verified.",
+  "z_support_datum": {
+    "lower_support_link_z_m": 0.1125,
+    "lower_support_status": "assumed at center of 5 mm lower carrier edge band, not at outer mounting face; actual center of pressure unmeasured",
+    "carrier_CAD_bottom_top_link_z_m": [
+      0.11,
+      0.215
+    ],
+    "lower_contact_band_link_z_m": [
+      0.11,
+      0.115
+    ],
+    "upper_contact_band_link_z_m": [
+      0.21,
+      0.215
+    ],
+    "carrier_CAD_envelope_height_m": 0.105,
+    "effective_upper_support_z_under_assumption_m": 0.21250000000000002,
+    "datum_caveat": "Reported 100 mm span matches CAD contact-band center spacing, while full outer height is 105 mm. Equal-center contact is an assumption. Under exact 100 mm span, shifting both support lines within the two bands permits +/-2.5 mm change in upper absolute COM; this is geometric sensitivity, not a statistical confidence interval.",
+    "source_image": "2a35ec12-4714-4ff9-9511-841da139a072.png"
+  },
+  "user_confirmed_second_test_rotated_90_degrees": true,
+  "superseded_lateral_span_m": 0.185,
+  "direction": "killSwitch-side reaction is +Y in lateral test and -X in fore-aft test; Z test left 1273.8 g=upper/+Z, right 1257.5 g=lower/-Z per user",
+  "formula": "q = support_midpoint + D/2 * (reaction_plus - reaction_minus)/(reaction_plus + reaction_minus)",
+  "tests": {
+    "x": {
+      "nominal_support_span_m": 0.2,
+      "reaction_plus_g": 1179.0,
+      "reaction_minus_g": 1329.0,
+      "reaction_sum_g": 2508.0,
+      "reaction_sum_minus_reference_g": -20.0,
+      "COM_offset_from_support_midpoint_m": -0.005980861244019139,
+      "COM_distance_from_minus_support_m": 0.09401913875598086,
+      "dCOM_dSpan": -0.029904306220095694
+    },
+    "y": {
+      "nominal_support_span_m": 0.2,
+      "reaction_plus_g": 1377.5,
+      "reaction_minus_g": 1149.0,
+      "reaction_sum_g": 2526.5,
+      "reaction_sum_minus_reference_g": -1.5,
+      "COM_offset_from_support_midpoint_m": 0.009044132198693846,
+      "COM_distance_from_minus_support_m": 0.10904413219869385,
+      "dCOM_dSpan": 0.045220660993469226
+    },
+    "z": {
+      "nominal_support_span_m": 0.1,
+      "reaction_plus_g": 1273.8,
+      "reaction_minus_g": 1257.5,
+      "reaction_sum_g": 2531.3,
+      "reaction_sum_minus_reference_g": 3.300000000000182,
+      "COM_offset_from_support_midpoint_m": 0.00032196894876149185,
+      "COM_distance_from_minus_support_m": 0.050321968948761495,
+      "dCOM_dSpan": 0.0032196894876150503
+    }
+  },
+  "upper_prior_COM_link_m": [
+    0.0022142085828601456,
+    0.0005750234856569373,
+    0.1590572036861344
+  ],
+  "upper_calibrated_COM_link_m": [
+    -0.005980861244019139,
+    0.009044132198693846,
+    0.1628219689487615
+  ],
+  "upper_COM_change_link_m": [
+    -0.008195069826879285,
+    0.008469108713036909,
+    0.00376476526262709
+  ],
+  "upper_central_inertia_link_kgm2": [
+    [
+      0.011482945538099417,
+      0.00043440011587170426,
+      0.0002059905466540784
+    ],
+    [
+      0.00043440011587170426,
+      0.010629273289017872,
+      -0.0002789210989767814
+    ],
+    [
+      0.0002059905466540784,
+      -0.0002789210989767814,
+      0.01767366619534038
+    ]
+  ],
+  "inertia_status": "retained CAD-based upper aggregate central tensor; not identified by two-scale tests",
+  "height_status": "Z relative to lower support measured from reaction ratio; absolute Body-frame Z uses provisional lower contact-band center datum 0.1125 m",
+  "lower_mass_kg": 3.742,
+  "lower_COM_link_m": [
+    0.01764235294040864,
+    -0.00380978639821963,
+    0.06927571617566937
+  ],
+  "lower_central_inertia_link_kgm2": [
+    [
+      0.012311031713916204,
+      -0.00026262727902804755,
+      0.0003007200461375562
+    ],
+    [
+      -0.00026262727902804755,
+      0.011546715458320343,
+      0.0003489387366783656
+    ],
+    [
+      0.0003007200461375562,
+      0.0003489387366783656,
+      0.017639081762470993
+    ]
+  ],
+  "Body_prior_COM_link_m": [
+    0.011421882615706471,
+    -0.0020418758102706725,
+    0.1054746955100323
+  ],
+  "Body_prior_central_inertia_link_kgm2": [
+    [
+      0.03598447836128635,
+      0.00027383805631349097,
+      0.0025965542735357514
+    ],
+    [
+      0.00027383805631349097,
+      0.034696602968416,
+      -0.0005239337160527867
+    ],
+    [
+      0.0025965542735357514,
+      -0.0005239337160527867,
+      0.035700876677038175
+    ]
+  ],
+  "Body_COM_change_link_m": [
+    -0.0033041685043621732,
+    0.0034146581860537966,
+    0.0015179149256652896
+  ],
+  "modeling_rule": "replace upper aggregate first moment only; retain its central second moment as an approximation; recombine upper and lower by parallel-axis theorem",
+  "component_records_status": "body_components describe pre-upper-COM-calibration CAD and cable-proxy distributions; use this aggregate calibration for final Body properties",
+  "limitations": [
+    "support midpoint and actual pad contact lines are approximate",
+    "fore-aft reaction sum is 20 g below the independent upper mass",
+    "absolute upper Z depends on assumed contact-band center datums; finite 5 mm edge width leaves a few mm geometric uncertainty",
+    "all central second moments remain CAD-based estimates; not measured by these tests",
+    "lower device COMs and tensors remain CAD-based estimates; two cable distributions use unmeasured straight-segment proxies"
+  ]
+}

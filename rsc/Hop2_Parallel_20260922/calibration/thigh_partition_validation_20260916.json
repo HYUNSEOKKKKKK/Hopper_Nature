@@ -1,0 +1,60 @@
+{
+  "long_link": {
+    "eigenvalues_kg_m2": [
+      7.009880000000001e-06,
+      0.00020309779000000003,
+      0.00020764036
+    ],
+    "principal_max_error_kg_m2": 0.0
+  },
+  "input_assembly": {
+    "eigenvalues_kg_m2": [
+      0.00015275308940857735,
+      0.0003362998157818352,
+      0.00036718660480958764
+    ],
+    "principal_max_error_kg_m2": 5.781835134364283e-12
+  },
+  "input_external_bolts": {
+    "eigenvalues_kg_m2": [
+      6.161875341777509e-06,
+      1.1203824658222491e-05,
+      1.629031e-05
+    ],
+    "principal_max_error_kg_m2": 5.341777509963817e-12
+  },
+  "output_cug_pins": {
+    "eigenvalues_kg_m2": [
+      2.2807578558838794e-08,
+      1.7470724214411614e-06,
+      1.76584e-06
+    ],
+    "principal_max_error_kg_m2": 2.4214411614346634e-12
+  },
+  "yt_pair": {
+    "eigenvalues_kg_m2": [
+      4.1976879786510455e-06,
+      0.000238794542021349,
+      0.00024122973000000001
+    ],
+    "principal_max_error_kg_m2": 7.978651024370328e-12
+  },
+  "yt_single": {
+    "eigenvalues_kg_m2": [
+      2.0988400000000004e-06,
+      2.0988400000000004e-06,
+      3.3164400000000004e-06
+    ],
+    "principal_max_error_kg_m2": 0.0
+  },
+  "yt_pair_geometry": {
+    "center_distance_from_inertia_mm": 141.3000007528873,
+    "old_STEP_center_distance_mm": 141.30000000000004,
+    "current_report_minus_old_STEP_COM_mm": [
+      2.1723738363732537e-09,
+      -41.70504363933509,
+      35.831537636106646
+    ],
+    "conclusion": "Bearing spacing agrees; poses cannot be mixed without reconciliation."
+  }
+}

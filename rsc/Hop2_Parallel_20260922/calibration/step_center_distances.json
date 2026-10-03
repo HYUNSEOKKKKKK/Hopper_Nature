@@ -1,0 +1,44 @@
+[
+  {
+    "assembly": "Calf_link_S_verU1",
+    "units": "mm",
+    "eye_center": [
+      -4.4111883257258455e-08,
+      -96.49999819972727,
+      -1.726796374779127e-06
+    ],
+    "ball_center": [
+      -4.4112352578490003e-08,
+      105.5000018002745,
+      -1.7267987843413602e-06
+    ],
+    "eye_axis_intersection_residual": 6.6018607235733855e-15,
+    "center_distance": 202.00000000000176,
+    "ball_sphere_entity": 419283,
+    "eye_cylinder_entities": [
+      622524,
+      604336
+    ]
+  },
+  {
+    "assembly": "Calf_link_L_verU1",
+    "units": "mm",
+    "eye_center": [
+      1.0806096645277208e-07,
+      -155.50000228504223,
+      4.969301913293478e-06
+    ],
+    "ball_center": [
+      1.0804088185908374e-07,
+      164.49999771494765,
+      4.969320133063367e-06
+    ],
+    "eye_axis_intersection_residual": 7.338397831473715e-15,
+    "center_distance": 319.9999999999899,
+    "ball_sphere_entity": 419283,
+    "eye_cylinder_entities": [
+      622524,
+      604336
+    ]
+  }
+]

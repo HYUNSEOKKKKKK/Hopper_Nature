@@ -1,0 +1,127 @@
+{
+  "date": "2026-09-21",
+  "status": "user_corrected_part_names_and_steel_CAD_reports_received",
+  "material_label": "AISI 1045 강, 냉간압연",
+  "comparison_density_kg_m3": 7850,
+  "tensor_field_order": [
+    "xx",
+    "xy",
+    "xz",
+    "yy",
+    "yz",
+    "zz"
+  ],
+  "tensor_notation": "SolidWorks positive products; off-diagonals must be negated for mechanics tensor",
+  "display_resolution": {
+    "mass_g": 0.01,
+    "volume_mm3": 0.01,
+    "com_mm": 0.01,
+    "inertia_g_mm2": 0.01
+  },
+  "assembly_mass_overrides": "E-GZW8_h_20240529 override shown in both reports; unchanged hardware baseline retained",
+  "measured_mass_source": "prior user measurements of bare rods: S=123 g, L=226 g; not replaced by CAD nominal mass",
+  "records": [
+    {
+      "label": "S",
+      "part": {
+        "name": "calf_link_S_1_verU1",
+        "image": "06b4dfd7-ae4c-429b-9e84-b1980469b977.png",
+        "mass_g": 122.69,
+        "volume_mm3": 15629.17,
+        "com_mm": [
+          0,
+          0,
+          0
+        ],
+        "com_positive_products_g_mm2": [
+          209881.16,
+          0,
+          0,
+          2367.92,
+          0,
+          209881.16
+        ],
+        "source_image_sha256": "0a27f23187e9a48d76daf2e79ff1d61209a6b95dc18a7f6ff291fd50fad726f1"
+      },
+      "assembly": {
+        "name": "Calf_link_S_verU1",
+        "image": "0ac549d1-ddb2-4219-861b-37a4fde890ab.png",
+        "mass_g": 252.75,
+        "volume_mm3": 33450.21,
+        "com_mm": [
+          0,
+          -20.9,
+          0.01
+        ],
+        "com_positive_products_g_mm2": [
+          1211398.07,
+          -9.3,
+          -0.19,
+          15429.45,
+          -174.86,
+          1202914.79
+        ],
+        "origin_positive_products_g_mm2": [
+          1321798.86,
+          -9.29,
+          -0.19,
+          15429.48,
+          -233.91,
+          1313315.55
+        ],
+        "source_image_sha256": "14bc1466e905ccf27c3a4698c974e180c34694e348830e17af40ccf5e3591612"
+      }
+    },
+    {
+      "label": "L",
+      "part": {
+        "name": "calf_link_L_1_verU1",
+        "image": "e4e4d34c-e5bc-4457-9b67-0ec67c98714b.png",
+        "mass_g": 227.45,
+        "volume_mm3": 28974.66,
+        "com_mm": [
+          0,
+          0,
+          0
+        ],
+        "com_positive_products_g_mm2": [
+          1271581.2,
+          0,
+          0,
+          4253.63,
+          0,
+          1271581.2
+        ],
+        "source_image_sha256": "03a96f85de8b9c61d405af247564ceba54cca5c0e7a9e769fe15377e6ec2332e"
+      },
+      "assembly": {
+        "name": "Calf_link_L_verU1",
+        "image": "2caf6fec-648d-4543-bae2-6942505d671e.png",
+        "mass_g": 357.51,
+        "volume_mm3": 46795.69,
+        "com_mm": [
+          0,
+          -24.75,
+          0.01
+        ],
+        "com_positive_products_g_mm2": [
+          4018879.81,
+          0.19,
+          -0.19,
+          17316.06,
+          -330.65,
+          4010397.41
+        ],
+        "origin_positive_products_g_mm2": [
+          4237962.83,
+          0.2,
+          -0.19,
+          17316.08,
+          -400.58,
+          4229480.4
+        ],
+        "source_image_sha256": "c27fa806da7b804f115b4db7dd51522c75c97534184cf1cc5b716b1ee7d38b07"
+      }
+    }
+  ]
+}

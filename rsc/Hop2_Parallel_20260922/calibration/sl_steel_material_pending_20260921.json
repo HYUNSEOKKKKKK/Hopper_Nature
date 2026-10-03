@@ -1,0 +1,309 @@
+{
+  "status": "old_STEP_basepart_candidates_not_confirmed_user_Drawing_Hopping_variants",
+  "source_sha256": "da4c84182594b1aa9e64a4c31521d92ce0cbd6a3c3ce270bc6cfc253fdcc1dce",
+  "unit_density_units": "mm^3 volume, mm COM, mm^5 COM inertia",
+  "mechanics_tensor_direct_from_OpenCascade_no_SW_sign_flip_required": true,
+  "parts": [
+    {
+      "STEP_part": "calf_link_L_1_verU1",
+      "user_requested_name": "calf_link_L_1_verU1_verDrawing1_verHopping",
+      "matches_name_exactly": false,
+      "volume_mm3": 28974.655149399157,
+      "part_COM_mm": [
+        1.0986261751147223e-16,
+        1.2806842269908762e-14,
+        1.679312805448729e-16
+      ],
+      "part_COM_inertia_mm5": [
+        [
+          161984866.68743694,
+          -4.3655745685100517e-11,
+          -5.006557077690627e-12
+        ],
+        [
+          -4.3655745685100517e-11,
+          541864.0463979485,
+          -1.9566973483667523e-11
+        ],
+        [
+          -5.006557077690627e-12,
+          -1.9566973483667523e-11,
+          161984866.68743694
+        ]
+      ],
+      "part_bbox_mm": [
+        [
+          -6.000000000000001,
+          -135.5,
+          -6.000000000000002
+        ],
+        [
+          6.000000000000001,
+          135.5,
+          6.000000000000002
+        ]
+      ],
+      "solid_count": 1,
+      "brep_valid": true,
+      "STEP_part_to_SL_assembly": [
+        [
+          1.0,
+          -2.3635607360183997e-17,
+          7.697835424647081e-18,
+          0.0
+        ],
+        [
+          2.3635607360183994e-17,
+          1.0,
+          3.3306690738754696e-16,
+          0.0
+        ],
+        [
+          -7.697835424647089e-18,
+          -3.3306690738754696e-16,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "assembly_COM_mm": [
+        1.0986261751147192e-16,
+        1.2806842269908762e-14,
+        1.6793128054486863e-16
+      ],
+      "urdf_link_frame_COM_m": [
+        1.6793128054486864e-19,
+        1.0986261751147192e-19,
+        0.1555
+      ],
+      "urdf_link_frame_COM_inertia_mm5": [
+        [
+          161984866.68743694,
+          -5.006557077691905e-12,
+          5.375175463552677e-08
+        ],
+        [
+          -5.006557077692022e-12,
+          161984866.68743694,
+          3.772147675787645e-09
+        ],
+        [
+          5.375175463552677e-08,
+          3.772147675787645e-09,
+          541864.0463979485
+        ]
+      ],
+      "urdf_rotation_assembly_to_link": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "urdf_eye_origin_in_assembly_mm": [
+        0.0,
+        -155.5,
+        0.0
+      ],
+      "assumed_6061_density_kg_m3": 2700,
+      "provisional_steel_density_kg_m3": 7850,
+      "candidate_6061_mass_kg": 0.07823156890337772,
+      "candidate_steel_mass_kg": 0.22745104292278337,
+      "candidate_delta_mass_kg": 0.14921947401940566,
+      "candidate_delta_COM_inertia_kg_m2": [
+        [
+          0.0008342220634403001,
+          -2.578376895011331e-23,
+          2.7682153637296284e-19
+        ],
+        [
+          -2.578376895011391e-23,
+          0.0008342220634403001,
+          1.942656053030637e-20
+        ],
+        [
+          2.7682153637296284e-19,
+          1.942656053030637e-20,
+          2.7905998389494346e-06
+        ]
+      ],
+      "notes": [
+        "Basepart source geometry differs in name from newly named Hopping/Drawing variant. Do not update URDF until geometry identity validated.",
+        "Density 2700/7850 assumptions require user CAD material density or exactpart report confirmation.",
+        "Mass override cannot be determined from this STEP extraction.",
+        "Other bolts, nuts, bushings, rod ends, Dice remain untouched by a part-only density change."
+      ],
+      "applied_to_urdf": false
+    },
+    {
+      "STEP_part": "calf_link_S_1_verU1",
+      "user_requested_name": "calf_link_S_1_verU1_verDrawing1_verHopping1",
+      "matches_name_exactly": false,
+      "volume_mm3": 15629.169556949722,
+      "part_COM_mm": [
+        9.456221490180374e-17,
+        8.146898514616938e-15,
+        1.7059840821130244e-16
+      ],
+      "part_COM_inertia_mm5": [
+        [
+          26736453.922544252,
+          3.637978807091714e-11,
+          -2.5216293917960086e-12
+        ],
+        [
+          3.637978807091714e-11,
+          301645.3057338585,
+          -5.044327859673633e-12
+        ],
+        [
+          -2.5216293917960086e-12,
+          -5.044327859673633e-12,
+          26736453.922544256
+        ]
+      ],
+      "part_bbox_mm": [
+        [
+          -6.000000000000001,
+          -76.5,
+          -6.000000000000001
+        ],
+        [
+          6.000000000000001,
+          76.5,
+          6.000000000000001
+        ]
+      ],
+      "solid_count": 1,
+      "brep_valid": true,
+      "STEP_part_to_SL_assembly": [
+        [
+          1.0,
+          -6.505213034913027e-19,
+          1.0842021724855042e-19,
+          0.0
+        ],
+        [
+          6.505213034913027e-19,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -1.0842021724855042e-19,
+          7.052966104933723e-38,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "assembly_COM_mm": [
+        9.456221490180374e-17,
+        8.146898514616938e-15,
+        1.7059840821130244e-16
+      ],
+      "urdf_link_frame_COM_m": [
+        1.7059840821130243e-19,
+        9.456221490180374e-20,
+        0.09650000000000002
+      ],
+      "urdf_link_frame_COM_inertia_mm5": [
+        [
+          26736453.922544256,
+          -2.5216293917960082e-12,
+          -5.044327859673633e-12
+        ],
+        [
+          -2.5216293917960082e-12,
+          26736453.922544252,
+          5.357619422986776e-11
+        ],
+        [
+          -5.044327859673633e-12,
+          5.357619422986776e-11,
+          301645.3057338585
+        ]
+      ],
+      "urdf_rotation_assembly_to_link": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "urdf_eye_origin_in_assembly_mm": [
+        0.0,
+        -96.5,
+        0.0
+      ],
+      "assumed_6061_density_kg_m3": 2700,
+      "provisional_steel_density_kg_m3": 7850,
+      "candidate_6061_mass_kg": 0.04219875780376425,
+      "candidate_steel_mass_kg": 0.1226889810220553,
+      "candidate_delta_mass_kg": 0.08049022321829107,
+      "candidate_delta_COM_inertia_kg_m2": [
+        [
+          0.00013769273770110292,
+          -1.2986391367749442e-23,
+          -2.5978288477319207e-23
+        ],
+        [
+          -1.2986391367749442e-23,
+          0.0001376927377011029,
+          2.759174002838189e-22
+        ],
+        [
+          -2.5978288477319207e-23,
+          2.759174002838189e-22,
+          1.553473324529371e-06
+        ]
+      ],
+      "notes": [
+        "Basepart source geometry differs in name from newly named Hopping/Drawing variant. Do not update URDF until geometry identity validated.",
+        "Density 2700/7850 assumptions require user CAD material density or exactpart report confirmation.",
+        "Mass override cannot be determined from this STEP extraction.",
+        "Other bolts, nuts, bushings, rod ends, Dice remain untouched by a part-only density change."
+      ],
+      "applied_to_urdf": false
+    }
+  ],
+  "resolution": {
+    "date": "2026-09-21",
+    "status": "superseded_by_measured_base_rod_mass_update",
+    "measured_S_kg": 0.123,
+    "measured_L_kg": 0.226,
+    "report": "sl_measured_steel_update_20260921.md",
+    "shape_status": "resolved: user-confirmed part identity and matching new SolidWorks steel mass properties",
+    "cad_confirmation_report": "sl_steel_cad_confirmation_20260921.md"
+  }
+}

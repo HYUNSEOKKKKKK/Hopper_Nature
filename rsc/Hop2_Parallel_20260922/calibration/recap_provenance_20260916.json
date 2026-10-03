@@ -1,0 +1,14 @@
+{
+  "requested_baseline": "Hop_verParallelAnkleLinks_ver20250304",
+  "exact_requested_baseline_verified": false,
+  "older_files_are_full_text_readbacks_not_byte_downloads": true,
+  "comparison_method": "Active XML elements and attributes, ignoring comments and whitespace",
+  "older_candidates": [
+    "Hop_verParallelAnkleLinks.urdf",
+    "Hop_verParallelAnkleLinks_20250311.urdf"
+  ],
+  "active_urdf": "Hop2_Parallel_20260820.urdf",
+  "active_sha256": "35da18cf42ebbedcdbde60d7434fd770ebd0ac027d70fcf051713340161d55c5",
+  "numeric_changes_in_this_recap_revision": false,
+  "user_cug_duplicate_correction_recorded": true
+}

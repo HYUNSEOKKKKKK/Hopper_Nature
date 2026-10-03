@@ -1,0 +1,1105 @@
+{
+  "identity_warning": "Neither recovered candidate has been verified as Hop_verParallelAnkleLinks_ver20250304. Do not rename or equate them to that baseline.",
+  "sources": {
+    "older_undated": {
+      "path": "/workspace/scratch/813fa2b7d6a7/cad_recovered/earlier_reference_readbacks/Hop_verParallelAnkleLinks.urdf",
+      "sha256": "b595c9c693e9b3bad80a66f0e53e346dee6c8dd26e14085d5339edbd5f54d886",
+      "mass_kg": 12.90813,
+      "joint_count": 10,
+      "link_count": 11
+    },
+    "older_20250311": {
+      "path": "/workspace/scratch/813fa2b7d6a7/cad_recovered/earlier_reference_readbacks/Hop_verParallelAnkleLinks_20250311.urdf",
+      "sha256": "30100ceeb4c108170403f711b96a60992fd8b631d3514c39664065d50f7601ae",
+      "mass_kg": 12.90813,
+      "joint_count": 10,
+      "link_count": 11
+    },
+    "uploaded_20260820": {
+      "path": "/workspace/scratch/813fa2b7d6a7/recovered_original/extracted/Hop2_Parallel_20260820/Hop2_Parallel_20260820.urdf",
+      "sha256": "04662417b0f9697db38a213d365285b77fcfad6bafb2f1f3b8de710181a570bb",
+      "mass_kg": 12.90813,
+      "joint_count": 10,
+      "link_count": 11
+    },
+    "current": {
+      "path": "/workspace/scratch/813fa2b7d6a7/recovered/extracted/Hop2_Parallel_20260820/Hop2_Parallel_20260820.urdf",
+      "sha256": "35da18cf42ebbedcdbde60d7434fd770ebd0ac027d70fcf051713340161d55c5",
+      "mass_kg": 12.958629,
+      "joint_count": 10,
+      "link_count": 11
+    }
+  },
+  "comparisons": {
+    "older_undated__older_20250311": {
+      "all_semantic_differences": [
+        {
+          "path": "/robot/link[Foot]/visual[1]/geometry[1]/box[0]",
+          "field": "@size",
+          "before": "0.06 0.1 0.03",
+          "after": "0.055 0.1 0.03"
+        },
+        {
+          "path": "/robot/link[Foot]/collision[3]/geometry[1]/box[0]",
+          "field": "@size",
+          "before": "0.06 0.1 0.03",
+          "after": "0.055 0.1 0.03"
+        }
+      ],
+      "link_inertial_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": true,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "link_visual_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": false,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "link_collision_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": false,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "joint_kinematics_equal": true,
+      "constraint_comparison": []
+    },
+    "older_undated__uploaded_20260820": {
+      "all_semantic_differences": [
+        {
+          "path": "/robot/link[Foot]/visual[1]/geometry[1]/box[0]",
+          "field": "@size",
+          "before": "0.06 0.1 0.03",
+          "after": "0.055 0.1 0.03"
+        },
+        {
+          "path": "/robot/link[Foot]/collision[3]/geometry[1]/box[0]",
+          "field": "@size",
+          "before": "0.06 0.1 0.03",
+          "after": "0.055 0.1 0.03"
+        },
+        {
+          "path": "/robot/joint[07_left_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.0128",
+          "after": "0.00535392"
+        },
+        {
+          "path": "/robot/joint[08_right_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.0128",
+          "after": "0.00535392"
+        }
+      ],
+      "link_inertial_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": true,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "link_visual_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": false,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "link_collision_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": false,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "joint_kinematics_equal": true,
+      "constraint_comparison": []
+    },
+    "older_20250311__uploaded_20260820": {
+      "all_semantic_differences": [
+        {
+          "path": "/robot/joint[07_left_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.0128",
+          "after": "0.00535392"
+        },
+        {
+          "path": "/robot/joint[08_right_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.0128",
+          "after": "0.00535392"
+        }
+      ],
+      "link_inertial_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": true,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "link_visual_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": true,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "link_collision_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": true,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "joint_kinematics_equal": true,
+      "constraint_comparison": []
+    },
+    "older_undated__current": {
+      "all_semantic_differences": [
+        {
+          "path": "/robot/joint[00_knee_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.36880",
+          "after": "0.37825873418"
+        },
+        {
+          "path": "/robot/joint[00_knee_joint]/limit[5]",
+          "field": "@effort",
+          "before": "600.0",
+          "after": "550.3"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/origin[0]",
+          "field": "@xyz",
+          "before": "0.001730 0.000040 -0.146153",
+          "after": "0.003950 0.000010 -0.144090"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/mass[1]",
+          "field": "@value",
+          "before": "3.38378",
+          "after": "3.419690"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.104136",
+          "after": "0.03144104616"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@ixy",
+          "before": "0.000004",
+          "after": "-0.00000152892"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@ixz",
+          "before": "-0.000722",
+          "after": "-0.00075255670"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.106810",
+          "after": "0.03453173442"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@iyz",
+          "before": "-0.000750",
+          "after": "0.00085899137"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@izz",
+          "before": "0.004357",
+          "after": "0.00474369522"
+        },
+        {
+          "path": "/robot/link[Universal]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.00048",
+          "after": "0.00004785009"
+        },
+        {
+          "path": "/robot/link[Universal]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.000089",
+          "after": "0.00008903210"
+        },
+        {
+          "path": "/robot/link[Universal]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000124",
+          "after": "0.00012365773"
+        },
+        {
+          "path": "/robot/link[Foot]/visual[1]/geometry[1]/box[0]",
+          "field": "@size",
+          "before": "0.06 0.1 0.03",
+          "after": "0.055 0.1 0.03"
+        },
+        {
+          "path": "/robot/link[Foot]/collision[3]/geometry[1]/box[0]",
+          "field": "@size",
+          "before": "0.06 0.1 0.03",
+          "after": "0.055 0.1 0.03"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/origin[0]",
+          "field": "@xyz",
+          "before": "0.003088 -0.0000 -0.044077",
+          "after": "0.00320582 -0.00032194 -0.03596666"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/mass[1]",
+          "field": "@value",
+          "before": "1.205532",
+          "after": "1.041857"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.003946",
+          "after": "0.00139245073"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@ixy",
+          "before": "0.000001",
+          "after": "-0.00001843666"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@ixz",
+          "before": "-0.000434",
+          "after": "-0.00021646787"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.008954",
+          "after": "0.00564702944"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@iyz",
+          "before": "0",
+          "after": "-0.00001139993"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@izz",
+          "before": "0.006827",
+          "after": "0.00584029057"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/visual[0]/geometry[1]/mesh[0]",
+          "field": "@filename",
+          "before": "URDF_Calf_Link_S_verHopping1_Simplified.dae",
+          "after": "URDF_Calf_Link_S_verV1_simplified.dae"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/origin[0]",
+          "field": "@xyz",
+          "before": "0.000021 0 0.083422",
+          "after": "0.000025644400 0 0.084408542972"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.001708",
+          "after": "0.000800961552250"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixy",
+          "before": "0",
+          "after": "0.000000000190000"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "0.000000211275310"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.001714",
+          "after": "0.000807444802804"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@iyz",
+          "before": "0",
+          "after": "0.000000009300000"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000010",
+          "after": "0.000009875940554"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/visual[0]/geometry[1]/mesh[0]",
+          "field": "@filename",
+          "before": "URDF_Calf_Link_L_verHopping1_Simplified.dae",
+          "after": "URDF_Calf_Link_L_verV1_simplified.dae"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/origin[0]",
+          "field": "@xyz",
+          "before": "0.000017 0 0.137377",
+          "after": "0.000012225326 0 0.138158414615"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.005596",
+          "after": "0.002425260969736"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixy",
+          "before": "0",
+          "after": "0.000000000190000"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "0.000000332931381"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.005602",
+          "after": "0.002431743355101"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@iyz",
+          "before": "0",
+          "after": "-0.000000000190000"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000011",
+          "after": "0.000010525435365"
+        },
+        {
+          "path": "/robot/joint[07_left_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.0128",
+          "after": "0.00611686196"
+        },
+        {
+          "path": "/robot/joint[07_left_ankle_link_input_joint]/limit[5]",
+          "field": "@effort",
+          "before": "150.0",
+          "after": "85.9"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/origin[0]",
+          "field": "@xyz",
+          "before": "0.022550 0.012714 -0.001469",
+          "after": "0.024120 0.013430 -0.001640"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/mass[1]",
+          "field": "@value",
+          "before": "0.132288",
+          "after": "0.118360"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.000048",
+          "after": "0.00002370602"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixy",
+          "before": "0.000048",
+          "after": "-0.00000732881"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "-0.00000462551"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.000170",
+          "after": "0.00009080315"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@iyz",
+          "before": "-0.000004",
+          "after": "0.00000161882"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000187",
+          "after": "0.00008559930"
+        },
+        {
+          "path": "/robot/joint[08_right_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.0128",
+          "after": "0.00611686196"
+        },
+        {
+          "path": "/robot/joint[08_right_ankle_link_input_joint]/limit[5]",
+          "field": "@effort",
+          "before": "150.0",
+          "after": "85.9"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/origin[0]",
+          "field": "@xyz",
+          "before": "0.022550 -0.012714 -0.001469",
+          "after": "0.024120 -0.013430 -0.001640"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/mass[1]",
+          "field": "@value",
+          "before": "0.132288",
+          "after": "0.118360"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.000048",
+          "after": "0.00002370594"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixy",
+          "before": "-0.000048",
+          "after": "0.00000732874"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "-0.00000462550"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.000170",
+          "after": "0.00009080295"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@iyz",
+          "before": "0.000004",
+          "after": "-0.00000161879"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000187",
+          "after": "0.00008559905"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/origin[0]",
+          "field": "@xyz",
+          "before": "0 0 0.046728",
+          "after": "0.000068979276 0 0.045106208574"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/mass[1]",
+          "field": "@value",
+          "before": "3.17388",
+          "after": "3.380000"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.010710",
+          "after": "0.004181097751"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "0.000009332820"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.010709",
+          "after": "0.004174563808"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+          "field": "@izz",
+          "before": "0.005796",
+          "after": "0.006073407112"
+        },
+        {
+          "path": "/robot/constraints[30]",
+          "field": "@nominal_config",
+          "before": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.641723, -0.002499, 0.409439, 0.001567, 0.541459, 0.249985",
+          "after": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.64057070, -0.00247525, 0.40891126, 0.00156250, 0.51048313, 0.23438469"
+        }
+      ],
+      "link_inertial_equal": {
+        "Thigh": true,
+        "Calf": false,
+        "Universal": false,
+        "Foot": false,
+        "Left_Dice": true,
+        "Left_Ankle_Link": false,
+        "Right_Dice": true,
+        "Right_Ankle_Link": false,
+        "Left_Ankle_Link_Input": false,
+        "Right_Ankle_Link_Input": false,
+        "Temp_Weight": false
+      },
+      "link_visual_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": false,
+        "Left_Dice": true,
+        "Left_Ankle_Link": false,
+        "Right_Dice": true,
+        "Right_Ankle_Link": false,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "link_collision_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": false,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "joint_kinematics_equal": true,
+      "constraint_comparison": [
+        {
+          "path": "/constraints",
+          "field": "@nominal_config",
+          "before": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.641723, -0.002499, 0.409439, 0.001567, 0.541459, 0.249985",
+          "after": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.64057070, -0.00247525, 0.40891126, 0.00156250, 0.51048313, 0.23438469"
+        }
+      ]
+    },
+    "older_20250311__current": {
+      "all_semantic_differences": [
+        {
+          "path": "/robot/joint[00_knee_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.36880",
+          "after": "0.37825873418"
+        },
+        {
+          "path": "/robot/joint[00_knee_joint]/limit[5]",
+          "field": "@effort",
+          "before": "600.0",
+          "after": "550.3"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/origin[0]",
+          "field": "@xyz",
+          "before": "0.001730 0.000040 -0.146153",
+          "after": "0.003950 0.000010 -0.144090"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/mass[1]",
+          "field": "@value",
+          "before": "3.38378",
+          "after": "3.419690"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.104136",
+          "after": "0.03144104616"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@ixy",
+          "before": "0.000004",
+          "after": "-0.00000152892"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@ixz",
+          "before": "-0.000722",
+          "after": "-0.00075255670"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.106810",
+          "after": "0.03453173442"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@iyz",
+          "before": "-0.000750",
+          "after": "0.00085899137"
+        },
+        {
+          "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+          "field": "@izz",
+          "before": "0.004357",
+          "after": "0.00474369522"
+        },
+        {
+          "path": "/robot/link[Universal]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.00048",
+          "after": "0.00004785009"
+        },
+        {
+          "path": "/robot/link[Universal]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.000089",
+          "after": "0.00008903210"
+        },
+        {
+          "path": "/robot/link[Universal]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000124",
+          "after": "0.00012365773"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/origin[0]",
+          "field": "@xyz",
+          "before": "0.003088 -0.0000 -0.044077",
+          "after": "0.00320582 -0.00032194 -0.03596666"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/mass[1]",
+          "field": "@value",
+          "before": "1.205532",
+          "after": "1.041857"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.003946",
+          "after": "0.00139245073"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@ixy",
+          "before": "0.000001",
+          "after": "-0.00001843666"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@ixz",
+          "before": "-0.000434",
+          "after": "-0.00021646787"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.008954",
+          "after": "0.00564702944"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@iyz",
+          "before": "0",
+          "after": "-0.00001139993"
+        },
+        {
+          "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+          "field": "@izz",
+          "before": "0.006827",
+          "after": "0.00584029057"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/visual[0]/geometry[1]/mesh[0]",
+          "field": "@filename",
+          "before": "URDF_Calf_Link_S_verHopping1_Simplified.dae",
+          "after": "URDF_Calf_Link_S_verV1_simplified.dae"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/origin[0]",
+          "field": "@xyz",
+          "before": "0.000021 0 0.083422",
+          "after": "0.000025644400 0 0.084408542972"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.001708",
+          "after": "0.000800961552250"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixy",
+          "before": "0",
+          "after": "0.000000000190000"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "0.000000211275310"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.001714",
+          "after": "0.000807444802804"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@iyz",
+          "before": "0",
+          "after": "0.000000009300000"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000010",
+          "after": "0.000009875940554"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/visual[0]/geometry[1]/mesh[0]",
+          "field": "@filename",
+          "before": "URDF_Calf_Link_L_verHopping1_Simplified.dae",
+          "after": "URDF_Calf_Link_L_verV1_simplified.dae"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/origin[0]",
+          "field": "@xyz",
+          "before": "0.000017 0 0.137377",
+          "after": "0.000012225326 0 0.138158414615"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.005596",
+          "after": "0.002425260969736"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixy",
+          "before": "0",
+          "after": "0.000000000190000"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "0.000000332931381"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.005602",
+          "after": "0.002431743355101"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@iyz",
+          "before": "0",
+          "after": "-0.000000000190000"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000011",
+          "after": "0.000010525435365"
+        },
+        {
+          "path": "/robot/joint[07_left_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.0128",
+          "after": "0.00611686196"
+        },
+        {
+          "path": "/robot/joint[07_left_ankle_link_input_joint]/limit[5]",
+          "field": "@effort",
+          "before": "150.0",
+          "after": "85.9"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/origin[0]",
+          "field": "@xyz",
+          "before": "0.022550 0.012714 -0.001469",
+          "after": "0.024120 0.013430 -0.001640"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/mass[1]",
+          "field": "@value",
+          "before": "0.132288",
+          "after": "0.118360"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.000048",
+          "after": "0.00002370602"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixy",
+          "before": "0.000048",
+          "after": "-0.00000732881"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "-0.00000462551"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.000170",
+          "after": "0.00009080315"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@iyz",
+          "before": "-0.000004",
+          "after": "0.00000161882"
+        },
+        {
+          "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000187",
+          "after": "0.00008559930"
+        },
+        {
+          "path": "/robot/joint[08_right_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.0128",
+          "after": "0.00611686196"
+        },
+        {
+          "path": "/robot/joint[08_right_ankle_link_input_joint]/limit[5]",
+          "field": "@effort",
+          "before": "150.0",
+          "after": "85.9"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/origin[0]",
+          "field": "@xyz",
+          "before": "0.022550 -0.012714 -0.001469",
+          "after": "0.024120 -0.013430 -0.001640"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/mass[1]",
+          "field": "@value",
+          "before": "0.132288",
+          "after": "0.118360"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.000048",
+          "after": "0.00002370594"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixy",
+          "before": "-0.000048",
+          "after": "0.00000732874"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "-0.00000462550"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.000170",
+          "after": "0.00009080295"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@iyz",
+          "before": "0.000004",
+          "after": "-0.00000161879"
+        },
+        {
+          "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+          "field": "@izz",
+          "before": "0.000187",
+          "after": "0.00008559905"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/origin[0]",
+          "field": "@xyz",
+          "before": "0 0 0.046728",
+          "after": "0.000068979276 0 0.045106208574"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/mass[1]",
+          "field": "@value",
+          "before": "3.17388",
+          "after": "3.380000"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+          "field": "@ixx",
+          "before": "0.010710",
+          "after": "0.004181097751"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+          "field": "@ixz",
+          "before": "0",
+          "after": "0.000009332820"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+          "field": "@iyy",
+          "before": "0.010709",
+          "after": "0.004174563808"
+        },
+        {
+          "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+          "field": "@izz",
+          "before": "0.005796",
+          "after": "0.006073407112"
+        },
+        {
+          "path": "/robot/constraints[30]",
+          "field": "@nominal_config",
+          "before": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.641723, -0.002499, 0.409439, 0.001567, 0.541459, 0.249985",
+          "after": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.64057070, -0.00247525, 0.40891126, 0.00156250, 0.51048313, 0.23438469"
+        }
+      ],
+      "link_inertial_equal": {
+        "Thigh": true,
+        "Calf": false,
+        "Universal": false,
+        "Foot": false,
+        "Left_Dice": true,
+        "Left_Ankle_Link": false,
+        "Right_Dice": true,
+        "Right_Ankle_Link": false,
+        "Left_Ankle_Link_Input": false,
+        "Right_Ankle_Link_Input": false,
+        "Temp_Weight": false
+      },
+      "link_visual_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": true,
+        "Left_Dice": true,
+        "Left_Ankle_Link": false,
+        "Right_Dice": true,
+        "Right_Ankle_Link": false,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "link_collision_equal": {
+        "Thigh": true,
+        "Calf": true,
+        "Universal": true,
+        "Foot": true,
+        "Left_Dice": true,
+        "Left_Ankle_Link": true,
+        "Right_Dice": true,
+        "Right_Ankle_Link": true,
+        "Left_Ankle_Link_Input": true,
+        "Right_Ankle_Link_Input": true,
+        "Temp_Weight": true
+      },
+      "joint_kinematics_equal": true,
+      "constraint_comparison": [
+        {
+          "path": "/constraints",
+          "field": "@nominal_config",
+          "before": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.641723, -0.002499, 0.409439, 0.001567, 0.541459, 0.249985",
+          "after": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.64057070, -0.00247525, 0.40891126, 0.00156250, 0.51048313, 0.23438469"
+        }
+      ]
+    }
+  },
+  "ankle_rotor_inertia_percent_old_undated_to_current": -52.2120159375,
+  "ankle_rotor_inertia_percent_old_undated_to_uploaded_august": -58.17250000000001,
+  "ankle_rotor_inertia_percent_uploaded_august_to_current": 14.250156147271543
+}

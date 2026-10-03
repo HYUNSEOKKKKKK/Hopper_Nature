@@ -1,0 +1,238 @@
+{
+  "method": {
+    "units": "mm",
+    "random_seed": 12345,
+    "ransac_iterations": 10000,
+    "radial_inlier_tolerance_mm": 0.04,
+    "projected_vertex_deduplication_decimal_places": 8,
+    "least_squares_refinement_iterations": 5,
+    "bottom_filter": "abs(Z)<6 and abs(Y)<6 and abs(X)>7.9",
+    "bottom_axis": "X",
+    "bottom_circle_radius_range_mm": [
+      4.8,
+      5.2
+    ],
+    "top_filter": "Z>max(mesh.Z)-23 and abs(Y)<6.01",
+    "top_axis": "Y",
+    "top_circle_radius_range_mm": [
+      3.8,
+      4.2
+    ],
+    "distance": "abs(top_axis.Z - bottom_axis.Z); axes X and Y are perpendicular",
+    "interpretation": "Mesh-derived cylinder-axis separation, not bounding-box length or certified physical tolerance."
+  },
+  "meshes": [
+    {
+      "file": "URDF_Calf_Link_L_verHopping1_Simplified.dae",
+      "sha256": "fb24ef3f02b9d7f7bef3ba5ad8ed3c793efce4964acfc0b756a16883df718e78",
+      "vertices": 1406,
+      "triangles": 2816,
+      "explicit_unit": null,
+      "up_axis": "Y_UP",
+      "scene_transforms": [],
+      "raw_coordinate_to_mm_scale": 1000.0,
+      "bounds_mm": [
+        [
+          -18.0,
+          -8.00007,
+          -7.956770000000001
+        ],
+        [
+          18.0,
+          8.00004,
+          328.382
+        ]
+      ],
+      "bottom_X_axis_fit_projected_YZ": {
+        "center_projected_mm": [
+          0.0009616651237490017,
+          -0.002129553814226526
+        ],
+        "radius_mm": 4.978772554566675,
+        "unique_inlier_count": 77,
+        "radial_rms_mm": 0.013015161811005356,
+        "radial_max_abs_mm": 0.02952926739093975
+      },
+      "top_Y_axis_fit_projected_XZ": {
+        "center_projected_mm": [
+          -0.0006298088552168758,
+          315.99871113815556
+        ],
+        "radius_mm": 3.9829029712313186,
+        "unique_inlier_count": 22,
+        "radial_rms_mm": 0.010466126927436283,
+        "radial_max_abs_mm": 0.019641186756021334
+      },
+      "perpendicular_pin_axis_separation_mm": 316.00084069196976,
+      "upper_Y0_circle_independent_check": {
+        "plane": "Y = 0 mm",
+        "point_count": 5,
+        "center_XZ_mm": [
+          -0.0029172272347119757,
+          315.99384740323296
+        ],
+        "radius_mm": 3.9830655246077145,
+        "radial_rms_mm": 0.007317950464886025
+      }
+    },
+    {
+      "file": "URDF_Calf_Link_L_verV1_simplified.dae",
+      "sha256": "820afc7de8819f3e0e81a708705b450a37b53aeab8de0e5f0daf655b31a1a9dc",
+      "vertices": 2812,
+      "triangles": 5632,
+      "explicit_unit": null,
+      "up_axis": "Y_UP",
+      "scene_transforms": [],
+      "raw_coordinate_to_mm_scale": 1000.0,
+      "bounds_mm": [
+        [
+          -18.0,
+          -8.00003,
+          -7.997509999999999
+        ],
+        [
+          18.0,
+          8.0,
+          332.409
+        ]
+      ],
+      "bottom_X_axis_fit_projected_YZ": {
+        "center_projected_mm": [
+          -0.00047409797972426833,
+          0.0006129634514637772
+        ],
+        "radius_mm": 4.994637409862503,
+        "unique_inlier_count": 145,
+        "radial_rms_mm": 0.0035559881298886727,
+        "radial_max_abs_mm": 0.010046039711515853
+      },
+      "top_Y_axis_fit_projected_XZ": {
+        "center_projected_mm": [
+          -0.001051206833963225,
+          319.99862753204206
+        ],
+        "radius_mm": 3.9962311548028313,
+        "unique_inlier_count": 58,
+        "radial_rms_mm": 0.007587511771885111,
+        "radial_max_abs_mm": 0.03180220577640114
+      },
+      "perpendicular_pin_axis_separation_mm": 319.9980145685906,
+      "upper_Y0_circle_independent_check": {
+        "plane": "Y = 0 mm",
+        "point_count": 17,
+        "center_XZ_mm": [
+          -0.00014675058067920843,
+          319.99957810501724
+        ],
+        "radius_mm": 3.995119543614747,
+        "radial_rms_mm": 0.002606483756116173
+      }
+    },
+    {
+      "file": "URDF_Calf_Link_S_verHopping1_Simplified.dae",
+      "sha256": "e67e180bb3e2d42da9b5d51360f083c0cbdc3b0e75d4ae2ed6cef85fd93ddac4",
+      "vertices": 1407,
+      "triangles": 2816,
+      "explicit_unit": null,
+      "up_axis": "Y_UP",
+      "scene_transforms": [],
+      "raw_coordinate_to_mm_scale": 1000.0,
+      "bounds_mm": [
+        [
+          -18.0,
+          -8.00009,
+          -7.962759999999999
+        ],
+        [
+          18.0,
+          8.00007,
+          210.238
+        ]
+      ],
+      "bottom_X_axis_fit_projected_YZ": {
+        "center_projected_mm": [
+          -0.0016461821441064563,
+          -0.004050660060400446
+        ],
+        "radius_mm": 4.979660494438834,
+        "unique_inlier_count": 82,
+        "radial_rms_mm": 0.012037681318660367,
+        "radial_max_abs_mm": 0.038183956525664975
+      },
+      "top_Y_axis_fit_projected_XZ": {
+        "center_projected_mm": [
+          0.0022624040036309566,
+          198.0005879463606
+        ],
+        "radius_mm": 3.982613275866279,
+        "unique_inlier_count": 23,
+        "radial_rms_mm": 0.01126295847836738,
+        "radial_max_abs_mm": 0.022165691186978975
+      },
+      "perpendicular_pin_axis_separation_mm": 198.004638606421,
+      "upper_Y0_circle_independent_check": {
+        "plane": "Y = 0 mm",
+        "point_count": 4,
+        "center_XZ_mm": [
+          -0.004326136909175727,
+          198.0156218304474
+        ],
+        "radius_mm": 3.969156731394368,
+        "radial_rms_mm": 0.0047757878958310475
+      }
+    },
+    {
+      "file": "URDF_Calf_Link_S_verV1_simplified.dae",
+      "sha256": "b23786c8e117a540ac883393b810af02bcd4b41eb5e751bb8931ec0f54e6d27b",
+      "vertices": 2812,
+      "triangles": 5632,
+      "explicit_unit": null,
+      "up_axis": "Y_UP",
+      "scene_transforms": [],
+      "raw_coordinate_to_mm_scale": 1000.0,
+      "bounds_mm": [
+        [
+          -18.0,
+          -8.00003,
+          -7.992539999999999
+        ],
+        [
+          18.0,
+          8.0,
+          214.454
+        ]
+      ],
+      "bottom_X_axis_fit_projected_YZ": {
+        "center_projected_mm": [
+          -0.0005202227341785319,
+          0.000506618838201689
+        ],
+        "radius_mm": 4.99468316308183,
+        "unique_inlier_count": 139,
+        "radial_rms_mm": 0.0035337865483169874,
+        "radial_max_abs_mm": 0.009921601940961366
+      },
+      "top_Y_axis_fit_projected_XZ": {
+        "center_projected_mm": [
+          0.0016573370858015888,
+          201.9974753416286
+        ],
+        "radius_mm": 3.996054008225221,
+        "unique_inlier_count": 54,
+        "radial_rms_mm": 0.008655224822032242,
+        "radial_max_abs_mm": 0.03604643580625355
+      },
+      "perpendicular_pin_axis_separation_mm": 201.99696872279037,
+      "upper_Y0_circle_independent_check": {
+        "plane": "Y = 0 mm",
+        "point_count": 25,
+        "center_XZ_mm": [
+          -6.168169264037781e-05,
+          201.9989810407995
+        ],
+        "radius_mm": 3.9954674996075843,
+        "radial_rms_mm": 0.0021662635095957023
+      }
+    }
+  ]
+}

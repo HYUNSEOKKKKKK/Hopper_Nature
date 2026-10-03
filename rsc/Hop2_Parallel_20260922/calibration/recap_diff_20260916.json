@@ -1,0 +1,3115 @@
+{
+  "baseline_note": "Exact comparison against uploaded 20260820 package only; not verified against Hop_verParallelAnkleLinks_ver20250304.",
+  "before_path": "/workspace/scratch/813fa2b7d6a7/recovered_original/extracted/Hop2_Parallel_20260820/Hop2_Parallel_20260820.urdf",
+  "after_path": "/workspace/scratch/813fa2b7d6a7/recovered/extracted/Hop2_Parallel_20260820/Hop2_Parallel_20260820.urdf",
+  "sha256_before": "04662417b0f9697db38a213d365285b77fcfad6bafb2f1f3b8de710181a570bb",
+  "sha256_after": "35da18cf42ebbedcdbde60d7434fd770ebd0ac027d70fcf051713340161d55c5",
+  "robot_name_before": "DHAL",
+  "robot_name_after": "DHAL",
+  "total_mass_before_kg": 12.90813,
+  "total_mass_after_kg": 12.958629,
+  "link_names_before": [
+    "Thigh",
+    "Calf",
+    "Universal",
+    "Foot",
+    "Left_Dice",
+    "Left_Ankle_Link",
+    "Right_Dice",
+    "Right_Ankle_Link",
+    "Left_Ankle_Link_Input",
+    "Right_Ankle_Link_Input",
+    "Temp_Weight"
+  ],
+  "link_names_after": [
+    "Thigh",
+    "Calf",
+    "Universal",
+    "Foot",
+    "Left_Dice",
+    "Left_Ankle_Link",
+    "Right_Dice",
+    "Right_Ankle_Link",
+    "Left_Ankle_Link_Input",
+    "Right_Ankle_Link_Input",
+    "Temp_Weight"
+  ],
+  "joint_names_before": [
+    "00_knee_joint",
+    "01_ankle_pitch_joint",
+    "02_ankle_roll_joint",
+    "03_left_ankle_link_pitch_joint",
+    "04_left_ankle_link_roll_joint",
+    "05_right_ankle_link_pitch_joint",
+    "06_right_ankle_link_roll_joint",
+    "07_left_ankle_link_input_joint",
+    "08_right_ankle_link_input_joint",
+    "09_temp_weight_joint"
+  ],
+  "joint_names_after": [
+    "00_knee_joint",
+    "01_ankle_pitch_joint",
+    "02_ankle_roll_joint",
+    "03_left_ankle_link_pitch_joint",
+    "04_left_ankle_link_roll_joint",
+    "05_right_ankle_link_pitch_joint",
+    "06_right_ankle_link_roll_joint",
+    "07_left_ankle_link_input_joint",
+    "08_right_ankle_link_input_joint",
+    "09_temp_weight_joint"
+  ],
+  "links": {
+    "Thigh": {
+      "before": {
+        "mass_kg": 4.29025,
+        "com_m": [
+          0.001815,
+          0.027609,
+          -0.115412
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.07712,
+          "ixy": -3e-05,
+          "ixz": -0.001298,
+          "iyy": 0.076206,
+          "iyz": -0.012889,
+          "izz": 0.014845
+        },
+        "principal_moments_kg_m2": [
+          0.012222407340703364,
+          0.0771146761837978,
+          0.07883391647549884
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 0.010503167049002324
+      },
+      "after": {
+        "mass_kg": 4.29025,
+        "com_m": [
+          0.001815,
+          0.027609,
+          -0.115412
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.07712,
+          "ixy": -3e-05,
+          "ixz": -0.001298,
+          "iyy": 0.076206,
+          "iyz": -0.012889,
+          "izz": 0.014845
+        },
+        "principal_moments_kg_m2": [
+          0.012222407340703364,
+          0.0771146761837978,
+          0.07883391647549884
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 0.010503167049002324
+      },
+      "mass_delta_kg": 0.0,
+      "com_delta_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertial_changed": false,
+      "tensor_diagonal_percent_change": {
+        "ixx": 0.0,
+        "iyy": 0.0,
+        "izz": 0.0
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Thigh_with_Link_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Thigh_with_Link_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Calf": {
+      "before": {
+        "mass_kg": 3.38378,
+        "com_m": [
+          0.00173,
+          4e-05,
+          -0.146153
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.104136,
+          "ixy": 4e-06,
+          "ixz": -0.000722,
+          "iyy": 0.10681,
+          "iyz": -0.00075,
+          "izz": 0.004357
+        },
+        "principal_moments_kg_m2": [
+          0.00434628685029283,
+          0.10414119088746573,
+          0.10681552226224145
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 0.0016719554755171145
+      },
+      "after": {
+        "mass_kg": 3.41969,
+        "com_m": [
+          0.00395,
+          1e-05,
+          -0.14409
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.03144104616,
+          "ixy": -1.52892e-06,
+          "ixz": -0.0007525567,
+          "iyy": 0.03453173442,
+          "iyz": 0.00085899137,
+          "izz": 0.00474369522
+        },
+        "principal_moments_kg_m2": [
+          0.004697788275465884,
+          0.031462029264037475,
+          0.034556658260496635
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 0.0016031592790067203
+      },
+      "mass_delta_kg": 0.03591000000000033,
+      "com_delta_mm": [
+        2.2200000000000006,
+        -0.030000000000000006,
+        2.0630000000000095
+      ],
+      "inertial_changed": true,
+      "tensor_diagonal_percent_change": {
+        "ixx": -69.80770707536298,
+        "iyy": -67.66994249602097,
+        "izz": 8.875263254532939
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Universal": {
+      "before": {
+        "mass_kg": 0.209567,
+        "com_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.00048,
+          "ixy": 0.0,
+          "ixz": 0.0,
+          "iyy": 8.9e-05,
+          "iyz": 0.0,
+          "izz": 0.000124
+        },
+        "principal_moments_kg_m2": [
+          8.9e-05,
+          0.000124,
+          0.00048
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": -0.000267
+      },
+      "after": {
+        "mass_kg": 0.209567,
+        "com_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 4.785009e-05,
+          "ixy": 0.0,
+          "ixz": 0.0,
+          "iyy": 8.90321e-05,
+          "iyz": 0.0,
+          "izz": 0.00012365773
+        },
+        "principal_moments_kg_m2": [
+          4.785009e-05,
+          8.90321e-05,
+          0.00012365773
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 1.3224459999999999e-05
+      },
+      "mass_delta_kg": 0.0,
+      "com_delta_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertial_changed": true,
+      "tensor_diagonal_percent_change": {
+        "ixx": -90.03123125,
+        "iyy": 0.03606741573034533,
+        "izz": -0.27602419354838537
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Universal_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Universal_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Foot": {
+      "before": {
+        "mass_kg": 1.205532,
+        "com_m": [
+          0.003088,
+          -0.0,
+          -0.044077
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.003946,
+          "ixy": 1e-06,
+          "ixz": -0.000434,
+          "iyy": 0.008954,
+          "iyz": 0.0,
+          "izz": 0.006827
+        },
+        "principal_moments_kg_m2": [
+          0.0038820410172971114,
+          0.006890958779427942,
+          0.008954000203274944
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 0.0018189995934501102
+      },
+      "after": {
+        "mass_kg": 1.041857,
+        "com_m": [
+          0.00320582,
+          -0.00032194,
+          -0.03596666
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.00139245073,
+          "ixy": -1.843666e-05,
+          "ixz": -0.00021646787,
+          "iyy": 0.00564702944,
+          "iyz": -1.139993e-05,
+          "izz": 0.00584029057
+        },
+        "principal_moments_kg_m2": [
+          0.0013818561348677488,
+          0.005646574740663808,
+          0.005851339864468446
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 0.0011770910110631104
+      },
+      "mass_delta_kg": -0.16367500000000001,
+      "com_delta_mm": [
+        0.11781999999999981,
+        -0.32194,
+        8.11034
+      ],
+      "inertial_changed": true,
+      "tensor_diagonal_percent_change": {
+        "ixx": -64.71234845413076,
+        "iyy": -36.932885414339964,
+        "izz": -14.453045700893508
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "-0.02 0 -0.065"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "box",
+                  "attributes": {
+                    "size": "0.20 0.1 0.03"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 -0.5 0",
+                "xyz": "0.12 0 -0.045"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "box",
+                  "attributes": {
+                    "size": "0.055 0.1 0.03"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "-0.02 0 -0.065"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "box",
+                  "attributes": {
+                    "size": "0.20 0.1 0.03"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 -0.5 0",
+                "xyz": "0.12 0 -0.045"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "box",
+                  "attributes": {
+                    "size": "0.055 0.1 0.03"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Left_Dice": {
+      "before": {
+        "mass_kg": 0.037914,
+        "com_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 2e-06,
+          "ixy": 0.0,
+          "ixz": 0.0,
+          "iyy": 4e-06,
+          "iyz": 0.0,
+          "izz": 4e-06
+        },
+        "principal_moments_kg_m2": [
+          2e-06,
+          4e-06,
+          4e-06
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 2.0000000000000003e-06
+      },
+      "after": {
+        "mass_kg": 0.037914,
+        "com_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 2e-06,
+          "ixy": 0.0,
+          "ixz": 0.0,
+          "iyy": 4e-06,
+          "iyz": 0.0,
+          "izz": 4e-06
+        },
+        "principal_moments_kg_m2": [
+          2e-06,
+          4e-06,
+          4e-06
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 2.0000000000000003e-06
+      },
+      "mass_delta_kg": 0.0,
+      "com_delta_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertial_changed": false,
+      "tensor_diagonal_percent_change": {
+        "ixx": 0.0,
+        "iyy": 0.0,
+        "izz": 0.0
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_Dice_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_Dice_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Left_Ankle_Link": {
+      "before": {
+        "mass_kg": 0.134342,
+        "com_m": [
+          2.1e-05,
+          0.0,
+          0.083422
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.001708,
+          "ixy": 0.0,
+          "ixz": 0.0,
+          "iyy": 0.001714,
+          "iyz": 0.0,
+          "izz": 1e-05
+        },
+        "principal_moments_kg_m2": [
+          1e-05,
+          0.001708,
+          0.001714
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 4.000000000000097e-06
+      },
+      "after": {
+        "mass_kg": 0.134342,
+        "com_m": [
+          2.56444e-05,
+          0.0,
+          0.084408542972
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.00080096155225,
+          "ixy": 1.9e-10,
+          "ixz": 2.1127531e-07,
+          "iyy": 0.000807444802804,
+          "iyz": 9.3e-09,
+          "izz": 9.875940554e-06
+        },
+        "principal_moments_kg_m2": [
+          9.875884020245806e-06,
+          0.0008009616086695984,
+          0.0008074448029181556
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 3.3926897716886166e-06
+      },
+      "mass_delta_kg": 0.0,
+      "com_delta_mm": [
+        0.0046444000000000025,
+        0.0,
+        0.9865429720000013
+      ],
+      "inertial_changed": true,
+      "tensor_diagonal_percent_change": {
+        "ixx": -53.10529553571429,
+        "iyy": -52.891201703383906,
+        "izz": -1.2405944600000107
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_S_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_S_verV1_simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Right_Dice": {
+      "before": {
+        "mass_kg": 0.037914,
+        "com_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 2e-06,
+          "ixy": 0.0,
+          "ixz": 0.0,
+          "iyy": 4e-06,
+          "iyz": 0.0,
+          "izz": 4e-06
+        },
+        "principal_moments_kg_m2": [
+          2e-06,
+          4e-06,
+          4e-06
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 2.0000000000000003e-06
+      },
+      "after": {
+        "mass_kg": 0.037914,
+        "com_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 2e-06,
+          "ixy": 0.0,
+          "ixz": 0.0,
+          "iyy": 4e-06,
+          "iyz": 0.0,
+          "izz": 4e-06
+        },
+        "principal_moments_kg_m2": [
+          2e-06,
+          4e-06,
+          4e-06
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 2.0000000000000003e-06
+      },
+      "mass_delta_kg": 0.0,
+      "com_delta_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertial_changed": false,
+      "tensor_diagonal_percent_change": {
+        "ixx": 0.0,
+        "iyy": 0.0,
+        "izz": 0.0
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_Dice_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_Dice_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Right_Ankle_Link": {
+      "before": {
+        "mass_kg": 0.170375,
+        "com_m": [
+          1.7e-05,
+          0.0,
+          0.137377
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.005596,
+          "ixy": 0.0,
+          "ixz": 0.0,
+          "iyy": 0.005602,
+          "iyz": 0.0,
+          "izz": 1.1e-05
+        },
+        "principal_moments_kg_m2": [
+          1.1e-05,
+          0.005596,
+          0.005602
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 4.999999999999796e-06
+      },
+      "after": {
+        "mass_kg": 0.170375,
+        "com_m": [
+          1.2225326e-05,
+          0.0,
+          0.138158414615
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.002425260969736,
+          "ixy": 1.9e-10,
+          "ixz": 3.32931381e-07,
+          "iyy": 0.002431743355101,
+          "iyz": -1.9e-10,
+          "izz": 1.0525435365e-05
+        },
+        "principal_moments_kg_m2": [
+          1.0525389462109872e-05,
+          0.0024252610156333073,
+          0.002431743355106582
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 4.043049988835569e-06
+      },
+      "mass_delta_kg": 0.0,
+      "com_delta_mm": [
+        -0.004774673999999999,
+        0.0,
+        0.7814146150000034
+      ],
+      "inertial_changed": true,
+      "tensor_diagonal_percent_change": {
+        "ixx": -56.660811834596146,
+        "iyy": -56.591514546572654,
+        "izz": -4.314223954545449
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_L_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_L_verV1_simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "white"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Left_Ankle_Link_Input": {
+      "before": {
+        "mass_kg": 0.132288,
+        "com_m": [
+          0.02255,
+          0.012714,
+          -0.001469
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 4.8e-05,
+          "ixy": 4.8e-05,
+          "ixz": 0.0,
+          "iyy": 0.00017,
+          "iyz": -4e-06,
+          "izz": 0.000187
+        },
+        "principal_moments_kg_m2": [
+          3.136811306341466e-05,
+          0.00018303123641594458,
+          0.00019060065052064077
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 2.3798698958718464e-05
+      },
+      "after": {
+        "mass_kg": 0.11836,
+        "com_m": [
+          0.02412,
+          0.01343,
+          -0.00164
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 2.370602e-05,
+          "ixy": -7.32881e-06,
+          "ixz": -4.62551e-06,
+          "iyy": 9.080315e-05,
+          "iyz": 1.61882e-06,
+          "izz": 8.55993e-05
+        },
+        "principal_moments_kg_m2": [
+          2.260369741864132e-05,
+          8.52180499302946e-05,
+          9.228672265106413e-05
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 1.5535024697871792e-05
+      },
+      "mass_delta_kg": -0.013927999999999982,
+      "com_delta_mm": [
+        1.5699999999999985,
+        0.7159999999999996,
+        -0.17099999999999993
+      ],
+      "inertial_changed": true,
+      "tensor_diagonal_percent_change": {
+        "ixx": -50.61245833333333,
+        "iyy": -46.58638235294118,
+        "izz": -54.22497326203208
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_Input_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "green"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_Input_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "green"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Right_Ankle_Link_Input": {
+      "before": {
+        "mass_kg": 0.132288,
+        "com_m": [
+          0.02255,
+          -0.012714,
+          -0.001469
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 4.8e-05,
+          "ixy": -4.8e-05,
+          "ixz": 0.0,
+          "iyy": 0.00017,
+          "iyz": 4e-06,
+          "izz": 0.000187
+        },
+        "principal_moments_kg_m2": [
+          3.136811306341466e-05,
+          0.00018303123641594458,
+          0.00019060065052064077
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 2.3798698958718464e-05
+      },
+      "after": {
+        "mass_kg": 0.11836,
+        "com_m": [
+          0.02412,
+          -0.01343,
+          -0.00164
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 2.370594e-05,
+          "ixy": 7.32874e-06,
+          "ixz": -4.6255e-06,
+          "iyy": 9.080295e-05,
+          "iyz": -1.61879e-06,
+          "izz": 8.559905e-05
+        },
+        "principal_moments_kg_m2": [
+          2.2603630784478856e-05,
+          8.521782413288365e-05,
+          9.228648508263755e-05
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 1.5534969834724957e-05
+      },
+      "mass_delta_kg": -0.013927999999999982,
+      "com_delta_mm": [
+        1.5699999999999985,
+        -0.7159999999999996,
+        -0.17099999999999993
+      ],
+      "inertial_changed": true,
+      "tensor_diagonal_percent_change": {
+        "ixx": -50.61262500000001,
+        "iyy": -46.58650000000001,
+        "izz": -54.22510695187166
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_Input_mir_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "green"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "mesh",
+                  "attributes": {
+                    "filename": "URDF_Calf_Link_Input_mir_verHopping1_Simplified.dae",
+                    "scale": "1 1 1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "green"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    },
+    "Temp_Weight": {
+      "before": {
+        "mass_kg": 3.17388,
+        "com_m": [
+          0.0,
+          0.0,
+          0.046728
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.01071,
+          "ixy": 0.0,
+          "ixz": 0.0,
+          "iyy": 0.010709,
+          "iyz": 0.0,
+          "izz": 0.005796
+        },
+        "principal_moments_kg_m2": [
+          0.005796,
+          0.010709,
+          0.01071
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 0.005794999999999998
+      },
+      "after": {
+        "mass_kg": 3.38,
+        "com_m": [
+          6.8979276e-05,
+          0.0,
+          0.045106208574
+        ],
+        "rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tensor_kg_m2": {
+          "ixx": 0.004181097751,
+          "ixy": 0.0,
+          "ixz": 9.33282e-06,
+          "iyy": 0.004174563808,
+          "iyz": 0.0,
+          "izz": 0.006073407112
+        },
+        "principal_moments_kg_m2": [
+          0.004174563808,
+          0.0041810517228967935,
+          0.0060734531401032054
+        ],
+        "positive_definite": true,
+        "principal_triangle_margin_kg_m2": 0.0022821623907935884
+      },
+      "mass_delta_kg": 0.20611999999999986,
+      "com_delta_mm": [
+        0.068979276,
+        0.0,
+        -1.6217914259999966
+      ],
+      "inertial_changed": true,
+      "tensor_diagonal_percent_change": {
+        "ixx": -60.96080531279179,
+        "iyy": -61.01817342422261,
+        "izz": 4.78618205659076
+      },
+      "visual_before": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "sphere",
+                  "attributes": {
+                    "radius": "0.1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "visual_after": [
+        {
+          "tag": "visual",
+          "attributes": {},
+          "children": [
+            {
+              "tag": "origin",
+              "attributes": {
+                "rpy": "0 0 0",
+                "xyz": "0 0 0"
+              },
+              "children": []
+            },
+            {
+              "tag": "geometry",
+              "attributes": {},
+              "children": [
+                {
+                  "tag": "sphere",
+                  "attributes": {
+                    "radius": "0.1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "tag": "material",
+              "attributes": {
+                "name": "grey"
+              },
+              "children": []
+            }
+          ]
+        }
+      ],
+      "collision_unchanged": true
+    }
+  },
+  "joints": {
+    "00_knee_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "00_knee_joint",
+          "type": "revolute"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 -0.2523"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Thigh"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Calf"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "dynamics",
+            "attributes": {
+              "rotor_inertia": "0.36880",
+              "damping": "0",
+              "friction": "0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "effort": "600.0",
+              "velocity": "10.11",
+              "lower": "0",
+              "upper": "2.26893"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "00_knee_joint",
+          "type": "revolute"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 -0.2523"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Thigh"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Calf"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "dynamics",
+            "attributes": {
+              "rotor_inertia": "0.37825873418",
+              "damping": "0",
+              "friction": "0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "effort": "550.3",
+              "velocity": "10.11",
+              "lower": "0",
+              "upper": "2.26893"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": [
+        {
+          "path": "/joint[00_knee_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.36880",
+          "after": "0.37825873418"
+        },
+        {
+          "path": "/joint[00_knee_joint]/limit[5]",
+          "field": "@effort",
+          "before": "600.0",
+          "after": "550.3"
+        }
+      ]
+    },
+    "01_ankle_pitch_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "01_ankle_pitch_joint",
+          "type": "revolute"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 -0.41"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Calf"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Universal"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "lower": "-0.872665",
+              "upper": "0.698132"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "01_ankle_pitch_joint",
+          "type": "revolute"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 -0.41"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Calf"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Universal"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "lower": "-0.872665",
+              "upper": "0.698132"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": []
+    },
+    "02_ankle_roll_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "02_ankle_roll_joint",
+          "type": "revolute"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Universal"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Foot"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "1 0 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "lower": "-0.523599",
+              "upper": "0.523599"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "02_ankle_roll_joint",
+          "type": "revolute"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Universal"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Foot"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "1 0 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "lower": "-0.523599",
+              "upper": "0.523599"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": []
+    },
+    "03_left_ankle_link_pitch_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "03_left_ankle_link_pitch_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "-0.0640125 0.04 0.0112871"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Foot"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Left_Dice"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "03_left_ankle_link_pitch_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "-0.0640125 0.04 0.0112871"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Foot"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Left_Dice"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": []
+    },
+    "04_left_ankle_link_roll_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "04_left_ankle_link_roll_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Left_Dice"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Left_Ankle_Link"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "1 0 0"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "04_left_ankle_link_roll_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Left_Dice"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Left_Ankle_Link"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "1 0 0"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": []
+    },
+    "05_right_ankle_link_pitch_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "05_right_ankle_link_pitch_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "-0.0640125 -0.04 0.0112871"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Foot"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Right_Dice"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "05_right_ankle_link_pitch_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "-0.0640125 -0.04 0.0112871"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Foot"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Right_Dice"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": []
+    },
+    "06_right_ankle_link_roll_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "06_right_ankle_link_roll_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Right_Dice"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Right_Ankle_Link"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "1 0 0"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "06_right_ankle_link_roll_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Right_Dice"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Right_Ankle_Link"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "1 0 0"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": []
+    },
+    "07_left_ankle_link_input_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "07_left_ankle_link_input_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0.0255 -0.205"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Calf"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Left_Ankle_Link_Input"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "dynamics",
+            "attributes": {
+              "rotor_inertia": "0.00535392",
+              "damping": "0",
+              "friction": "0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "effort": "150.0",
+              "velocity": "18.3"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "07_left_ankle_link_input_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0.0255 -0.205"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Calf"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Left_Ankle_Link_Input"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "dynamics",
+            "attributes": {
+              "rotor_inertia": "0.00611686196",
+              "damping": "0",
+              "friction": "0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "effort": "85.9",
+              "velocity": "18.3"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": [
+        {
+          "path": "/joint[07_left_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.00535392",
+          "after": "0.00611686196"
+        },
+        {
+          "path": "/joint[07_left_ankle_link_input_joint]/limit[5]",
+          "field": "@effort",
+          "before": "150.0",
+          "after": "85.9"
+        }
+      ]
+    },
+    "08_right_ankle_link_input_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "08_right_ankle_link_input_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 -0.0255 -0.09"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Calf"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Right_Ankle_Link_Input"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "dynamics",
+            "attributes": {
+              "rotor_inertia": "0.00535392",
+              "damping": "0",
+              "friction": "0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "effort": "150.0",
+              "velocity": "18.3"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "08_right_ankle_link_input_joint",
+          "type": "continuous"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 -0.0255 -0.09"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Calf"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Right_Ankle_Link_Input"
+            },
+            "children": []
+          },
+          {
+            "tag": "axis",
+            "attributes": {
+              "xyz": "0 1 0"
+            },
+            "children": []
+          },
+          {
+            "tag": "dynamics",
+            "attributes": {
+              "rotor_inertia": "0.00611686196",
+              "damping": "0",
+              "friction": "0"
+            },
+            "children": []
+          },
+          {
+            "tag": "limit",
+            "attributes": {
+              "effort": "85.9",
+              "velocity": "18.3"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": [
+        {
+          "path": "/joint[08_right_ankle_link_input_joint]/dynamics[4]",
+          "field": "@rotor_inertia",
+          "before": "0.00535392",
+          "after": "0.00611686196"
+        },
+        {
+          "path": "/joint[08_right_ankle_link_input_joint]/limit[5]",
+          "field": "@effort",
+          "before": "150.0",
+          "after": "85.9"
+        }
+      ]
+    },
+    "09_temp_weight_joint": {
+      "before": {
+        "tag": "joint",
+        "attributes": {
+          "name": "09_temp_weight_joint",
+          "type": "fixed"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 0.1"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Thigh"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Temp_Weight"
+            },
+            "children": []
+          }
+        ]
+      },
+      "after": {
+        "tag": "joint",
+        "attributes": {
+          "name": "09_temp_weight_joint",
+          "type": "fixed"
+        },
+        "children": [
+          {
+            "tag": "origin",
+            "attributes": {
+              "rpy": "0 0 0",
+              "xyz": "0 0 0.1"
+            },
+            "children": []
+          },
+          {
+            "tag": "parent",
+            "attributes": {
+              "link": "Thigh"
+            },
+            "children": []
+          },
+          {
+            "tag": "child",
+            "attributes": {
+              "link": "Temp_Weight"
+            },
+            "children": []
+          }
+        ]
+      },
+      "diff": []
+    }
+  },
+  "constraints_before": {
+    "tag": "constraints",
+    "attributes": {
+      "nominal_config": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.641723, -0.002499, 0.409439, 0.001567, 0.541459, 0.249985"
+    },
+    "children": [
+      {
+        "tag": "pin",
+        "attributes": {
+          "body1": "Left_Ankle_Link_Input",
+          "body2": "Left_Ankle_Link",
+          "anchor": "0.065 0.015 0.0"
+        },
+        "children": []
+      },
+      {
+        "tag": "pin",
+        "attributes": {
+          "body1": "Right_Ankle_Link_Input",
+          "body2": "Right_Ankle_Link",
+          "anchor": "0.065 -0.015 0.0"
+        },
+        "children": []
+      }
+    ]
+  },
+  "constraints_after": {
+    "tag": "constraints",
+    "attributes": {
+      "nominal_config": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.64057070, -0.00247525, 0.40891126, 0.00156250, 0.51048313, 0.23438469"
+    },
+    "children": [
+      {
+        "tag": "pin",
+        "attributes": {
+          "body1": "Left_Ankle_Link_Input",
+          "body2": "Left_Ankle_Link",
+          "anchor": "0.065 0.015 0.0"
+        },
+        "children": []
+      },
+      {
+        "tag": "pin",
+        "attributes": {
+          "body1": "Right_Ankle_Link_Input",
+          "body2": "Right_Ankle_Link",
+          "anchor": "0.065 -0.015 0.0"
+        },
+        "children": []
+      }
+    ]
+  },
+  "all_semantic_differences": [
+    {
+      "path": "/robot/joint[00_knee_joint]/dynamics[4]",
+      "field": "@rotor_inertia",
+      "before": "0.36880",
+      "after": "0.37825873418"
+    },
+    {
+      "path": "/robot/joint[00_knee_joint]/limit[5]",
+      "field": "@effort",
+      "before": "600.0",
+      "after": "550.3"
+    },
+    {
+      "path": "/robot/link[Calf]/inertial[2]/origin[0]",
+      "field": "@xyz",
+      "before": "0.001730 0.000040 -0.146153",
+      "after": "0.003950 0.000010 -0.144090"
+    },
+    {
+      "path": "/robot/link[Calf]/inertial[2]/mass[1]",
+      "field": "@value",
+      "before": "3.38378",
+      "after": "3.419690"
+    },
+    {
+      "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+      "field": "@ixx",
+      "before": "0.104136",
+      "after": "0.03144104616"
+    },
+    {
+      "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+      "field": "@ixy",
+      "before": "0.000004",
+      "after": "-0.00000152892"
+    },
+    {
+      "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+      "field": "@ixz",
+      "before": "-0.000722",
+      "after": "-0.00075255670"
+    },
+    {
+      "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+      "field": "@iyy",
+      "before": "0.106810",
+      "after": "0.03453173442"
+    },
+    {
+      "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+      "field": "@iyz",
+      "before": "-0.000750",
+      "after": "0.00085899137"
+    },
+    {
+      "path": "/robot/link[Calf]/inertial[2]/inertia[2]",
+      "field": "@izz",
+      "before": "0.004357",
+      "after": "0.00474369522"
+    },
+    {
+      "path": "/robot/link[Universal]/inertial[1]/inertia[2]",
+      "field": "@ixx",
+      "before": "0.00048",
+      "after": "0.00004785009"
+    },
+    {
+      "path": "/robot/link[Universal]/inertial[1]/inertia[2]",
+      "field": "@iyy",
+      "before": "0.000089",
+      "after": "0.00008903210"
+    },
+    {
+      "path": "/robot/link[Universal]/inertial[1]/inertia[2]",
+      "field": "@izz",
+      "before": "0.000124",
+      "after": "0.00012365773"
+    },
+    {
+      "path": "/robot/link[Foot]/inertial[4]/origin[0]",
+      "field": "@xyz",
+      "before": "0.003088 -0.0000 -0.044077",
+      "after": "0.00320582 -0.00032194 -0.03596666"
+    },
+    {
+      "path": "/robot/link[Foot]/inertial[4]/mass[1]",
+      "field": "@value",
+      "before": "1.205532",
+      "after": "1.041857"
+    },
+    {
+      "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+      "field": "@ixx",
+      "before": "0.003946",
+      "after": "0.00139245073"
+    },
+    {
+      "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+      "field": "@ixy",
+      "before": "0.000001",
+      "after": "-0.00001843666"
+    },
+    {
+      "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+      "field": "@ixz",
+      "before": "-0.000434",
+      "after": "-0.00021646787"
+    },
+    {
+      "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+      "field": "@iyy",
+      "before": "0.008954",
+      "after": "0.00564702944"
+    },
+    {
+      "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+      "field": "@iyz",
+      "before": "0",
+      "after": "-0.00001139993"
+    },
+    {
+      "path": "/robot/link[Foot]/inertial[4]/inertia[2]",
+      "field": "@izz",
+      "before": "0.006827",
+      "after": "0.00584029057"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link]/visual[0]/geometry[1]/mesh[0]",
+      "field": "@filename",
+      "before": "URDF_Calf_Link_S_verHopping1_Simplified.dae",
+      "after": "URDF_Calf_Link_S_verV1_simplified.dae"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link]/inertial[1]/origin[0]",
+      "field": "@xyz",
+      "before": "0.000021 0 0.083422",
+      "after": "0.000025644400 0 0.084408542972"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@ixx",
+      "before": "0.001708",
+      "after": "0.000800961552250"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@ixy",
+      "before": "0",
+      "after": "0.000000000190000"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@ixz",
+      "before": "0",
+      "after": "0.000000211275310"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@iyy",
+      "before": "0.001714",
+      "after": "0.000807444802804"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@iyz",
+      "before": "0",
+      "after": "0.000000009300000"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@izz",
+      "before": "0.000010",
+      "after": "0.000009875940554"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link]/visual[0]/geometry[1]/mesh[0]",
+      "field": "@filename",
+      "before": "URDF_Calf_Link_L_verHopping1_Simplified.dae",
+      "after": "URDF_Calf_Link_L_verV1_simplified.dae"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link]/inertial[1]/origin[0]",
+      "field": "@xyz",
+      "before": "0.000017 0 0.137377",
+      "after": "0.000012225326 0 0.138158414615"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@ixx",
+      "before": "0.005596",
+      "after": "0.002425260969736"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@ixy",
+      "before": "0",
+      "after": "0.000000000190000"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@ixz",
+      "before": "0",
+      "after": "0.000000332931381"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@iyy",
+      "before": "0.005602",
+      "after": "0.002431743355101"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@iyz",
+      "before": "0",
+      "after": "-0.000000000190000"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link]/inertial[1]/inertia[2]",
+      "field": "@izz",
+      "before": "0.000011",
+      "after": "0.000010525435365"
+    },
+    {
+      "path": "/robot/joint[07_left_ankle_link_input_joint]/dynamics[4]",
+      "field": "@rotor_inertia",
+      "before": "0.00535392",
+      "after": "0.00611686196"
+    },
+    {
+      "path": "/robot/joint[07_left_ankle_link_input_joint]/limit[5]",
+      "field": "@effort",
+      "before": "150.0",
+      "after": "85.9"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/origin[0]",
+      "field": "@xyz",
+      "before": "0.022550 0.012714 -0.001469",
+      "after": "0.024120 0.013430 -0.001640"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/mass[1]",
+      "field": "@value",
+      "before": "0.132288",
+      "after": "0.118360"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@ixx",
+      "before": "0.000048",
+      "after": "0.00002370602"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@ixy",
+      "before": "0.000048",
+      "after": "-0.00000732881"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@ixz",
+      "before": "0",
+      "after": "-0.00000462551"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@iyy",
+      "before": "0.000170",
+      "after": "0.00009080315"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@iyz",
+      "before": "-0.000004",
+      "after": "0.00000161882"
+    },
+    {
+      "path": "/robot/link[Left_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@izz",
+      "before": "0.000187",
+      "after": "0.00008559930"
+    },
+    {
+      "path": "/robot/joint[08_right_ankle_link_input_joint]/dynamics[4]",
+      "field": "@rotor_inertia",
+      "before": "0.00535392",
+      "after": "0.00611686196"
+    },
+    {
+      "path": "/robot/joint[08_right_ankle_link_input_joint]/limit[5]",
+      "field": "@effort",
+      "before": "150.0",
+      "after": "85.9"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/origin[0]",
+      "field": "@xyz",
+      "before": "0.022550 -0.012714 -0.001469",
+      "after": "0.024120 -0.013430 -0.001640"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/mass[1]",
+      "field": "@value",
+      "before": "0.132288",
+      "after": "0.118360"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@ixx",
+      "before": "0.000048",
+      "after": "0.00002370594"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@ixy",
+      "before": "-0.000048",
+      "after": "0.00000732874"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@ixz",
+      "before": "0",
+      "after": "-0.00000462550"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@iyy",
+      "before": "0.000170",
+      "after": "0.00009080295"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@iyz",
+      "before": "0.000004",
+      "after": "-0.00000161879"
+    },
+    {
+      "path": "/robot/link[Right_Ankle_Link_Input]/inertial[1]/inertia[2]",
+      "field": "@izz",
+      "before": "0.000187",
+      "after": "0.00008559905"
+    },
+    {
+      "path": "/robot/link[Temp_Weight]/inertial[2]/origin[0]",
+      "field": "@xyz",
+      "before": "0 0 0.046728",
+      "after": "0.000068979276 0 0.045106208574"
+    },
+    {
+      "path": "/robot/link[Temp_Weight]/inertial[2]/mass[1]",
+      "field": "@value",
+      "before": "3.17388",
+      "after": "3.380000"
+    },
+    {
+      "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+      "field": "@ixx",
+      "before": "0.010710",
+      "after": "0.004181097751"
+    },
+    {
+      "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+      "field": "@ixz",
+      "before": "0",
+      "after": "0.000009332820"
+    },
+    {
+      "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+      "field": "@iyy",
+      "before": "0.010709",
+      "after": "0.004174563808"
+    },
+    {
+      "path": "/robot/link[Temp_Weight]/inertial[2]/inertia[2]",
+      "field": "@izz",
+      "before": "0.005796",
+      "after": "0.006073407112"
+    },
+    {
+      "path": "/robot/constraints[30]",
+      "field": "@nominal_config",
+      "before": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.641723, -0.002499, 0.409439, 0.001567, 0.541459, 0.249985",
+      "after": "0.0, 0.0, 0.8, 0.99619470, 0.0, -0.08715574, 0.0,  0.349066, 0.0, 0.0,  0.64057070, -0.00247525, 0.40891126, 0.00156250, 0.51048313, 0.23438469"
+    }
+  ]
+}

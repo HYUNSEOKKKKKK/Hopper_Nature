@@ -1,0 +1,203 @@
+{
+  "date": "2026-09-21",
+  "units": "kg,m,kg*m^2",
+  "status": "measured_basepart_mass_with_confirmed_CAD_geometry_and_provisional_Dice_partition",
+  "mass_source": "user reports S=123 g, L=226 g; resolution unreported",
+  "assumptions": [
+    "Measurements are single base rods, not whole S/L assemblies.",
+    "User corrected part identities to calf_link_S_1_verU1 / calf_link_L_1_verU1; new SolidWorks part properties validate the STEP mass distribution at displayed precision.",
+    "Existing installation transforms are retained; whole-assembly steel properties agree within propagated report rounding.",
+    "Existing basepart contribution is inferred at 2700 kg/m^3.",
+    "Measured mass is distributed uniformly over that CAD solid.",
+    "S45C grade is presumed, not established by weighing.",
+    "Unchanged Dice and bushing partition still provisional.",
+    "Aluminum and steel material stiffness are not modeled in rigid URDF."
+  ],
+  "links": [
+    {
+      "urdf_link": "Right_Ankle_Link",
+      "user_part_name": "calf_link_L_1_verU1",
+      "before_link": {
+        "mass_kg": 0.170375,
+        "com_m": [
+          1.2225326e-05,
+          0.0,
+          0.138158414615
+        ],
+        "inertia_fields": {
+          "ixx": 0.002425260969736,
+          "ixy": 1.9e-10,
+          "ixz": 3.32931381e-07,
+          "iyy": 0.002431743355101,
+          "iyz": -1.9e-10,
+          "izz": 1.0525435365e-05
+        }
+      },
+      "after_link": {
+        "mass_kg": 0.3181434310966223,
+        "com_m": [
+          6.547015319695341e-06,
+          5.1028011390585856e-20,
+          0.14621307994703792
+        ],
+        "inertia_fields": {
+          "ixx": 0.0032751689682712446,
+          "ixy": 1.8999999999997455e-10,
+          "ixz": 3.4970836220719883e-07,
+          "iyy": 0.003281651365463539,
+          "iyz": -1.899999999809131e-10,
+          "izz": 1.3288910625804924e-05
+        },
+        "principal_inertias_kg_m2": [
+          1.3288873133325087e-05,
+          0.0032751690057581458,
+          0.003281651365469116
+        ]
+      },
+      "part_mass_before_kg": 0.07823156890337772,
+      "part_mass_measured_kg": 0.226,
+      "delta_mass_kg": 0.1477684310966223,
+      "part_COM_urdf_m": [
+        1.6793128054486864e-19,
+        1.0986261751147192e-19,
+        0.1555
+      ],
+      "part_inertia_before_kg_m2": [
+        [
+          0.0004373591400560797,
+          -1.3517704109768143e-23,
+          1.4512973751592228e-19
+        ],
+        [
+          -1.3517704109768457e-23,
+          0.0004373591400560797,
+          1.018479872462664e-20
+        ],
+        [
+          1.4512973751592228e-19,
+          1.018479872462664e-20,
+          1.4630329252744608e-06
+        ]
+      ],
+      "part_inertia_after_kg_m2": [
+        [
+          0.0012634690450188117,
+          -3.905074603042632e-23,
+          4.192594004999214e-19
+        ],
+        [
+          -3.905074603042722e-23,
+          0.0012634690450188117,
+          2.9422451115718834e-20
+        ],
+        [
+          4.192594004999214e-19,
+          2.9422451115718834e-20,
+          4.2264963587832664e-06
+        ]
+      ],
+      "effective_density_kg_m3": 7799.920269445779,
+      "retained_hardware_mass_kg": 0.09214343109662228,
+      "retained_hardware_principal_inertias_kg_m2": [
+        9.06233361214284e-06,
+        0.0019444006880189489,
+        0.001950883004567536
+      ],
+      "reconstruction_max_error_kg_m2": 2.6020852139652106e-18
+    },
+    {
+      "urdf_link": "Left_Ankle_Link",
+      "user_part_name": "calf_link_S_1_verU1",
+      "before_link": {
+        "mass_kg": 0.134342,
+        "com_m": [
+          2.56444e-05,
+          0.0,
+          0.084408542972
+        ],
+        "inertia_fields": {
+          "ixx": 0.00080096155225,
+          "ixy": 1.9e-10,
+          "ixz": 2.1127531e-07,
+          "iyy": 0.000807444802804,
+          "iyz": 9.3e-09,
+          "izz": 9.875940554e-06
+        }
+      },
+      "after_link": {
+        "mass_kg": 0.21514324219623573,
+        "com_m": [
+          1.601314524049825e-05,
+          3.551468477882232e-20,
+          0.08894972557132916
+        ],
+        "inertia_fields": {
+          "ixx": 0.000946562996788773,
+          "ixy": 1.899999999999871e-10,
+          "ixz": 2.2692022892757477e-07,
+          "iyy": 0.0009530462805236017,
+          "iyz": 9.300000000000219e-09,
+          "izz": 1.1435449772064189e-05
+        },
+        "principal_inertias_kg_m2": [
+          1.1435394615223673e-05,
+          0.0009465630518480599,
+          0.0009530462806211551
+        ]
+      },
+      "part_mass_before_kg": 0.04219875780376425,
+      "part_mass_measured_kg": 0.123,
+      "delta_mass_kg": 0.08080124219623575,
+      "part_COM_urdf_m": [
+        1.7059840821130243e-19,
+        9.456221490180374e-20,
+        0.09650000000000002
+      ],
+      "part_inertia_before_kg_m2": [
+        [
+          7.218842559086949e-05,
+          -6.808399357849223e-24,
+          -1.361968522111881e-23
+        ],
+        [
+          -6.808399357849223e-24,
+          7.218842559086948e-05,
+          1.4465572442064295e-22
+        ],
+        [
+          -1.361968522111881e-23,
+          1.4465572442064295e-22,
+          8.144423254814181e-07
+        ]
+      ],
+      "part_inertia_after_kg_m2": [
+        [
+          0.00021041321616545067,
+          -1.984497090909043e-23,
+          -3.9698355339933224e-23
+        ],
+        [
+          -1.984497090909043e-23,
+          0.00021041321616545064,
+          4.216392858405876e-22
+        ],
+        [
+          -3.9698355339933224e-23,
+          4.216392858405876e-22,
+          2.3739183627172643e-06
+        ]
+      ],
+      "effective_density_kg_m3": 7869.899904266274,
+      "retained_hardware_mass_kg": 0.09214324219623574,
+      "retained_hardware_principal_inertias_kg_m2": [
+        9.061405671496399e-06,
+        0.0007197780938597239,
+        0.0007262612521093203
+      ],
+      "reconstruction_max_error_kg_m2": 6.505213034913027e-19
+    }
+  ],
+  "total_before_kg": 12.958629,
+  "delta_total_kg": 0.22856967329285804,
+  "total_after_kg": 13.187198673292858
+}

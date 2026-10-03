@@ -1,0 +1,207 @@
+{
+  "status": "provisional_Dice_partition_composite_CAD_reconciled",
+  "units": "kg, m, kg*m^2",
+  "cad_to_urdf_rotation": [
+    [
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ]
+  ],
+  "transform_evidence": [
+    "STEP lower eye axis intersections: S (0,-96.5,0), L (0,-155.5,0) mm.",
+    "STEP ball centers: S (0,105.5,0), L (0,164.5,0) mm.",
+    "URDF V1 meshes extend along +Z from lower eye to the ball.",
+    "STEP fork-end M3 bolt heads map to negative URDF X near -14 mm; both V1 meshes have the same asymmetric negative-X features."
+  ],
+  "caveats": [
+    "Retains existing Dice mass, COM, and tensor; these are not newly measured CAD properties.",
+    "Exact assignment of the lower-eye bushings between Dice and rod remains to be checked using selected-component CAD properties.",
+    "Retains existing higher-precision URDF composite masses; these differ from rounded CAD reports by 4 mg (S) and 1 mg (L), both below the reports' 10 mg resolution.",
+    "CAD COM input is rounded to 0.01 mm; numerical precision in outputs does not imply better physical accuracy.",
+    "Supplied flexible-assembly CAD snapshot is reconciled to the straight-link URDF frame; tiny bushing/eye rotations visible in STEP are idealized."
+  ],
+  "retained_Dice": {
+    "mass_kg": 0.037914,
+    "com_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "inertia_kg_m2": [
+      [
+        2e-06,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        4e-06,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        4e-06
+      ]
+    ]
+  },
+  "links": [
+    {
+      "name": "S",
+      "urdf_link": "Left_Ankle_Link",
+      "cad_report_mass_kg": 0.17226,
+      "retained_composite_mass_kg": 0.172256,
+      "mass_difference_from_CAD_kg": -4.000000000004e-06,
+      "eye_cad_mm": [
+        0.0,
+        -96.5,
+        0.0
+      ],
+      "composite_com_urdf_m": [
+        2e-05,
+        0.0,
+        0.06583
+      ],
+      "composite_inertia_com_urdf_kg_m2": [
+        [
+          0.00101363503,
+          1.9000000000000002e-10,
+          1.4727000000000002e-07
+        ],
+        [
+          1.9000000000000002e-10,
+          0.0010221183000000001,
+          9.3e-09
+        ],
+        [
+          1.4727000000000002e-07,
+          9.3e-09,
+          1.387596e-05
+        ]
+      ],
+      "rod_mass_kg": 0.134342,
+      "rod_com_m": [
+        2.5644400113144067e-05,
+        0.0,
+        0.0844085429724137
+      ],
+      "rod_inertia_com_kg_m2": [
+        [
+          0.0008009615522498013,
+          1.9000000000000002e-10,
+          2.1127530996512191e-07
+        ],
+        [
+          1.9000000000000002e-10,
+          0.0008074448028041657,
+          9.3e-09
+        ],
+        [
+          2.1127530996512191e-07,
+          9.3e-09,
+          9.875940554364325e-06
+        ]
+      ],
+      "rod_inertia_urdf_fields": {
+        "ixx": 0.0008009615522498013,
+        "ixy": 1.9000000000000002e-10,
+        "ixz": 2.1127530996512191e-07,
+        "iyy": 0.0008074448028041657,
+        "iyz": 9.3e-09,
+        "izz": 9.875940554364325e-06
+      },
+      "principal_inertias_kg_m2": [
+        9.875884020610237e-06,
+        0.0008009616086693998,
+        0.0008074448029183215
+      ],
+      "reconstruction_COM_max_error_m": 0.0,
+      "reconstruction_inertia_max_error_kg_m2": 4.404571325722362e-20,
+      "old_composite_trace_ratio_to_CAD": 1.880123099066216
+    },
+    {
+      "name": "L",
+      "urdf_link": "Right_Ankle_Link",
+      "cad_report_mass_kg": 0.20829,
+      "retained_composite_mass_kg": 0.208289,
+      "mass_difference_from_CAD_kg": -1.000000000001e-06,
+      "eye_cad_mm": [
+        0.0,
+        -155.5,
+        0.0
+      ],
+      "composite_com_urdf_m": [
+        1e-05,
+        0.0,
+        0.11300999999999999
+      ],
+      "composite_inertia_com_urdf_kg_m2": [
+        [
+          0.0030192229600000003,
+          1.9000000000000002e-10,
+          2.8055e-07
+        ],
+        [
+          1.9000000000000002e-10,
+          0.0030277053500000002,
+          -1.9000000000000002e-10
+        ],
+        [
+          2.8055e-07,
+          -1.9000000000000002e-10,
+          1.4525440000000001e-05
+        ]
+      ],
+      "rod_mass_kg": 0.170375,
+      "rod_com_m": [
+        1.2225326485693324e-05,
+        0.0,
+        0.13815841461482023
+      ],
+      "rod_inertia_com_kg_m2": [
+        [
+          0.0024252609697358726,
+          1.9000000000000002e-10,
+          3.3293138131706295e-07
+        ],
+        [
+          1.9000000000000002e-10,
+          0.002431743355100762,
+          -1.9000000000000002e-10
+        ],
+        [
+          3.3293138131706295e-07,
+          -1.9000000000000002e-10,
+          1.0525435364890054e-05
+        ]
+      ],
+      "rod_inertia_urdf_fields": {
+        "ixx": 0.0024252609697358726,
+        "ixy": 1.9000000000000002e-10,
+        "ixz": 3.3293138131706295e-07,
+        "iyy": 0.002431743355100762,
+        "iyz": -1.9000000000000002e-10,
+        "izz": 1.0525435364890054e-05
+      },
+      "principal_inertias_kg_m2": [
+        1.0525389462000246e-05,
+        0.00242526101563318,
+        0.002431743355106344
+      ],
+      "reconstruction_COM_max_error_m": 0.0,
+      "reconstruction_inertia_max_error_kg_m2": 4.336808689942018e-19,
+      "old_composite_trace_ratio_to_CAD": 2.04399307415866
+    }
+  ]
+}

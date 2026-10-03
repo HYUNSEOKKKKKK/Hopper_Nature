@@ -1,0 +1,105 @@
+{
+  "status": "passed",
+  "total_mass_kg": "16.689999999999999999",
+  "link_count": 11,
+  "joint_count": 10,
+  "body_mesh_vertices": 207342,
+  "body_mesh_triangles": 216929,
+  "body_mesh_bounds_link_m": [
+    [
+      -0.112,
+      -0.104,
+      -0.01016
+    ],
+    [
+      0.1323,
+      0.104,
+      0.2336
+    ]
+  ],
+  "all_body_mesh_vertices_inside_collision_boxes": true,
+  "inertia_eigenvalues_kgm2": {
+    "Thigh": [
+      0.012986122615925915,
+      0.08193317506897893,
+      0.08375984183043747
+    ],
+    "Calf": [
+      0.004991328865770606,
+      0.033427929407000824,
+      0.03671592582853931
+    ],
+    "Universal": [
+      5.083999564093504e-05,
+      9.45952573109746e-05,
+      0.0001313844645677348
+    ],
+    "Foot": [
+      0.0014682012065823844,
+      0.0059994001098338965,
+      0.006216959951448477
+    ],
+    "Left_Dice": [
+      2.1249696976927333e-06,
+      4.2499393953854665e-06,
+      4.2499393953854665e-06
+    ],
+    "Left_Ankle_Link": [
+      1.2149933519186689e-05,
+      0.0010057089010665824,
+      0.0010125972334097825
+    ],
+    "Right_Dice": [
+      2.1249696976927333e-06,
+      4.2499393953854665e-06,
+      4.2499393953854665e-06
+    ],
+    "Right_Ankle_Link": [
+      1.4119226362606722e-05,
+      0.003479817446028988,
+      0.0034867048550074192
+    ],
+    "Left_Ankle_Link_Input": [
+      2.4016086035214128e-05,
+      9.054288689917116e-05,
+      9.805324456644243e-05
+    ],
+    "Right_Ankle_Link_Input": [
+      2.4016015237426096e-05,
+      9.054264699284312e-05,
+      9.805299215358851e-05
+    ],
+    "Body_Nature": [
+      0.03221307052158582,
+      0.036854005191893545,
+      0.04080371763902005
+    ]
+  },
+  "checks": [
+    "XML parse",
+    "mass sum",
+    "ten Body CAD geometries",
+    "upper measured 2.528 kg includes switch/cables exactly once",
+    "measured carrier and board subgroup mass closure",
+    "explicit upper residual without button double count",
+    "finite mesh coordinates and valid indices",
+    "positive-definite inertias and principal triangle inequalities",
+    "mesh paths present",
+    "leg COM/visual/collision unchanged",
+    "moving joint parameters and rotor inertias unchanged",
+    "two-scale XY signs and corrected 200 mm spans; Z upper/lower ratio with 100 mm span",
+    "hierarchical aggregation reproduces previous CAD model before calibration",
+    "upper mass/central inertia retained; final Body recombined by parallel-axis theorem",
+    "new lower 3.742 kg mass closure; GV7 62 g counted once as body plus cable",
+    "lower cable segments use positive-semidefinite central tensors; no upper-group membership"
+  ],
+  "upper_COM_calibration_status": "approximate: symmetric XY supports each 200 mm; Z span 100 mm and supports at CAD edge-band centers Z=112.5/212.5 mm assumed; actual contact lines and datum not independently verified",
+  "not_tested": [
+    "RaiSim/other simulator loading and dynamics",
+    "independent whole Body COM and central inertia measurement",
+    "support contact-line metrology and absolute Z support datum verification",
+    "actual lower cable routing/ports/slack distribution",
+    "exact PC machine type and individual mass",
+    "remaining measurement-group scope assumptions"
+  ]
+}

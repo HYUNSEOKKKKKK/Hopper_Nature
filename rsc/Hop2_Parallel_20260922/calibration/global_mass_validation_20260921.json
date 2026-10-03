@@ -1,0 +1,338 @@
+{
+  "validation_date": "2026-09-21",
+  "validator": "independent_agent_verify_global_mass",
+  "status": "PASS",
+  "scope": "Static XML, Decimal arithmetic, tensor eigenvalues, and local mesh resolution. No simulator run or hardware validation performed.",
+  "baseline_file": "calibration/baseline_before_global_mass_20260921.urdf",
+  "final_file": "Hop2_Parallel_20260820.urdf",
+  "baseline_sha256": "2cf7ba73442aa1278afbddf0bd54eb62ce5ea136ea00e153e1be864511f8c48e",
+  "final_sha256": "2b6fcff19bb3399d338c6b8f28f8db3834b15e54dc4d93b8b28d7063932ccf5a",
+  "baseline_total_mass_kg": "13.187198673293",
+  "final_total_mass_kg": "14.000000000000000000",
+  "independent_factor": "1.0616356321644795439547563032018071123483308513040659685955660790401060137907918",
+  "checks": {
+    "xml_parseable": true,
+    "eleven_links_preserved": true,
+    "baseline_total_matches_manifest": true,
+    "final_total_exact_decimal_14_kg": true,
+    "total_error_below_1e_minus_12_kg": true,
+    "baseline_sha_matches_manifest": true,
+    "final_sha_matches_manifest": true,
+    "manifest_factor_matches_independent_calculation": true,
+    "all_other_xml_semantics_unchanged": true,
+    "all_per_link_checks_passed": true,
+    "all_rotor_inertias_unchanged": true,
+    "all_referenced_mesh_files_resolve": true
+  },
+  "rotor_inertias_preserved": [
+    {
+      "joint": "00_knee_joint",
+      "rotor_inertia": "0.37825873418"
+    },
+    {
+      "joint": "07_left_ankle_link_input_joint",
+      "rotor_inertia": "0.00611686196"
+    },
+    {
+      "joint": "08_right_ankle_link_input_joint",
+      "rotor_inertia": "0.00611686196"
+    }
+  ],
+  "per_link": [
+    {
+      "link": "Thigh",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "4.29025",
+      "effective_mass_kg": "4.554682270893658363",
+      "mass_scaling_absolute_error_kg": "4.518932298115529637524264348072690217671273706018148256659445E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "3.57321030826582810971487608859303801178443350373774724304E-25",
+      "principal_moments_kg_m2": [
+        0.012975743143719366,
+        0.08186768799954532,
+        0.08369289475346801
+      ],
+      "principal_triangle_margin_kg_m2": 0.01115053638979667
+    },
+    {
+      "link": "Calf",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "3.419690",
+      "effective_mass_kg": "3.630464754956549052",
+      "mass_scaling_absolute_error_kg": "3.333594175038122359735364711039986478534286351673398656997672E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "3.61157985798867679663487524516693702148230973669396868480E-25",
+      "principal_moments_kg_m2": [
+        0.0049873394255991015,
+        0.03340121132690378,
+        0.036686579737874224
+      ],
+      "principal_triangle_margin_kg_m2": 0.001701971014628663
+    },
+    {
+      "link": "Universal",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "0.209567",
+      "effective_mass_kg": "0.222483794525813485",
+      "mass_scaling_absolute_error_kg": "4.1203358580690688888649734848476080715933300351380210300790513E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "3.94045036273758488507742584676173963235010483016186369430629E-25",
+      "principal_moments_kg_m2": [
+        5.079936054627724e-05,
+        9.451964976643117e-05,
+        0.00013127945236057452
+      ],
+      "principal_triangle_margin_kg_m2": 1.4039557952133882e-05
+    },
+    {
+      "link": "Foot",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "1.041857",
+      "effective_mass_kg": "1.106072514819988164",
+      "mass_scaling_absolute_error_kg": "2.260705377849251526498949357471002578430706884104877312100330E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "4.83854976440623045726892678293239242628348388568324250205939E-25",
+      "principal_moments_kg_m2": [
+        0.0014670277113006866,
+        0.005994604944368605,
+        0.00621199089602418
+      ],
+      "principal_triangle_margin_kg_m2": 0.0012496417596451117
+    },
+    {
+      "link": "Left_Dice",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "0.037914",
+      "effective_mass_kg": "0.040250853357884077",
+      "mass_scaling_absolute_error_kg": "4.29500630479593314857574615896342357133332292320726579406864080E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "1.809747871927715506066765947837361256177356838395759448368328E-25",
+      "principal_moments_kg_m2": [
+        2.1232712643289592e-06,
+        4.2465425286579185e-06,
+        4.2465425286579185e-06
+      ],
+      "principal_triangle_margin_kg_m2": 2.1232712643289592e-06
+    },
+    {
+      "link": "Left_Ankle_Link",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "0.215143242196",
+      "effective_mass_kg": "0.228403731934666190",
+      "mass_scaling_absolute_error_kg": "2.3334576300590399783683232665844952712111720291464760732250844E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "4.16081945764668012891698418125647083249125278770114294259739E-25",
+      "principal_moments_kg_m2": [
+        1.2140222391314778e-05,
+        0.001004905063932495,
+        0.001011787890609669
+      ],
+      "principal_triangle_margin_kg_m2": 5.257395714140757e-06
+    },
+    {
+      "link": "Right_Dice",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "0.037914",
+      "effective_mass_kg": "0.040250853357884077",
+      "mass_scaling_absolute_error_kg": "4.29500630479593314857574615896342357133332292320726579406864080E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "1.809747871927715506066765947837361256177356838395759448368328E-25",
+      "principal_moments_kg_m2": [
+        2.1232712643289592e-06,
+        4.2465425286579185e-06,
+        4.2465425286579185e-06
+      ],
+      "principal_triangle_margin_kg_m2": 2.1232712643289592e-06
+    },
+    {
+      "link": "Right_Ankle_Link",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "0.318143431097",
+      "effective_mass_kg": "0.337752402591640135",
+      "mass_scaling_absolute_error_kg": "2.3696400516688943846672426594518553592417395727319357650197390E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "4.19995100858972357688109663258228207074600364241220686830956E-25",
+      "principal_moments_kg_m2": [
+        1.4107941229857999e-05,
+        0.0034770361178732994,
+        0.0034839180219237258
+      ],
+      "principal_triangle_margin_kg_m2": 7.226037179431776e-06
+    },
+    {
+      "link": "Left_Ankle_Link_Input",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "0.118360",
+      "effective_mass_kg": "0.125655193422987799",
+      "mass_scaling_absolute_error_kg": "1.7751504395303411018245156043965075195702879888481305220772188E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "4.689424575315640169504293736542482886971293642700806450699071E-25",
+      "principal_moments_kg_m2": [
+        2.3996890598293892e-05,
+        9.047051830957246e-05,
+        9.797487314205046e-05
+      ],
+      "principal_triangle_margin_kg_m2": 1.6492535765815885e-05
+    },
+    {
+      "link": "Right_Ankle_Link_Input",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "0.118360",
+      "effective_mass_kg": "0.125655193422987799",
+      "mass_scaling_absolute_error_kg": "1.7751504395303411018245156043965075195702879888481305220772188E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "4.372747195400412018327956472930428622612091013999896332106925E-25",
+      "principal_moments_kg_m2": [
+        2.3996819857092703e-05,
+        9.047027859499537e-05,
+        9.797462093094366e-05
+      ],
+      "principal_triangle_margin_kg_m2": 1.6492477521144416e-05
+    },
+    {
+      "link": "Temp_Weight",
+      "passed": true,
+      "checks": {
+        "mass_positive": true,
+        "mass_scaled_within_half_unit_last_place": true,
+        "all_six_inertia_entries_scaled_within_half_unit_last_place": true,
+        "origin_position_and_orientation_unchanged": true,
+        "tensor_positive_definite": true,
+        "principal_moment_triangle_inequality": true,
+        "mass_and_tensor_match_manifest": true
+      },
+      "baseline_mass_kg": "3.380000",
+      "effective_mass_kg": "3.588328436715940859",
+      "mass_scaling_absolute_error_kg": "4.329236951778919602626417225922570261469866528444416733871237E-19",
+      "maximum_inertia_scaling_absolute_error_kg_m2": "4.118287216478894542667491356676129530280710137870822076269775E-25",
+      "principal_moments_kg_m2": [
+        0.004431865687317036,
+        0.004438753488949925,
+        0.006447794263814809
+      ],
+      "principal_triangle_margin_kg_m2": 0.0024228249124521517
+    }
+  ],
+  "mesh_references": [
+    {
+      "filename": "URDF_Calf_Link_Dice_verHopping1_Simplified.dae",
+      "exists": true,
+      "sha256": "17388caf1e8190563f4cb5e99be8b67a1f54022ad974933994eabe54d75c7bc5"
+    },
+    {
+      "filename": "URDF_Calf_Link_Input_mir_verHopping1_Simplified.dae",
+      "exists": true,
+      "sha256": "2786f35c109046d82603dd9083c2e5d227e82aa74dcc0b8496aba9dc61a7c23a"
+    },
+    {
+      "filename": "URDF_Calf_Link_Input_verHopping1_Simplified.dae",
+      "exists": true,
+      "sha256": "a13d6907486dcb94f10be1d4f00b86f281173d7aec083e99ec75502a51621ede"
+    },
+    {
+      "filename": "URDF_Calf_Link_L_verV1_simplified.dae",
+      "exists": true,
+      "sha256": "820afc7de8819f3e0e81a708705b450a37b53aeab8de0e5f0daf655b31a1a9dc"
+    },
+    {
+      "filename": "URDF_Calf_Link_S_verV1_simplified.dae",
+      "exists": true,
+      "sha256": "b23786c8e117a540ac883393b810af02bcd4b41eb5e751bb8931ec0f54e6d27b"
+    },
+    {
+      "filename": "URDF_Calf_verHopping1_Simplified.dae",
+      "exists": true,
+      "sha256": "9bf7741b5f7a8c24346c4c84af5b7258ed48e086e637b65f506379e6b4d2fe96"
+    },
+    {
+      "filename": "URDF_Thigh_with_Link_verHopping1_Simplified.dae",
+      "exists": true,
+      "sha256": "61a3a1d3beb5a90c1ab0f2791c87fe61a7f7381bbfd20ebe57ab8b382efe177e"
+    },
+    {
+      "filename": "URDF_Universal_verHopping1_Simplified.dae",
+      "exists": true,
+      "sha256": "882acc3cceb7e60b68a68146902461dcafa5444f579502a28160837689574918"
+    }
+  ]
+}

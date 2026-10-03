@@ -1,0 +1,160 @@
+{
+  "date": "2026-09-21",
+  "numeric_update_required": false,
+  "decision": "retain measured-mass URDF values; update part identity and CAD verification evidence",
+  "remaining_assumptions": [
+    "uniform mass distribution in each rod",
+    "provisional Dice/bushing partition",
+    "rounded original assembly COM inputs"
+  ],
+  "records": [
+    {
+      "label": "S",
+      "part_name": "calf_link_S_1_verU1",
+      "part_volume_mm3": 15629.169556949722,
+      "part_predicted_steel_mass_g": 122.6889810220553,
+      "part_CAD_report_mass_g": 122.69,
+      "part_predicted_COM_inertia_g_mm2": [
+        [
+          209881.1632919724,
+          2.855813363566996e-13,
+          -1.9794790725598668e-14
+        ],
+        [
+          2.855813363566996e-13,
+          2367.9156500107897,
+          -3.9597973698438016e-14
+        ],
+        [
+          -1.9794790725598668e-14,
+          -3.9597973698438016e-14,
+          209881.16329197242
+        ]
+      ],
+      "part_all_properties_match_display_precision": true,
+      "assembly_predicted_steel_mass_g": 252.74622321829105,
+      "assembly_CAD_report_mass_g": 252.75,
+      "assembly_mass_predicted_minus_report_g": -0.0037767817089502387,
+      "assembly_predicted_COM_mm": [
+        0.0,
+        -20.90275159299657,
+        0.013630747696769852
+      ],
+      "assembly_report_COM_mm": [
+        0,
+        -20.9,
+        0.01
+      ],
+      "assembly_predicted_COM_inertia_g_mm2": [
+        [
+          1211412.3268767148,
+          9.300000000000276,
+          0.18999999999998704
+        ],
+        [
+          9.300000000000276,
+          15429.45526736787,
+          180.9193428319357
+        ],
+        [
+          0.18999999999998704,
+          180.9193428319357,
+          1202929.0349338762
+        ]
+      ],
+      "assembly_report_minus_predicted_inertia_g_mm2": [
+        [
+          -14.256876714564479,
+          -2.7627832459271124e-13,
+          1.2976395859425622e-14
+        ],
+        [
+          -2.7627832459271124e-13,
+          -0.005267367867833189,
+          -6.059342831935681
+        ],
+        [
+          1.2976395859425622e-14,
+          -6.059342831935681,
+          -14.244933876136207
+        ]
+      ],
+      "assembly_max_diagonal_relative_difference": 1.1842014076604882e-05,
+      "interpretation": "part properties match exactly at display precision; assembly differences are consistent with original COM rounding to 0.01 mm"
+    },
+    {
+      "label": "L",
+      "part_name": "calf_link_L_1_verU1",
+      "part_volume_mm3": 28974.655149399157,
+      "part_predicted_steel_mass_g": 227.45104292278336,
+      "part_CAD_report_mass_g": 227.45,
+      "part_predicted_COM_inertia_g_mm2": [
+        [
+          1271581.20349638,
+          -3.4269760362803913e-13,
+          -3.9301473059871425e-14
+        ],
+        [
+          -3.4269760362803913e-13,
+          4253.632764223897,
+          -1.536007418467901e-13
+        ],
+        [
+          -3.9301473059871425e-14,
+          -1.536007418467901e-13,
+          1271581.20349638
+        ]
+      ],
+      "part_all_properties_match_display_precision": true,
+      "assembly_predicted_steel_mass_g": 357.50847401940564,
+      "assembly_CAD_report_mass_g": 357.51,
+      "assembly_mass_predicted_minus_report_g": -0.0015259805943514948,
+      "assembly_predicted_COM_mm": [
+        0.0,
+        -24.755216318367914,
+        0.005826127634353474
+      ],
+      "assembly_report_COM_mm": [
+        0,
+        -24.75,
+        0.01
+      ],
+      "assembly_predicted_COM_inertia_g_mm2": [
+        [
+          4018883.7977566323,
+          -0.18999999998057346,
+          0.18999999999997425
+        ],
+        [
+          -0.18999999998057346,
+          17316.04853266647,
+          317.4896035829115
+        ],
+        [
+          0.18999999999997425,
+          317.4896035829115,
+          4010401.399062915
+        ]
+      ],
+      "assembly_report_minus_predicted_inertia_g_mm2": [
+        [
+          -3.987756631851358,
+          -1.9426569330355135e-11,
+          2.577184595985527e-14
+        ],
+        [
+          -1.9426569330355135e-11,
+          0.01146733353212621,
+          13.1603964170885
+        ],
+        [
+          2.577184595985527e-14,
+          13.1603964170885,
+          -3.9890629141905998
+        ]
+      ],
+      "assembly_max_diagonal_relative_difference": 9.946802040724935e-07,
+      "interpretation": "part properties match exactly at display precision; assembly differences are consistent with original COM rounding to 0.01 mm"
+    }
+  ]
+}
