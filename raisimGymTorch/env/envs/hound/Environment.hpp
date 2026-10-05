@@ -182,10 +182,10 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          refBodyToFoot_[i] =   footPos_[i] - hipJointPos_[i];
       }
 
-      edgePosLocal_.col(0) << -0.12, -0.04, -0.015-0.065;
-      edgePosLocal_.col(1) << -0.12, 0.04, -0.015-0.065;
-      edgePosLocal_.col(2) << 0.08, -0.04, -0.015-0.065; /// toe
-      edgePosLocal_.col(3) << 0.08, 0.04, -0.015-0.065;  /// toe
+      edgePosLocal_.col(0) << -0.12, -0.05, -0.015-0.065;
+      edgePosLocal_.col(1) << -0.12, 0.05, -0.015-0.065;
+      edgePosLocal_.col(2) << 0.08, -0.05, -0.015-0.065; /// toe
+      edgePosLocal_.col(3) << 0.08, 0.05, -0.015-0.065;  /// toe
 
       for (int i=0; i<4; i++){
           for (int j= 0; j<2; j++){
@@ -222,10 +222,10 @@ class ENVIRONMENT : public RaisimGymEnv {
       }
 
       /// foorCorners
-      footCorners_.push_back(Eigen::Vector3d{ 0.08, 0.04, -0.015-0.065});
-      footCorners_.push_back(Eigen::Vector3d{ 0.08,-0.04, -0.015-0.065});
-      footCorners_.push_back(Eigen::Vector3d{-0.12, 0.04, -0.015-0.065});
-      footCorners_.push_back(Eigen::Vector3d{-0.12,-0.04, -0.015-0.065});
+      footCorners_.push_back(Eigen::Vector3d{ 0.08, 0.05, -0.015-0.065});
+      footCorners_.push_back(Eigen::Vector3d{ 0.08,-0.05, -0.015-0.065});
+      footCorners_.push_back(Eigen::Vector3d{-0.12, 0.05, -0.015-0.065});
+      footCorners_.push_back(Eigen::Vector3d{-0.12,-0.05, -0.015-0.065});
   }
 
   void init() final { }
@@ -267,8 +267,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
 //    world_->setDefaultMaterial(mu_, 0, 0);
-    world_->setMaterialPairProp("default","rubber",mu_, 0.6+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
-    world_->setMaterialPairProp("default","toe",   mu_, 0.6+0.1*uniDist_(gen_), 0.001); // toe: sole 과 마찰 동일, restitution 만 여기서 조절
+    world_->setMaterialPairProp("default","rubber",mu_, 0.2+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
+    world_->setMaterialPairProp("default","toe",   mu_, 0.0, 0.001); // toe: sole 과 마찰 동일, restitution 만 여기서 조절
 
     /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
     bool reset = true;
