@@ -353,6 +353,9 @@ class ENVIRONMENT : public RaisimGymEnv {
 //    for (auto& vec : jointPosErrorHist_) { vec.setZero(); }
 //    for (auto& vec : jointVelHist_) { vec.setZero(); }
 
+    // Reward-only event memory; also clear it on preserved-state standing resets.
+    resetLandingSupport();
+
     terminalStack_ = 0;
     prevTerminal_ = false;
     /// random joint friction
@@ -434,6 +437,8 @@ class ENVIRONMENT : public RaisimGymEnv {
       world_->integrate();
       if(server_) server_->unlockVisualizationServerMutex();
       updateObservation();
+      // Read the phase getLogBarReward() will use; do not advance phase here.
+      updateLandingSupport();
       avgReward += getReward();
       barrierReward_+= getLogBarReward();
 
@@ -603,7 +608,12 @@ class ENVIRONMENT : public RaisimGymEnv {
       // neg reward
       footSlip_.setZero();
       for (int i=0; i<numLegs_; i++){
-          if (footContact_ > 1){
+          if (enablePostLandingFootSlip_ && landingSupport_) {
+              // Trial A1: after a main landing, penalize xyz foot-frame motion
+              // even during a brief loss of ground contact. Keep coefficient -2.0.
+              footSlip_(i) = footVel_[i].e().squaredNorm();
+          } else if (footContact_ > 1) {
+              // Baseline behavior, including standing and pre-landing flight.
               footSlip_(i) = footVel_[i].e().head(2).squaredNorm();
           }
       }
@@ -850,6 +860,51 @@ class ENVIRONMENT : public RaisimGymEnv {
     updateFootToTerrain();
   }
 
+  void resetLandingSupport() {
+      landingFlightArmed_ = false;
+      landingSupport_ = false;
+      landingAirTime_ = 0.0;
+      landingPreviousSin_ = sin(phase_ / gait_hz_ * 2.0 * 3.141592);
+  }
+
+  void updateLandingSupport() {
+      const double nextPhaseSin = sin((phase_ + simulation_dt_) / gait_hz_ * 2.0 * 3.141592);
+      if (standingMode_) {
+          resetLandingSupport();
+          landingPreviousSin_ = nextPhaseSin;
+          return;
+      }
+
+      // Release only at the NEXT positive-to-negative half-cycle crossing.
+      // A landing in the current negative half-cycle must retain the latch.
+      if (landingPreviousSin_ >= 0.0 && nextPhaseSin < 0.0) {
+          landingSupport_ = false;
+          landingFlightArmed_ = false;
+          landingAirTime_ = 0.0;
+      }
+
+      if (!landingSupport_) {
+          // A 1 cm gap for >=40 ms in swing distinguishes a main flight
+          // from a momentary lost corner contact/partial foot rocking.
+          if (!footGroundContact_ && nextPhaseSin < 0.0
+              && footToTerrain_.minCoeff() > 0.01) {
+              landingAirTime_ += simulation_dt_;
+              if (landingAirTime_ >= 0.04 - 1e-9) landingFlightArmed_ = true;
+          } else {
+              landingAirTime_ = 0.0;
+          }
+
+          if (landingFlightArmed_ && footGroundContact_) {
+              landingSupport_ = true;
+              landingFlightArmed_ = false;
+              landingAirTime_ = 0.0;
+          }
+      }
+
+      // Deliberately keep support through a contact loss or phase wrap.
+      landingPreviousSin_ = nextPhaseSin;
+  }
+
   void updateFootContact(){
       /// all foot area including toe
 //      footContact_ = 0;
@@ -863,13 +918,18 @@ class ENVIRONMENT : public RaisimGymEnv {
 //          }
 //      }
 
-    /// excluding toe
+    /// Existing corner-only count is unchanged; a separate bool detects landings.
+      footGroundContact_ = false;
       footContact_ = 0;
       footCornerContact_.setZero();
       footNormalImpulse_ = 0.0;
       for(auto& contact: dhal_->getContacts()){
           for (size_t i=0; i<numLegs_; i++){
               if(contact.getlocalBodyIndex() == footIndices_[i]){
+                  // Static ground/height-map contact, including sole/toe/one edge.
+                  if (contact.getPairObjectBodyType() == raisim::BodyType::STATIC) {
+                      footGroundContact_ = true;
+                  }
                   Eigen::Vector3d footCornerContact = footOrientation_[i].e().transpose()*(contact.getPosition().e()-footPos_[i].e()); // local(in ankle frame) position of contact
                   int footContactLocationNum = -1;
                   if (footCornerContact(2)<0){
@@ -1124,6 +1184,16 @@ class ENVIRONMENT : public RaisimGymEnv {
   std::vector<std::string> footJointFrames_;
   std::vector<std::string> hipJointFrames_;
   int footContact_;
+  // Single experimental switch: false = original footSlip; true = trial A1.
+  static constexpr bool enablePostLandingFootSlip_ = true;
+  // Reward-only event memory for this single-foot robot.
+  // No new policy observation or real-robot contact sensor is required.
+  bool footGroundContact_ = false;
+  bool landingFlightArmed_ = false;
+  bool landingSupport_ = false;
+  double landingAirTime_ = 0.0;
+  double landingPreviousSin_ = 0.0;
+
   Eigen::Vector4i footCornerContact_;
   double footNormalImpulse_;
   int bodyContact_; // 1
