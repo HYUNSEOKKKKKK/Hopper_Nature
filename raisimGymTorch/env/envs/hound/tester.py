@@ -31,15 +31,16 @@ cfg = YAML().load(open(task_path + "/cfg.yaml", 'r'))
 # create environment from the configuration file
 cfg['environment']['num_envs'] = 1
 
-env = VecEnv(hound.RaisimGymEnv(home_path + "/rsc", dump(cfg['environment'], Dumper=RoundTripDumper)), cfg['environment'])
+env = VecEnv(hound.RaisimGymEnv(task_path + "/../../../../rsc", dump(cfg['environment'], Dumper=RoundTripDumper)), cfg['environment'])
 
 # shortcuts
 ob_dim = env.num_obs
 act_dim = env.num_acts
 est_dim = env.num_est
 
-weight_path = ("/home/hyunseok/raisim_ws/raisimLib/hound/raisimGymTorch/data/dhal_one_leg/2026-09-28-00-40-51/full_7000.pt")
-#weight_path = ("/home/hyunseok/raisim_ws/raisimLib/Hopper_Nature/raisimGymTorch/data/dhal_one_leg/2026-09-04-02-04-02/full_10000.pt")
+### runner.py 가 체크포인트를 쓰는 위치 (raisimLib/hound/...). run 폴더 이름만 바꿔 쓰면 됨.
+weight_path = (home_path + "/hound/raisimGymTorch/data/dhal_one_leg/2026-10-07-02-53-23/full_5000.pt")
+#weight_path = (task_path + "/../../../data/dhal_one_leg/2026-09-04-02-04-02/full_10000.pt")
 iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
 weight_dir = weight_path.rsplit('/', 1)[0] + '/'
 
