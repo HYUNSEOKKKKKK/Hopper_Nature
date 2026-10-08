@@ -1,0 +1,8 @@
+{
+  "date": "2026-10-08",
+  "status": "disabled; superseded by explicit lower residual allocation",
+  "applied": false,
+  "global_factor": "1",
+  "previous_global_factor_historical_only": "1.0245656081485919713",
+  "replacement": "lower_residual_mass_allocation.json"
+}

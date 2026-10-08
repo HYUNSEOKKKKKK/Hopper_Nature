@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-08",
+  "status": "inferred lower total; unknown residual location assumed",
+  "accounting_kg": {
+    "whole_robot_measured": 17.1,
+    "L_leg_measured": 10.42,
+    "upper_measured": 2.55,
+    "battery_measured": 3.1,
+    "lower_excluding_battery_inferred": 1.03,
+    "known_nonbattery_lower": 0.642,
+    "unknown_lower_residual": 0.388,
+    "lower_including_battery": 4.13,
+    "Body_Nature": 6.68
+  },
+  "formula": "17.100 - 10.420 - 2.550 - 3.100 = 1.030; 1.030 - 0.642 = 0.388 kg",
+  "allocation_rule": "unknown 0.388 kg follows the known 0.642 kg nonbattery lower spatial distribution proportionally",
+  "battery_excluded": true,
+  "known_component_masses_unchanged": true,
+  "independently_measured_lower_total": false,
+  "hardware_identity_known": false,
+  "distribution_weights": {
+    "body_1_tethered_verHopping1": 0.6962616822429907,
+    "EtherCAT_module_v6_GND": 0.0763239875389408,
+    "temp_USB_to_LAN_20240712": 0.052959501557632405,
+    "GV7_ASY_SingleBody": 0.03115264797507788,
+    "GV7_USB_cable": 0.06542056074766356,
+    "USB_LAN_EtherCAT_cable": 0.07788161993769471
+  },
+  "residual_proxy_portions_kg": {
+    "body_1_tethered_verHopping1": 0.27014953271028036,
+    "EtherCAT_module_v6_GND": 0.029613707165109034,
+    "temp_USB_to_LAN_20240712": 0.020548286604361372,
+    "GV7_ASY_SingleBody": 0.012087227414330218,
+    "GV7_USB_cable": 0.02538317757009346,
+    "USB_LAN_EtherCAT_cable": 0.030218068535825544
+  },
+  "residual_COM_link_m": [
+    -0.0028023794467945695,
+    -0.005058205062212335,
+    0.05135482944224714
+  ],
+  "residual_central_tensor_link_kgm2": [
+    [
+      0.002477416498380669,
+      -0.00013918182078805522,
+      0.0003534239095049145
+    ],
+    [
+      -0.00013918182078805522,
+      0.0025233747670431843,
+      0.00022131669308470927
+    ],
+    [
+      0.0003534239095049145,
+      0.00022131669308470927,
+      0.0030318418084814914
+    ]
+  ],
+  "scope_caveat": "Assumes measured leg, upper, battery are disjoint, complete and refer to the same assembled robot. Residual can also include measurement/scope discrepancies."
+}

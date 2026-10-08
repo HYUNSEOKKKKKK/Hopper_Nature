@@ -1,0 +1,1085 @@
+{
+  "model": "Hop2_Parallel_Nature_20261001",
+  "date": "2026-10-08",
+  "revision": "Upper measured 2.550; battery 3.100; leg 10.420; inferred nonbattery lower 1.030; explicit lower residual 0.388; robot 17.100. Global scaling removed.",
+  "baseline_urdf_sha256": "2b6fcff19bb3399d338c6b8f28f8db3834b15e54dc4d93b8b28d7063932ccf5a",
+  "mass_kg": {
+    "baseline_robot": "14.000000000000000000",
+    "baseline_old_Body": "3.588328436715940859",
+    "baseline_L_leg": "10.411671563284059141",
+    "measured_L_leg": "10.42",
+    "L_leg_correction": "0.008328436715940859",
+    "L_leg_factor": "1.0007999135071942180756506171297543466971156603258",
+    "current_Body_component_group_sum": "6.680",
+    "lower_excluding_battery": "1.030",
+    "lower_including_battery": "4.130",
+    "new_Body_group_sum": "6.680",
+    "new_robot_sum": "17.100",
+    "prior_revision_Body": "6.424026363091671660",
+    "prior_revision_robot": "17.100",
+    "revision_mass_change": "0.000",
+    "known_Body_component_group_sum_before_lower_residual": "6.292",
+    "known_robot_sum_before_lower_residual": "16.712",
+    "lower_known_excluding_battery": "0.642",
+    "lower_unknown_residual": "0.388",
+    "effective_L_leg": "10.420"
+  },
+  "measured_Body_groups_kg": {
+    "battery_16S_1": 3.1,
+    "body_1_tethered_verHopping1": 0.447,
+    "EtherCAT_module_v6_GND": 0.049,
+    "temp_USB_to_LAN_20240712": 0.034,
+    "USB_LAN_EtherCAT_cable_approx": 0.05,
+    "GV7_body_and_USB_group": 0.062,
+    "GV7_body_approx_subtotal_NOT_ADDITIONAL": 0.02,
+    "GV7_USB_approx_subtotal_NOT_ADDITIONAL": 0.042,
+    "upper_assembly_INCLUDING_killSwitch_and_all_upper_cables": 2.55,
+    "killSwitch_and_cables_subtotal_NOT_ADDITIONAL": 0.133,
+    "carrier_powerboard_receiver_subtotal_NOT_ADDITIONAL": 0.806,
+    "powerboard_receiver_subsubtotal_NOT_ADDITIONAL": 0.119
+  },
+  "IMU_source": {
+    "manufacturer": "MicroStrain by HBK",
+    "family": "3DM-GV7",
+    "previous_manufacturer_nominal_mass_kg": 0.0177,
+    "assigned_body_mass_kg": 0.02,
+    "mass_status": "user approximate measured body mass supersedes previous manufacturer nominal",
+    "body_plus_USB_measured_kg": 0.062,
+    "derived_USB_cable_approx_kg": 0.042,
+    "source_url": "https://www.hbkworld.com/en/products/transducers/inertial-sensors/attitude-and-heading/3dm-gv7-ahrs",
+    "verified_date": "2026-10-01",
+    "official_dimensions_mm": [
+      36.2,
+      36.6,
+      10.2
+    ],
+    "mounting": "below body_1_tethered_verHopping1; CAD placement retained"
+  },
+  "user_confirmed_scope": {
+    "GV7_is_in_upper_PC_group": false,
+    "battery_in_lower_body": true,
+    "GV7_in_lower_body": true,
+    "GV7_USB_is_in_upper_PC_group": false,
+    "GV7_USB_in_lower_mass_group": true,
+    "USB_LAN_hub_and_EtherCAT_cable_separate_masses": true,
+    "upper_2p550_includes_killSwitch_and_cables": true,
+    "upper_2p550_weighed_on_single_larger_scale": true
+  },
+  "superseded_lower_ledger": {
+    "status": "historical only; do not add or enforce together with current measurements",
+    "old_frame_board_hub_cables_group_kg": 0.506,
+    "old_board_hub_cables_group_kg": 0.109,
+    "old_frame_derived_kg": 0.397,
+    "old_EtherCAT_kg": 0.047,
+    "old_hub_plus_cables_derived_kg": 0.062,
+    "old_GV7_nominal_kg": 0.0177
+  },
+  "lower_cable_proxies": {
+    "GV7_USB_cable": {
+      "assigned_mass_kg": 0.042,
+      "mass_group": "lower, excluded from measured upper 2.550 kg",
+      "source": "GV7_ASY_SingleBody",
+      "destination": "P360_20240712",
+      "endpoint_proxy_body_CAD_m": [
+        [
+          3.0678634794532034e-06,
+          -0.005174054223574897,
+          0.0014353579048427523
+        ],
+        [
+          -0.0017519687543535516,
+          0.14292463497566865,
+          0.0036275947493636593
+        ]
+      ],
+      "endpoint_proxy_body_link_m": [
+        [
+          0.0014353579048427523,
+          3.0678634794532034e-06,
+          -0.005174054223574897
+        ],
+        [
+          0.0036275947493636593,
+          -0.0017519687543535516,
+          0.14292463497566865
+        ]
+      ],
+      "COM_body_link_m": [
+        0.002531476327103206,
+        -0.0008744504454370493,
+        0.06887529037604688
+      ],
+      "central_inertia_body_link_kgm2": [
+        [
+          7.677705663622426e-05,
+          1.346609577983905e-08,
+          -1.1363359108074128e-06
+        ],
+        [
+          1.346609577983905e-08,
+          7.678309675720815e-05,
+          9.097151790920961e-07
+        ],
+        [
+          -1.1363359108074128e-06,
+          9.097151790920961e-07,
+          2.7601195693430573e-08
+        ]
+      ],
+      "distribution": "uniform slender straight segment between device CAD centroid proxies",
+      "unit_tensor_formula": "(||b-a||^2*identity - outer(b-a,b-a))/12",
+      "status": "PROVISIONAL: connector locations, routing, coiled slack and connector mass distribution unmeasured. Segment length is a proxy and is not actual cable length."
+    },
+    "USB_LAN_EtherCAT_cable": {
+      "assigned_mass_kg": 0.05,
+      "mass_group": "lower, excluded from measured upper 2.550 kg",
+      "source": "temp_USB_to_LAN_20240712",
+      "destination": "EtherCAT_module_v6_GND",
+      "endpoint_proxy_body_CAD_m": [
+        [
+          -0.059998999682216614,
+          0.1752564001868664,
+          -0.08399950898405556
+        ],
+        [
+          0.004604332205462796,
+          0.016370003376799936,
+          0.04346628754871831
+        ]
+      ],
+      "endpoint_proxy_body_link_m": [
+        [
+          -0.08399950898405556,
+          -0.059998999682216614,
+          0.1752564001868664
+        ],
+        [
+          0.04346628754871831,
+          0.004604332205462796,
+          0.016370003376799936
+        ]
+      ],
+      "COM_body_link_m": [
+        -0.020266610717668623,
+        -0.02769733373837691,
+        0.09581320178183317
+      ],
+      "central_inertia_body_link_kgm2": [
+        [
+          0.0001225769899261481,
+          -3.431131315722586e-05,
+          8.438575469840627e-05
+        ],
+        [
+          -3.431131315722586e-05,
+          0.000172885068237585,
+          4.276912760649271e-05
+        ],
+        [
+          8.438575469840627e-05,
+          4.276912760649271e-05,
+          8.508799906968402e-05
+        ]
+      ],
+      "distribution": "uniform slender straight segment between device CAD centroid proxies",
+      "unit_tensor_formula": "(||b-a||^2*identity - outer(b-a,b-a))/12",
+      "status": "PROVISIONAL: connector locations, routing, coiled slack and connector mass distribution unmeasured. Segment length is a proxy and is not actual cable length."
+    }
+  },
+  "PC_source": {
+    "manufacturer": "Lenovo",
+    "inferred_model": "ThinkStation P360 Tiny",
+    "model_identity_status": "inferred from user P360 name and compact CAD size; exact machine type unconfirmed",
+    "source_url": "https://psref.lenovo.com/syspool/Sys/PDF/ThinkStation/ThinkStation_P360_Tiny/ThinkStation_P360_Tiny_Spec.html",
+    "verified_date": "2026-10-01",
+    "nominal_mass_kg": 1.4,
+    "specification_qualifier": "1.4 kg maximum configuration; approximate, configuration-dependent",
+    "official_dimensions_WDH_mm": [
+      179,
+      182.9,
+      37
+    ],
+    "CAD_envelope_body_axes_mm": [
+      186.06000000000182,
+      43.499999999999986,
+      187.10000000000184
+    ],
+    "CAD_dimension_note": "186.06 x 43.5 x 187.1 mm envelope; compatible with compact Tiny form but not an exact dimensional match",
+    "manufacturer_COM_inertia_found": false,
+    "previous_volume_allocated_PC_mass_kg": 1.465528598053115,
+    "measured_upper_assembly_including_switch_kg": 2.55,
+    "non_PC_mass_within_upper_kg": 1.15
+  },
+  "upper_mass_budget": {
+    "measured_total_kg": 2.55,
+    "PC_nominal_kg": 1.4,
+    "carrier_derived_measured_kg": 0.687,
+    "powerboard_including_receiver_measured_kg": 0.119,
+    "killSwitch_and_cables_included_subtotal_kg": 0.133,
+    "unlocalized_residual_kg": 0.211,
+    "residual_geometry_volume_weights": {
+      "P360_20240712": 0.5812017806374455,
+      "NatureHop_pccarrier": 0.22864939970199133,
+      "nature_hopper_powerboard": 0.16125800634982626,
+      "button_big": 0.004481724513342742,
+      "killSwitch": 0.02440908879739421
+    },
+    "residual_COM_body_CAD_m": [
+      -0.0019423847962023422,
+      0.15982123972483514,
+      0.008191717469268193
+    ],
+    "residual_unit_central_tensor_body_CAD_m2": [
+      [
+        0.003964850632529021,
+        -9.676148328406314e-07,
+        0.00012424267400930198
+      ],
+      [
+        -9.676148328406314e-07,
+        0.006441375269283237,
+        -0.00011483539389661797
+      ],
+      [
+        0.00012424267400930198,
+        -0.00011483539389661797,
+        0.004092895097763479
+      ]
+    ],
+    "button_has_no_separate_measured_mass": true,
+    "receiver_geometry": "omitted; mass included once in powerboard at user request"
+  },
+  "assumptions": [
+    "Leg 10.420, upper 2.550 (including switch/cables), battery 3.100, robot 17.100 kg are measured group totals and assumed disjoint where applicable.",
+    "INFERRED UNKNOWN LOWER MASS: 17.100 whole robot - 10.420 leg - 2.550 measured upper - 3.100 battery - 0.642 known nonbattery lower = 0.388 kg. Not an independently weighed or identified component. Assumed to follow known nonbattery lower mass distributions proportionally; battery excluded.",
+    "UNLOCALIZED UPPER BUDGET: measured upper 2.550 minus nominal PC 1.400 minus measured carrier/board/receiver 0.806 minus switch/cables 0.133 = 0.211 kg. Already inside upper total; includes possible PC mass error. Distribution uses existing upper CAD volume weights. Additional 22 g location not measured; aggregate COM retained by assumption.",
+    "Upper COM retains previous three-axis reaction-ratio estimate; support midpoints and Z contact datum remain provisional. Added 22 g location was not measured.",
+    "Body components use CAD geometry uniform-density priors, two lower cable segment proxies, and separate residual distributions. Central inertia is estimated, not experimentally identified.",
+    "PC 1.400 kg remains a provisional maximum-configuration Tiny specification, not an individual measurement. Upper measured total constrains combined mass.",
+    "Known lower 0.642 kg includes approximate measurements; inferred residual inherits their errors and any scope mismatch.",
+    "Earlier leg-only 1.0007999135 correction to the measured 10.420 kg remains; whole-robot global 1.0245656081 multiplier is removed.",
+    "Receiver remains within measured board group 0.119 kg; carrier 0.687 kg; switch/cables 0.133 kg included once. Prior 0.506/0.109 lower group records are superseded."
+  ],
+  "leg_links": [
+    {
+      "link": "Thigh",
+      "old_mass_kg": "4.554682270893658363",
+      "new_mass_kg": "4.5583256227631242349110601582040013530209017862867",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    },
+    {
+      "link": "Calf",
+      "old_mass_kg": "3.630464754956549052",
+      "new_mass_kg": "3.6333688127514313426632278955880666624608561996003",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    },
+    {
+      "link": "Universal",
+      "old_mass_kg": "0.222483794525813485",
+      "new_mass_kg": "0.22266176231818650624125049269567698197656249119681",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    },
+    {
+      "link": "Foot",
+      "old_mass_kg": "1.106072514819988164",
+      "new_mass_kg": "1.1069572771645289494813221079456272170994005314845",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    },
+    {
+      "link": "Left_Dice",
+      "old_mass_kg": "0.040250853357884077",
+      "new_mass_kg": "0.040283050559161142221414991465189961420979161572207",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    },
+    {
+      "link": "Left_Ankle_Link",
+      "old_mass_kg": "0.228403731934666190",
+      "new_mass_kg": "0.22858643516493429686020499860368589798290497462027",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    },
+    {
+      "link": "Right_Dice",
+      "old_mass_kg": "0.040250853357884077",
+      "new_mass_kg": "0.040283050559161142221414991465189961420979161572207",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    },
+    {
+      "link": "Right_Ankle_Link",
+      "old_mass_kg": "0.337752402591640135",
+      "new_mass_kg": "0.33802257530056048737094752430185424759837275494357",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    },
+    {
+      "link": "Left_Ankle_Link_Input",
+      "old_mass_kg": "0.125655193422987799",
+      "new_mass_kg": "0.12575570670945594901457841986535385850952146936166",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    },
+    {
+      "link": "Right_Ankle_Link_Input",
+      "old_mass_kg": "0.125655193422987799",
+      "new_mass_kg": "0.12575570670945594901457841986535385850952146936166",
+      "factor": "1.0007999135071942180756506171297543466971156603258"
+    }
+  ],
+  "body_components": [
+    {
+      "CAD_name": "battery_16S_1",
+      "record_name": "battery_16S_1",
+      "record_type": "CAD_component",
+      "assigned_mass_kg": 3.1,
+      "status": "MEASURED component mass; uniform CAD geometry used for COM and inertia",
+      "uniform_geometry_COM_body_CAD_m": [
+        -0.003551242920063721,
+        0.07298707400884905,
+        0.021876391067048785
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          0.006798635562567068,
+          7.738098867591565e-08,
+          -1.2551926856122783e-05
+        ],
+        [
+          7.738098867591565e-08,
+          0.01229734807439879,
+          -1.3458039664916614e-07
+        ],
+        [
+          -1.2551926856122783e-05,
+          -1.3458039664916614e-07,
+          0.007961710014044606
+        ]
+      ]
+    },
+    {
+      "CAD_name": "body_1_tethered_verHopping1",
+      "record_name": "body_1_tethered_verHopping1",
+      "record_type": "CAD_component",
+      "assigned_mass_kg": 0.447,
+      "status": "USER MEASURED 0.447 kg, supersedes previous 0.397 kg residual inferred from old 0.506/0.109 kg groups; same CAD part geometry",
+      "uniform_geometry_COM_body_CAD_m": [
+        -2.5686108400488717e-05,
+        0.0416756410060221,
+        -0.0004355503741010744
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          0.00275542386115139,
+          9.69363078030514e-07,
+          -1.0546999641183505e-06
+        ],
+        [
+          9.69363078030514e-07,
+          0.004362919313075586,
+          2.8838410862193498e-05
+        ],
+        [
+          -1.0546999641183505e-06,
+          2.8838410862193498e-05,
+          0.0028990689416202287
+        ]
+      ]
+    },
+    {
+      "CAD_name": "EtherCAT_module_v6_GND",
+      "record_name": "EtherCAT_module_v6_GND",
+      "record_type": "CAD_component",
+      "assigned_mass_kg": 0.049,
+      "status": "USER MEASURED 0.049 kg, supersedes previous 0.047 kg; connecting cable is separate",
+      "uniform_geometry_COM_body_CAD_m": [
+        0.004604332205462796,
+        0.016370003376799936,
+        0.04346628754871831
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          1.652528533641134e-05,
+          -1.2006742537718737e-06,
+          5.0979671942112555e-06
+        ],
+        [
+          -1.2006742537718737e-06,
+          5.102628337577912e-05,
+          1.3957544771695874e-06
+        ],
+        [
+          5.0979671942112555e-06,
+          1.3957544771695874e-06,
+          3.5317124887307446e-05
+        ]
+      ]
+    },
+    {
+      "CAD_name": "temp_USB_to_LAN_20240712",
+      "record_name": "temp_USB_to_LAN_20240712",
+      "record_type": "CAD_component",
+      "assigned_mass_kg": 0.034,
+      "status": "USER MEASURED HUB ONLY 0.034 kg; 0.050 kg EtherCAT connecting cable represented separately; supersedes old derived hub-plus-cable 0.062 kg",
+      "uniform_geometry_COM_body_CAD_m": [
+        -0.059998999682216614,
+        0.1752564001868664,
+        -0.08399950898405556
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          3.6597945584848273e-06,
+          -3.484342874134253e-10,
+          3.445263262146911e-11
+        ],
+        [
+          -3.484342874134253e-10,
+          2.0604898304063057e-05,
+          -1.7101051630036476e-10
+        ],
+        [
+          3.445263262146911e-11,
+          -1.7101051630036476e-10,
+          1.9351583122614107e-05
+        ]
+      ]
+    },
+    {
+      "CAD_name": "killSwitch",
+      "record_name": "killSwitch",
+      "record_type": "CAD_component",
+      "assigned_mass_kg": 0.133,
+      "status": "MEASURED SUBGROUP: switch plus cables 0.133 kg included within measured upper 2.550 kg, counted once; represented by switch geometry",
+      "uniform_geometry_COM_body_CAD_m": [
+        0.046371941251355284,
+        0.20683271230058412,
+        -0.055381961696036264
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          3.31908489538442e-05,
+          2.9257254462211946e-11,
+          5.143527550563326e-08
+        ],
+        [
+          2.9257254462211946e-11,
+          2.4542547959920212e-05,
+          3.8302225125838713e-13
+        ],
+        [
+          5.143527550563323e-08,
+          3.8302225125838713e-13,
+          3.51472008154554e-05
+        ]
+      ]
+    },
+    {
+      "CAD_name": "GV7_ASY_SingleBody",
+      "record_name": "GV7_ASY_SingleBody",
+      "record_type": "CAD_component",
+      "assigned_mass_kg": 0.02,
+      "status": "USER APPROXIMATE BODY-ONLY MEASUREMENT 0.020 kg; supersedes manufacturer nominal 0.0177 kg. Body-plus-USB cable measured 0.062 kg; remaining approximately 0.042 kg cable is a separate lower-group distribution, excluded from upper 2.550 kg",
+      "uniform_geometry_COM_body_CAD_m": [
+        3.0678634794532034e-06,
+        -0.005174054223574897,
+        0.0014353579048427523
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          2.1942398459589282e-06,
+          -6.356570873716291e-10,
+          -1.64911091020917e-10
+        ],
+        [
+          -6.356570873716291e-10,
+          3.1718710134189423e-06,
+          5.9022086325571754e-09
+        ],
+        [
+          -1.64911091020917e-10,
+          5.9022086325571754e-09,
+          1.3047875642297278e-06
+        ]
+      ]
+    },
+    {
+      "CAD_name": "P360_20240712",
+      "record_name": "P360_20240712",
+      "record_type": "CAD_component",
+      "assigned_mass_kg": 1.4,
+      "status": "PROVISIONAL MANUFACTURER MASS: P360 Tiny 1.4 kg maximum configuration, approximate and configuration-dependent; Tiny form factor inferred from CAD size, exact machine type not confirmed. COM/inertia remain uniform-CAD estimates, not manufacturer specifications",
+      "uniform_geometry_COM_body_CAD_m": [
+        -0.0017519687543535516,
+        0.14292463497566865,
+        0.0036275947493636593
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          0.003991861501816844,
+          7.200477239718311e-07,
+          1.3855548555351223e-06
+        ],
+        [
+          7.200477239718311e-07,
+          0.0077644588036608845,
+          2.446580668188242e-06
+        ],
+        [
+          1.3855548555351223e-06,
+          2.446580668188242e-06,
+          0.004137678043192225
+        ]
+      ]
+    },
+    {
+      "CAD_name": "NatureHop_pccarrier",
+      "record_name": "NatureHop_pccarrier",
+      "record_type": "CAD_component",
+      "assigned_mass_kg": 0.687,
+      "status": "DERIVED MEASURED CARRIER: 0.806 kg carrier+board+receiver minus 0.119 kg board+receiver = 0.687 kg; user identifies PLA printed part. COM/inertia use uniform effective density in CAD geometry; infill/wall distribution unmeasured",
+      "uniform_geometry_COM_body_CAD_m": [
+        -0.0009273436403160017,
+        0.17761664560471963,
+        0.001392222339821787
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          0.004054012125478471,
+          -2.358861801224177e-06,
+          -7.847331638862312e-06
+        ],
+        [
+          -2.358861801224177e-06,
+          0.007469099552333653,
+          -3.3364419685320704e-05
+        ],
+        [
+          -7.847331638862312e-06,
+          -3.3364419685320704e-05,
+          0.005105678998434764
+        ]
+      ]
+    },
+    {
+      "CAD_name": "nature_hopper_powerboard",
+      "record_name": "nature_hopper_powerboard",
+      "record_type": "CAD_component",
+      "assigned_mass_kg": 0.119,
+      "status": "MEASURED GROUP: powerboard plus unmodeled receiver = 0.119 kg; receiver lumped into powerboard geometry and location per explicit user instruction",
+      "uniform_geometry_COM_body_CAD_m": [
+        -0.01056182143878326,
+        0.1870968183041832,
+        0.04521005214104952
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          0.00013140046569104483,
+          9.777545032743201e-06,
+          2.9290036662807493e-06
+        ],
+        [
+          9.777545032743201e-06,
+          0.00022290220606980413,
+          -5.436769335967068e-06
+        ],
+        [
+          2.9290036662807493e-06,
+          -5.436769335967068e-06,
+          0.00012860110381799784
+        ]
+      ]
+    },
+    {
+      "CAD_name": null,
+      "record_name": "upper_unlocalized_residual",
+      "record_type": "unlocalized_mass_budget",
+      "assigned_mass_kg": 0.211,
+      "status": "UNLOCALIZED UPPER BUDGET: measured upper 2.550 minus nominal PC 1.400 minus measured carrier/board/receiver 0.806 minus switch/cables 0.133 = 0.211 kg. Already inside upper total; includes possible PC mass error. Distribution uses existing upper CAD volume weights. Additional 22 g location not measured; aggregate COM retained by assumption.",
+      "uniform_geometry_COM_body_CAD_m": [
+        -0.0019423847962023422,
+        0.15982123972483514,
+        0.008191717469268193
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          0.0008365834834636234,
+          -2.0416672972937322e-07,
+          2.6215204215962716e-05
+        ],
+        [
+          -2.0416672972937322e-07,
+          0.001359130181818763,
+          -2.423026811218639e-05
+        ],
+        [
+          2.6215204215962716e-05,
+          -2.423026811218639e-05,
+          0.000863600865628094
+        ]
+      ]
+    },
+    {
+      "CAD_name": null,
+      "record_name": "GV7_USB_cable",
+      "record_type": "uniform_segment_proxy",
+      "assigned_mass_kg": 0.042,
+      "status": "USER DERIVED APPROXIMATE MASS 0.062 minus approximately 0.020 = approximately 0.042 kg; PROVISIONAL: connector locations, routing, coiled slack and connector mass distribution unmeasured. Segment length is a proxy and is not actual cable length. Assigned to lower group, never added to upper 2.550 kg.",
+      "uniform_geometry_COM_body_CAD_m": [
+        -0.0008744504454370493,
+        0.06887529037604688,
+        0.002531476327103206
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          7.678309675720815e-05,
+          9.097151790920961e-07,
+          1.346609577983905e-08
+        ],
+        [
+          9.097151790920961e-07,
+          2.7601195693430573e-08,
+          -1.1363359108074128e-06
+        ],
+        [
+          1.346609577983905e-08,
+          -1.1363359108074128e-06,
+          7.677705663622426e-05
+        ]
+      ]
+    },
+    {
+      "CAD_name": null,
+      "record_name": "USB_LAN_EtherCAT_cable",
+      "record_type": "uniform_segment_proxy",
+      "assigned_mass_kg": 0.05,
+      "status": "USER APPROXIMATE MEASURED CABLE MASS 0.050 kg; PROVISIONAL: connector locations, routing, coiled slack and connector mass distribution unmeasured. Segment length is a proxy and is not actual cable length. Assigned to lower group, never added to upper 2.550 kg.",
+      "uniform_geometry_COM_body_CAD_m": [
+        -0.02769733373837691,
+        0.09581320178183317,
+        -0.020266610717668623
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          0.000172885068237585,
+          4.276912760649271e-05,
+          -3.431131315722586e-05
+        ],
+        [
+          4.276912760649271e-05,
+          8.508799906968402e-05,
+          8.438575469840627e-05
+        ],
+        [
+          -3.431131315722586e-05,
+          8.438575469840627e-05,
+          0.0001225769899261481
+        ]
+      ]
+    },
+    {
+      "CAD_name": null,
+      "record_name": "lower_unlocalized_residual",
+      "record_type": "inferred_unlocalized_mass_budget",
+      "assigned_mass_kg": 0.388,
+      "status": "INFERRED UNKNOWN LOWER MASS: 17.100 whole robot - 10.420 leg - 2.550 measured upper - 3.100 battery - 0.642 known nonbattery lower = 0.388 kg. Not an independently weighed or identified component. Assumed to follow known nonbattery lower mass distributions proportionally; battery excluded.",
+      "uniform_geometry_COM_body_CAD_m": [
+        -0.005058205062212335,
+        0.05135482944224714,
+        -0.0028023794467945695
+      ],
+      "uniform_geometry_central_inertia_kgm2": [
+        [
+          0.0025233747670431843,
+          0.00022131669308470927,
+          -0.00013918182078805522
+        ],
+        [
+          0.00022131669308470927,
+          0.0030318418084814914,
+          0.0003534239095049145
+        ],
+        [
+          -0.00013918182078805522,
+          0.0003534239095049145,
+          0.0024774164983806684
+        ]
+      ]
+    }
+  ],
+  "upper_com_calibration": {
+    "status": "approximate three-axis two-scale upper COM calibration; support geometry and absolute Z datum are nominal",
+    "date": "2026-10-08",
+    "measured_upper_mass_kg": 2.55,
+    "mass_source": "new independent upper total 2.550 kg supersedes 2.528 kg; old reaction ratios retained as COM assumption",
+    "frame": "Body_Nature URDF axes [X,Y,Z] = Body CAD [Z,X,Y]",
+    "support_midpoints_link_m": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.1625
+    },
+    "support_midpoint_status": "XY assumed symmetric about centered carrier CAD axes. Z midpoint=0.1625 m from CAD lower and upper contact-band centers 0.1125/0.2125 m. Actual centers of pressure not separately measured.",
+    "contact_geometry_status": "User reports XY spacing approximately 200 mm and Z spacing 100 mm, used as effective reaction-line spacing. Actual finite support contact positions are not independently verified.",
+    "z_support_datum": {
+      "lower_support_link_z_m": 0.1125,
+      "lower_support_status": "assumed at center of 5 mm lower carrier edge band, not at outer mounting face; actual center of pressure unmeasured",
+      "carrier_CAD_bottom_top_link_z_m": [
+        0.11,
+        0.215
+      ],
+      "lower_contact_band_link_z_m": [
+        0.11,
+        0.115
+      ],
+      "upper_contact_band_link_z_m": [
+        0.21,
+        0.215
+      ],
+      "carrier_CAD_envelope_height_m": 0.105,
+      "effective_upper_support_z_under_assumption_m": 0.21250000000000002,
+      "datum_caveat": "Reported 100 mm span matches CAD contact-band center spacing, while full outer height is 105 mm. Equal-center contact is an assumption. Under exact 100 mm span, shifting both support lines within the two bands permits +/-2.5 mm change in upper absolute COM; this is geometric sensitivity, not a statistical confidence interval.",
+      "source_image": "2a35ec12-4714-4ff9-9511-841da139a072.png"
+    },
+    "user_confirmed_second_test_rotated_90_degrees": true,
+    "superseded_lateral_span_m": 0.185,
+    "direction": "killSwitch-side reaction is +Y in lateral test and -X in fore-aft test; Z test left 1273.8 g=upper/+Z, right 1257.5 g=lower/-Z per user",
+    "formula": "q = support_midpoint + D/2 * (reaction_plus - reaction_minus)/(reaction_plus + reaction_minus)",
+    "tests": {
+      "x": {
+        "nominal_support_span_m": 0.2,
+        "reaction_plus_g": 1179.0,
+        "reaction_minus_g": 1329.0,
+        "reaction_sum_g": 2508.0,
+        "COM_offset_from_support_midpoint_m": -0.005980861244019139,
+        "COM_distance_from_minus_support_m": 0.09401913875598086,
+        "dCOM_dSpan": -0.029904306220095694,
+        "reaction_sum_minus_original_reference_g": -20.0,
+        "reaction_sum_minus_current_upper_mass_g": -42.0
+      },
+      "y": {
+        "nominal_support_span_m": 0.2,
+        "reaction_plus_g": 1377.5,
+        "reaction_minus_g": 1149.0,
+        "reaction_sum_g": 2526.5,
+        "COM_offset_from_support_midpoint_m": 0.009044132198693846,
+        "COM_distance_from_minus_support_m": 0.10904413219869385,
+        "dCOM_dSpan": 0.045220660993469226,
+        "reaction_sum_minus_original_reference_g": -1.5,
+        "reaction_sum_minus_current_upper_mass_g": -23.5
+      },
+      "z": {
+        "nominal_support_span_m": 0.1,
+        "reaction_plus_g": 1273.8,
+        "reaction_minus_g": 1257.5,
+        "reaction_sum_g": 2531.3,
+        "COM_offset_from_support_midpoint_m": 0.00032196894876149185,
+        "COM_distance_from_minus_support_m": 0.050321968948761495,
+        "dCOM_dSpan": 0.0032196894876150503,
+        "reaction_sum_minus_original_reference_g": 3.300000000000182,
+        "reaction_sum_minus_current_upper_mass_g": -18.699999999999818
+      }
+    },
+    "upper_prior_COM_link_m": [
+      0.0022657792477624897,
+      0.0005533046691075632,
+      0.15906379536960555
+    ],
+    "upper_calibrated_COM_link_m": [
+      -0.005980861244019139,
+      0.009044132198693846,
+      0.1628219689487615
+    ],
+    "upper_COM_change_link_m": [
+      -0.008246640491781629,
+      0.008490827529586282,
+      0.003758173579155949
+    ],
+    "upper_central_inertia_link_kgm2": [
+      [
+        0.011573140180700714,
+        0.0004374616508309542,
+        0.00020336456012033722
+      ],
+      [
+        0.0004374616508309542,
+        0.010717292026323119,
+        -0.00027890043697586
+      ],
+      [
+        0.00020336456012033722,
+        -0.00027890043697586,
+        0.017816293961654194
+      ]
+    ],
+    "inertia_status": "recomputed CAD prior with upper residual 0.211 kg; not measured; retain previous aggregate measured COM by assumption",
+    "height_status": "Z relative to lower support measured from reaction ratio; absolute Body-frame Z uses provisional lower contact-band center datum 0.1125 m",
+    "lower_mass_kg": 4.13,
+    "lower_COM_link_m": [
+      0.015721637161659283,
+      -0.003927071250914344,
+      0.06759210744623406
+    ],
+    "lower_central_inertia_link_kgm2": [
+      [
+        0.014901898849126528,
+        -0.0004107818823057514,
+        0.000525340835889075
+      ],
+      [
+        -0.0004107818823057514,
+        0.014329935758482149,
+        0.00056239031244898
+      ],
+      [
+        0.000525340835889075,
+        0.00056239031244898,
+        0.020818414279005173
+      ]
+    ],
+    "Body_prior_COM_link_m": [
+      0.010585044694528024,
+      -0.002216748107792209,
+      0.10251019190800012
+    ],
+    "Body_prior_central_inertia_link_kgm2": [
+      [
+        0.0396979733634065,
+        0.00012172703180409725,
+        0.0026691973903898844
+      ],
+      [
+        0.00012172703180409725,
+        0.0385239686572887,
+        -0.0003626327025334836
+      ],
+      [
+        0.0026691973903898844,
+        -0.0003626327025334836,
+        0.03895181025613349
+      ]
+    ],
+    "Body_COM_change_link_m": [
+      -0.0031480439003058617,
+      0.003241259012042668,
+      0.0014346321297676184
+    ],
+    "modeling_rule": "recompute CAD central tensors with current budgets; retain old upper COM; combine upper/lower by parallel-axis theorem",
+    "component_records_status": "body_components describe pre-upper-COM-calibration CAD and cable-proxy distributions; use this aggregate calibration for final Body properties",
+    "limitations": [
+      "support midpoint and actual pad contact lines are approximate",
+      "fore-aft reaction sum is 20 g below the historical 2.528 kg independent mass (42 g below new 2.550 kg)",
+      "absolute upper Z depends on assumed contact-band center datums; finite 5 mm edge width leaves a few mm geometric uncertainty",
+      "all central second moments remain CAD-based estimates; not measured by these tests",
+      "lower device COMs and tensors remain CAD-based estimates; two cable distributions use unmeasured straight-segment proxies",
+      "Additional upper 22 g spatial location unmeasured; previous upper COM retained as an explicit approximation.",
+      "INFERRED UNKNOWN LOWER MASS: 17.100 whole robot - 10.420 leg - 2.550 measured upper - 3.100 battery - 0.642 known nonbattery lower = 0.388 kg. Not an independently weighed or identified component. Assumed to follow known nonbattery lower mass distributions proportionally; battery excluded."
+    ],
+    "reaction_measurement_reference_mass_kg": 2.528
+  },
+  "Body_COM_link_m": [
+    0.007437000794222162,
+    0.001024510904250459,
+    0.10394482403776774
+  ],
+  "Body_central_inertia_link_kgm2": [
+    [
+      0.041037799591917126,
+      0.00047049660533504873,
+      0.003987047312091848
+    ],
+    [
+      0.00047049660533504873,
+      0.040087289671633594,
+      -0.0016639640587169172
+    ],
+    [
+      0.003987047312091848,
+      -0.0016639640587169172,
+      0.0396425326763329
+    ]
+  ],
+  "Body_principal_moments_kgm2": [
+    0.03571619111066605,
+    0.04054123632904125,
+    0.044510194500176334
+  ],
+  "rotation_body_CAD_to_body_URDF": [
+    [
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ]
+  ],
+  "body_joint_xyz_m": [
+    0,
+    0,
+    0
+  ],
+  "body_joint_rpy_rad": [
+    0,
+    0,
+    0
+  ],
+  "collision_boxes": [
+    {
+      "center_body_URDF_m": [
+        0.0,
+        0.0,
+        0.04992000000000001
+      ],
+      "size_body_URDF_m": [
+        0.22399999999999998,
+        0.20199999999999999,
+        0.12015999999999998
+      ]
+    },
+    {
+      "center_body_URDF_m": [
+        0.01015000000000002,
+        -6.938893903907228e-18,
+        0.1625
+      ],
+      "size_body_URDF_m": [
+        0.24430000000000002,
+        0.20800000000000007,
+        0.105
+      ]
+    },
+    {
+      "center_body_URDF_m": [
+        -0.0540639401126987,
+        0.01196789281446357,
+        0.2243
+      ],
+      "size_body_URDF_m": [
+        0.05548650923408669,
+        0.115465510275539,
+        0.018600000000000005
+      ]
+    }
+  ],
+  "cad_mounting_check": {
+    "ThighCAD_to_BodyCAD_mm": [
+      0,
+      -147.7,
+      0
+    ],
+    "ThighCAD_to_CalfCAD_mm": [
+      0,
+      -400,
+      0
+    ],
+    "CAD_to_ThighURDF_translation_mm": [
+      0,
+      0,
+      147.7
+    ],
+    "mapped_Body_origin_mm": [
+      0,
+      0,
+      0
+    ],
+    "mapped_Calf_origin_mm": [
+      0,
+      0,
+      -252.3
+    ],
+    "existing_knee_origin_mm": [
+      0,
+      0,
+      -252.3
+    ]
+  },
+  "source_stage_assumptions_20261002": [
+    "L_leg=10.42 kg is the union of the ten existing non-Body URDF links, excluding upper Body and its cabling.",
+    "Lower 3.742 kg and upper 2.528 kg are disjoint measured-component/group sums, not separately measured assembled totals. Upper includes killSwitch/cables; lower includes battery, GV7 body and its entire USB cable even though it connects to the upper PC.",
+    "New lower component measurements replace old 0.506/0.109 kg bundled constraints. Frame 0.447, EtherCAT 0.049, hub 0.034, hub-EtherCAT cable approx 0.050, GV7+USB total 0.062, battery 3.100 kg. Old subtotals are historical only and are not added or enforced.",
+    "GV7 body uses user approximate 0.020 kg, superseding manufacturer nominal 0.0177 kg. Its USB cable is the approximate residual 0.062-0.020=0.042 kg, represented separately. GV7 group total is included once.",
+    "P360_20240712 uses provisional Lenovo P360 Tiny 1.4 kg maximum-configuration specification. Tiny is inferred from the compact CAD envelope, not confirmed by a machine type label. Exact configuration and actual unit mass remain unknown.",
+    "The measured 0.806 kg carrier/board/receiver subgroup is included within the 2.528 kg upper assembly, not added to it.",
+    "Carrier mass is 0.806 minus 0.119 = 0.687 kg; powerboard plus receiver is 0.119 kg. The receiver is explicitly lumped into powerboard CAD geometry/location per user instruction.",
+    "The PLA carrier uses uniform effective density within its CAD geometry. Measured mass fixes its mass scale but does not identify actual printing infill/wall COM or inertia.",
+    "After 1.400 kg nominal PC, 0.806 kg measured carrier/board/receiver subgroup, and 0.133 kg switch/cable subgroup, 0.189 kg remains within upper 2.528 kg. This is an unlocalized budget including button/cables/other items and possible PC specification error, not a measured cable or button mass. Its distribution is approximated by five upper CAD solid volume weights; measured component masses remain separate.",
+    "Each CAD device central tensor uses uniform density within its CAD geometry, scaled to its assigned mass; the two unmodeled lower cables use separate uniform-segment tensors.",
+    "Hub-EtherCAT cable 0.050 kg and GV7-PC USB cable 0.042 kg are uniform straight-segment distribution proxies between corresponding CAD device centroids. Ports, actual routes, bundled slack, and connector mass distribution are unmeasured; proxy segment lengths are not actual cable lengths. KillSwitch/cables remains represented within upper group as before.",
+    "Upper XY COM uses reaction ratios and corrected approximate 200 mm spacing on both axes. Effective support lines are assumed symmetric about carrier CAD center; pad contact locations are not independently verified.",
+    "Upper mass stays 2.528 kg despite reaction sums XY 2.5265/2.508 kg and Z 2.5313 kg; scale ratios identify approximate COM only. Central inertia remains a CAD estimate; Body inertia is recombined using the new aggregate COM.",
+    "Z test uses upper 1273.8 g, lower 1257.5 g and user-reported 100 mm support spacing. CAD lower/upper 5 mm contact bands are Z=110..115 and 210..215 mm. Their centers 112.5/212.5 mm define the nominal supports. Actual centers of pressure are unmeasured; absolute Z remains provisional.",
+    "body_components retains uncalibrated CAD device priors and lower cable-proxy distributions. Final Body properties require the upper_com_calibration aggregate first-moment correction; no physical CAD component or mesh was relocated.",
+    "The 8.3284 g leg correction is proportional across ten links. It does not identify the actual cable mass locations.",
+    "Body collision boxes conservatively fill some unoccupied interior space; the visual mesh is not used as collision geometry."
+  ],
+  "global_mass_normalization": {
+    "date": "2026-10-08",
+    "status": "disabled; superseded by explicit lower residual allocation",
+    "applied": false,
+    "global_factor": "1",
+    "previous_global_factor_historical_only": "1.0245656081485919713",
+    "replacement": "lower_residual_mass_allocation.json"
+  },
+  "lower_residual_mass_allocation": {
+    "date": "2026-10-08",
+    "status": "inferred lower total; unknown residual location assumed",
+    "accounting_kg": {
+      "whole_robot_measured": 17.1,
+      "L_leg_measured": 10.42,
+      "upper_measured": 2.55,
+      "battery_measured": 3.1,
+      "lower_excluding_battery_inferred": 1.03,
+      "known_nonbattery_lower": 0.642,
+      "unknown_lower_residual": 0.388,
+      "lower_including_battery": 4.13,
+      "Body_Nature": 6.68
+    },
+    "formula": "17.100 - 10.420 - 2.550 - 3.100 = 1.030; 1.030 - 0.642 = 0.388 kg",
+    "allocation_rule": "unknown 0.388 kg follows the known 0.642 kg nonbattery lower spatial distribution proportionally",
+    "battery_excluded": true,
+    "known_component_masses_unchanged": true,
+    "independently_measured_lower_total": false,
+    "hardware_identity_known": false,
+    "distribution_weights": {
+      "body_1_tethered_verHopping1": 0.6962616822429907,
+      "EtherCAT_module_v6_GND": 0.0763239875389408,
+      "temp_USB_to_LAN_20240712": 0.052959501557632405,
+      "GV7_ASY_SingleBody": 0.03115264797507788,
+      "GV7_USB_cable": 0.06542056074766356,
+      "USB_LAN_EtherCAT_cable": 0.07788161993769471
+    },
+    "residual_proxy_portions_kg": {
+      "body_1_tethered_verHopping1": 0.27014953271028036,
+      "EtherCAT_module_v6_GND": 0.029613707165109034,
+      "temp_USB_to_LAN_20240712": 0.020548286604361372,
+      "GV7_ASY_SingleBody": 0.012087227414330218,
+      "GV7_USB_cable": 0.02538317757009346,
+      "USB_LAN_EtherCAT_cable": 0.030218068535825544
+    },
+    "residual_COM_link_m": [
+      -0.0028023794467945695,
+      -0.005058205062212335,
+      0.05135482944224714
+    ],
+    "residual_central_tensor_link_kgm2": [
+      [
+        0.002477416498380669,
+        -0.00013918182078805522,
+        0.0003534239095049145
+      ],
+      [
+        -0.00013918182078805522,
+        0.0025233747670431843,
+        0.00022131669308470927
+      ],
+      [
+        0.0003534239095049145,
+        0.00022131669308470927,
+        0.0030318418084814914
+      ]
+    ],
+    "scope_caveat": "Assumes measured leg, upper, battery are disjoint, complete and refer to the same assembled robot. Residual can also include measurement/scope discrepancies."
+  },
+  "source_records_notice": "Current component records sum to Body 6.680 kg before upper COM correction. No global multiplier. Upper 2.550 kg independently weighed; lower 4.130 kg inferred. Historical records are labelled separately."
+}

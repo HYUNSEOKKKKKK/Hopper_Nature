@@ -1,0 +1,112 @@
+{
+  "GV7_USB_cable": {
+    "assigned_mass_kg": 0.042,
+    "mass_group": "lower, excluded from measured upper 2.550 kg",
+    "source": "GV7_ASY_SingleBody",
+    "destination": "P360_20240712",
+    "endpoint_proxy_body_CAD_m": [
+      [
+        3.0678634794532034e-06,
+        -0.005174054223574897,
+        0.0014353579048427523
+      ],
+      [
+        -0.0017519687543535516,
+        0.14292463497566865,
+        0.0036275947493636593
+      ]
+    ],
+    "endpoint_proxy_body_link_m": [
+      [
+        0.0014353579048427523,
+        3.0678634794532034e-06,
+        -0.005174054223574897
+      ],
+      [
+        0.0036275947493636593,
+        -0.0017519687543535516,
+        0.14292463497566865
+      ]
+    ],
+    "COM_body_link_m": [
+      0.002531476327103206,
+      -0.0008744504454370493,
+      0.06887529037604688
+    ],
+    "central_inertia_body_link_kgm2": [
+      [
+        7.677705663622426e-05,
+        1.346609577983905e-08,
+        -1.1363359108074128e-06
+      ],
+      [
+        1.346609577983905e-08,
+        7.678309675720815e-05,
+        9.097151790920961e-07
+      ],
+      [
+        -1.1363359108074128e-06,
+        9.097151790920961e-07,
+        2.7601195693430573e-08
+      ]
+    ],
+    "distribution": "uniform slender straight segment between device CAD centroid proxies",
+    "unit_tensor_formula": "(||b-a||^2*identity - outer(b-a,b-a))/12",
+    "status": "PROVISIONAL: connector locations, routing, coiled slack and connector mass distribution unmeasured. Segment length is a proxy and is not actual cable length."
+  },
+  "USB_LAN_EtherCAT_cable": {
+    "assigned_mass_kg": 0.05,
+    "mass_group": "lower, excluded from measured upper 2.550 kg",
+    "source": "temp_USB_to_LAN_20240712",
+    "destination": "EtherCAT_module_v6_GND",
+    "endpoint_proxy_body_CAD_m": [
+      [
+        -0.059998999682216614,
+        0.1752564001868664,
+        -0.08399950898405556
+      ],
+      [
+        0.004604332205462796,
+        0.016370003376799936,
+        0.04346628754871831
+      ]
+    ],
+    "endpoint_proxy_body_link_m": [
+      [
+        -0.08399950898405556,
+        -0.059998999682216614,
+        0.1752564001868664
+      ],
+      [
+        0.04346628754871831,
+        0.004604332205462796,
+        0.016370003376799936
+      ]
+    ],
+    "COM_body_link_m": [
+      -0.020266610717668623,
+      -0.02769733373837691,
+      0.09581320178183317
+    ],
+    "central_inertia_body_link_kgm2": [
+      [
+        0.0001225769899261481,
+        -3.431131315722586e-05,
+        8.438575469840627e-05
+      ],
+      [
+        -3.431131315722586e-05,
+        0.000172885068237585,
+        4.276912760649271e-05
+      ],
+      [
+        8.438575469840627e-05,
+        4.276912760649271e-05,
+        8.508799906968402e-05
+      ]
+    ],
+    "distribution": "uniform slender straight segment between device CAD centroid proxies",
+    "unit_tensor_formula": "(||b-a||^2*identity - outer(b-a,b-a))/12",
+    "status": "PROVISIONAL: connector locations, routing, coiled slack and connector mass distribution unmeasured. Segment length is a proxy and is not actual cable length."
+  }
+}
