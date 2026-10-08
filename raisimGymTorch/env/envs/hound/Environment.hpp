@@ -25,7 +25,7 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// add objects
     /// resourceDir_ is this repository's own rsc/ (passed by runner.py / tester.py),
     /// so the checkout directory may be named anything.
-    dhal_ = world_->addArticulatedSystem(resourceDir_+"/Hop2_Parallel_Nature_20261001/Hop2_Parallel_Nature_20261001.urdf");
+    dhal_ = world_->addArticulatedSystem(resourceDir_+"/Hop2_Parallel_Nature_20261008/Hop2_Parallel_Nature_20261008.urdf");
     dhal_->setName("dhal");
     dhal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
     world_->addGround();
@@ -48,7 +48,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     /// this is nominal configuration of robot
     gcInit_.segment(0,7) << 0.0,0.0,0.73,   0.9887711, 0.0, -0.1494381, 0.0;
     gcInit_.segment(7,3) << 0.4, -0.1, 0.0; // knee, ankle output (passive)
-    gcInit_.tail(6) << 0.727265, -0.002499, 0.505897, 0.001567, 0.628833, 0.346578; // universal passive, ankle input (active)
+    /// closed-loop solution for the ankle output above under the current URDF (link 202/320 mm); subStep() converges here with ~0 residual
+    gcInit_.tail(6) << 0.727127, -0.002475, 0.505687, 0.001563, 0.598060, 0.331160; // universal passive, ankle input (active)
     gcInit_.segment(3,4).normalize();
     gc_ = gcInit_;
 
@@ -269,8 +270,8 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
 //    world_->setDefaultMaterial(mu_, 0, 0);
-    world_->setMaterialPairProp("default","rubber",mu_, 0.2+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
-    world_->setMaterialPairProp("default","toe",   mu_, 0.0, 0.001); // toe: sole 과 마찰 동일, restitution 만 여기서 조절
+    world_->setMaterialPairProp("default","rubber",mu_, 0.4+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
+    world_->setMaterialPairProp("default","toe",   mu_, 0.2+0.1*uniDist_(gen_), 0.001); // toe: sole 과 마찰 동일, restitution 만 여기서 조절
 
     /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
     bool reset = true;
@@ -956,7 +957,7 @@ class ENVIRONMENT : public RaisimGymEnv {
                       footContact_ += 1; /// excluding toe
                   }
 
-                  footNormalImpulse_ += contact.getImpulse().e()(2);\
+                  footNormalImpulse_ += contact.getImpulse().e()(2);
               }
           }
       }
