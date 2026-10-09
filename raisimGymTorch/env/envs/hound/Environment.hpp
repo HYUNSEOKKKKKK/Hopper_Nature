@@ -261,7 +261,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         standingMode_ = false;
         do {
 //            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
-            double maxCommand = 0.8; // 평지 lin x max 1.5
+            double maxCommand = 0.6; // 평지 lin x max 1.5
 //            command_ << maxCommand * uniDist_(gen_), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
             command_ << -maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
 //            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
@@ -270,7 +270,7 @@ class ENVIRONMENT : public RaisimGymEnv {
 
     mu_ = 0.7 + 0.3 * uniDist_(gen_);
 //    world_->setDefaultMaterial(mu_, 0, 0);
-    world_->setMaterialPairProp("default","rubber",mu_, 0.4+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
+    world_->setMaterialPairProp("default","rubber",mu_, 0.6+0.1*uniDist_(gen_), 0.001); // restitution (0.5~0.7)
     world_->setMaterialPairProp("default","toe",   mu_, 0.2+0.1*uniDist_(gen_), 0.001); // toe: sole 과 마찰 동일, restitution 만 여기서 조절
 
     /// initialize the pose /// 넘어진 상태에서 그대로 reset 되는 경우가 생김
@@ -367,8 +367,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointFrictions_(2) = 0.5 + 0.5 * uniDist_(gen_);
     jointFrictions_ /= 1e1;
     /// randomization for mass
-    dhal_->getMass()[0] = nominalMass_[0] * (1+uniDist_(gen_)*0.05); // 0.95~1.05, trunk + thigh
-    dhal_->getMass()[1] = nominalMass_[1] * (1+uniDist_(gen_)*0.05); // 0.95~1.05, calf
+    dhal_->getMass()[0] = nominalMass_[0] * (1+uniDist_(gen_)*0.1); // 0.95~1.05, trunk + thigh
+    dhal_->getMass()[1] = nominalMass_[1] * (1+uniDist_(gen_)*0.1); // 0.95~1.05, calf
     dhal_->getMass()[3] = nominalMass_[2] * (1+uniDist_(gen_)*0.05); // 0.95~1.05, foot
 
 //    std::cout << "dhal_->getMass()[0]: " << dhal_->getMass()[0] << std::endl;
@@ -676,8 +676,6 @@ class ENVIRONMENT : public RaisimGymEnv {
       footContactPhase_(0) = sin(phase_/gait_hz_ * 2*3.141592); // left
 //      footContactPhase_(1) = -footContactPhase_(0); // right
 
-      phaseSin_(0) = sin(phase_/gait_hz_ * 2*3.141592); // for observation
-      phaseSin_(1) = cos(phase_/gait_hz_ * 2*3.141592); // for observation
 //
       if (!standingMode_){ /// walking
           /// footContactDouble_ -> limit_foot_contact 에 있도록 (-0.3,3) -> Gait Enforcing (요 -0.3 이 벗어나도 되는 범위)
@@ -1028,6 +1026,9 @@ class ENVIRONMENT : public RaisimGymEnv {
   }
 
   void observe(Eigen::Ref<EigenVec> ob) final {
+      // Encode the current phase on every observation, including immediately after reset.
+      phaseSin_(0) = sin(phase_/gait_hz_ * 2*3.141592);
+      phaseSin_(1) = cos(phase_/gait_hz_ * 2*3.141592);
       if (standingMode_){
           phaseSin_.setZero();
       }

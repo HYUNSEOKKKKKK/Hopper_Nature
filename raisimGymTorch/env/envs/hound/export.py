@@ -10,7 +10,7 @@ task_path = os.path.dirname(os.path.realpath(__file__))
 home_path = task_path + "/../../../../.."
 
 # weight path (runner.py 가 체크포인트를 쓰는 위치. run 폴더 이름만 바꿔 쓰면 됨)
-full_path = home_path + "/hound/raisimGymTorch/data/dhal_one_leg/2026-10-07-02-53-23/full_5000.pt"
+full_path = home_path + "/hound/raisimGymTorch/data/dhal_one_leg/2026-10-08-12-50-29/full_10000.pt"
 full = torch.load(full_path)
 iteration = full_path.rsplit('/')[-1].rsplit('_')[-1].rsplit('.')[0]
 scale_path = '/'.join(full_path.rsplit('/')[:-1])
