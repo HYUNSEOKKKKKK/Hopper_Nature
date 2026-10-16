@@ -261,7 +261,7 @@ class ENVIRONMENT : public RaisimGymEnv {
         standingMode_ = false;
         do {
 //            double maxCommand = 0.4 + comCurriculum * 0.4; // 평지 lin x max 1.5
-            double maxCommand = 0.6; // 평지 lin x max 1.5
+            double maxCommand = 0.8; // 평지 lin x max 1.5
 //            command_ << maxCommand * uniDist_(gen_), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
             command_ << -maxCommand * abs(uniDist_(gen_)), 0.2 * uniDist_(gen_), 0.6 * uniDist_(gen_);     // [lix x max, 0.6, 0.6]
 //            command_(0) = (command_(0) < -0.8) ? command_(0)+1.6 : command_(0);           // 뒤로가는 건 max -0.8
@@ -367,8 +367,8 @@ class ENVIRONMENT : public RaisimGymEnv {
     jointFrictions_(2) = 0.5 + 0.5 * uniDist_(gen_);
     jointFrictions_ /= 1e1;
     /// randomization for mass
-    dhal_->getMass()[0] = nominalMass_[0] * (1+uniDist_(gen_)*0.1); // 0.95~1.05, trunk + thigh
-    dhal_->getMass()[1] = nominalMass_[1] * (1+uniDist_(gen_)*0.1); // 0.95~1.05, calf
+    dhal_->getMass()[0] = nominalMass_[0] * (1+uniDist_(gen_)*0.15); // 0.95~1.05, trunk + thigh
+    dhal_->getMass()[1] = nominalMass_[1] * (1+uniDist_(gen_)*0.15); // 0.95~1.05, calf
     dhal_->getMass()[3] = nominalMass_[2] * (1+uniDist_(gen_)*0.05); // 0.95~1.05, foot
 
 //    std::cout << "dhal_->getMass()[0]: " << dhal_->getMass()[0] << std::endl;
