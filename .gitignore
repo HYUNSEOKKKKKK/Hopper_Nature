@@ -27,5 +27,7 @@ activation.raisim
 *.mp4
 *.mov
 *.webm
+# Curated, browser-compatible demo videos are part of the public repository.
+!/assets/demos/*.mp4
 outputs/
 __pycache__/

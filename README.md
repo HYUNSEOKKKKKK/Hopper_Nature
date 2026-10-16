@@ -33,9 +33,24 @@
 
 ## Demos
 
-The image above is rendered from the included **2026-10-08 URDF and CAD meshes**. Recorded simulation and hardware videos will be added with their checkpoint, command sequence and playback speed. See the [demo and media guide](docs/demos.md) for the planned clips and provenance.
+### Outdoor hopping trial
 
-<!-- Add real recorded previews here when supplied. Do not present the CAD render as a hardware photo. -->
+<p align="center">
+  <a href="assets/demos/outdoor-trial.mp4">
+    <img src="assets/demos/outdoor-trial.gif" alt="Recorded outdoor Hopper trial on a running track" width="800">
+  </a>
+</p>
+
+<p align="center">
+  Recorded hardware trial · 8-second excerpt · 1× playback<br>
+  <a href="assets/demos/outdoor-trial.mp4">Full recording / download MP4 · 20.75 s</a>
+</p>
+
+The preview shows a recorded physical trial. The full MP4 is included in the repository; [clip intervals and recording context](docs/demos.md) describe the edits and trial conditions. The cover image is a render of the included **2026-10-08 URDF and CAD meshes**.
+
+A full presentation will be linked here after publication on the lab's YouTube channel.
+
+<!-- LAB_YOUTUBE_VIDEO: add the supplied public video URL here and in docs/demos.md when available. -->
 
 ## Supported setup
 
@@ -122,21 +137,22 @@ The output directory contains `actor.txt`, `estimator.txt`, and the matching mea
 
 ## Results and validation
 
-Recorded behavior and quantitative results will be attached to a selected checkpoint. The current release preparation verifies software execution; it does not establish hopping success rate or hardware performance. The [validation record](docs/validation.md) lists the actual checks and their limits.
+The demos show recorded hardware trials. A selected checkpoint and quantitative evaluation will be added separately. The software checks verify local execution; they do not establish hopping success rate or tracking accuracy. The [validation record](docs/validation.md) lists the actual checks and their limits.
 
 | Item | Source / status |
 | --- | --- |
 | Robot mass and calibration | 17.100 kg nominal; [measured quantities and modelling assumptions](rsc/Hop2_Parallel_Nature_20261008/README_Nature_20261008.txt) |
 | Controller specification | 3 actions, 42 observations, 19 estimated states; [method](docs/method.md) |
 | Local build, training, replay and export | [Validation record](docs/validation.md) |
-| Selected trained checkpoint and recorded demos | To be added with the result bundle |
+| Recorded hardware demos | [Preview above](#demos), full MP4 and [recording context](docs/demos.md) |
+| Selected trained checkpoint and quantitative evaluation | To be added with the result bundle |
 
 <details>
 <summary>Repository layout</summary>
 
 ```text
 Hopper_Nature/
-├── assets/                       # README model render and future demo previews
+├── assets/                       # Model render, recorded demo previews and full MP4s
 ├── docs/                         # Installation, training, method and validation
 ├── scripts/                      # Portable export, media and release utilities
 ├── raisimGymTorch/

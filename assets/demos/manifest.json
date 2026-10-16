@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "supplied_date": "2026-10-16",
+  "playback_speed": 1.0,
+  "youtube": {
+    "video_url": null,
+    "channel_url": null,
+    "status": "awaiting_public_url"
+  },
+  "recordings": [
+    {
+      "id": "outdoor-trial",
+      "context": "Outdoor hardware trial on a running track; operator present; full recording includes fall and recovery.",
+      "source": {
+        "filename": "IMG_8769.MP4",
+        "sha256": "2722b253170ea7ae5b82ef4c6441dbac75cd61df42050c63c613448c87a74181",
+        "duration_seconds": 20.753356,
+        "width": 1920,
+        "height": 1080
+      },
+      "video": {
+        "path": "outdoor-trial.mp4",
+        "sha256": "06c6398408b41e327d3508dab911c22ad501ef5931a0e41c21a4b4308a0d5853",
+        "size_bytes": 10913790,
+        "source_interval_seconds": [
+          0,
+          20.753356
+        ],
+        "encoding_arguments": [
+          "-map",
+          "0:v:0",
+          "-map",
+          "0:a:0?",
+          "-map_metadata",
+          "-1",
+          "-map_chapters",
+          "-1",
+          "-vf",
+          "scale=1280:-2",
+          "-c:v",
+          "libx264",
+          "-preset",
+          "medium",
+          "-crf",
+          "22",
+          "-pix_fmt",
+          "yuv420p",
+          "-c:a",
+          "aac",
+          "-b:a",
+          "128k",
+          "-movflags",
+          "+faststart"
+        ]
+      },
+      "preview": {
+        "path": "outdoor-trial.gif",
+        "sha256": "6bdc8ea0d5d869d07c8a764527d290109e79f2ac9b6418492875549bf7209e1b",
+        "size_bytes": 5745448,
+        "source_interval_seconds": [
+          2,
+          10
+        ],
+        "fps": 10,
+        "width": 600,
+        "crop_xywh": [
+          600,
+          350,
+          1200,
+          674
+        ],
+        "filter": "[0:v]crop=1200:674:600:350,fps=10,scale=600:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=3",
+        "loop": true,
+        "audio": false
+      },
+      "checkpoint": null,
+      "command_trace": null
+    }
+  ]
+}

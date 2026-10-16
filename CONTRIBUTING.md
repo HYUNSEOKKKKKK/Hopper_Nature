@@ -13,4 +13,4 @@ python -m unittest discover -s tests -v
 
 For environment or training changes, also run the [two-update training check](docs/training.md#first-run) with your own licensed RaiSim installation, then replay and export its checkpoint. Report which checks were actually run; GPU, viewer and hardware behavior need their own validation.
 
-Keep raw videos, checkpoints, personal paths, license keys and build outputs outside commits. Add only small recorded previews and reproducible result descriptions. Retain existing copyright and third-party notices.
+Keep unprocessed camera videos, checkpoints, personal paths, license keys and build outputs outside commits. Curated, browser-compatible MP4 recordings and small GIF previews belong under `assets/demos/`, with source hashes and editing details in `docs/demos.md`. Retain existing copyright and third-party notices.

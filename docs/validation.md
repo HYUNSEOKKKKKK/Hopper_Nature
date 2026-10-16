@@ -62,6 +62,6 @@ Replace `<timestamp>` before executing the commands. GitHub Actions runs only th
 - A clean OS / new Python environment installation using the documented pip wheel was not performed; simulation used the existing Conda PyTorch build listed above.
 - License acquisition and activation on another machine have not been checked.
 - CUDA training, the Unity client, viewer video recording, Windows/macOS and hardware execution have not been checked here.
-- A representative final checkpoint, full training run, measured tracking metrics and recorded simulation/hardware demos are still to be supplied.
+- A representative final checkpoint, full training run, measured tracking metrics and a recorded simulation demo are still to be supplied. Maintainer-supplied hardware recordings are now included in [the demo record](demos.md); their association with a specific policy checkpoint is not yet documented.
 
 When a result bundle is selected, add its source revision, model revision, configuration, checkpoint/CSV checksums, evaluation commands and measurements to this record. Record its demo intervals in [demos.md](demos.md).

@@ -15,4 +15,4 @@ The historical repository also contains Windows RaiSim DLLs and a debug symbol a
 
 `setup.py` retains the inherited RaiSimGymTorch package-author attribution and identifies the repository source license as MIT, matching the existing root license. This does not relicense the proprietary simulator or third-party materials.
 
-The README cover is generated from this repository's URDF/DAE assets by `scripts/render_robot.py`. Future photographs and recorded clips should carry their source and credit in `docs/demos.md`. Project layout and presentation follow the maintainer's [PiPER Manipulation](https://github.com/HYUNSEOKKKKKK/Piper_manipulation) repository.
+The README cover is generated from this repository's URDF/DAE assets by `scripts/render_robot.py`. Recorded hardware clips were supplied by the project maintainer; their source and edits are recorded in [docs/demos.md](docs/demos.md). Project layout and presentation follow the maintainer's [PiPER Manipulation](https://github.com/HYUNSEOKKKKKK/Piper_manipulation) repository.
