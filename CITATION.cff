@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, cite this repository and acknowledge the upstream dependencies."
+type: software
+title: "Hopper Nature: Single-Leg Robot Simulation and Reinforcement Learning"
+authors:
+  - name: "Hopper Nature contributors"
+repository-code: "https://github.com/HYUNSEOKKKKKK/Hopper_Nature"
+url: "https://github.com/HYUNSEOKKKKKK/Hopper_Nature"
+license: MIT

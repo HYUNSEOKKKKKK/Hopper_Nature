@@ -15,3 +15,17 @@ raisimGymTorch/env/data/*
 id_rsa
 */data/*
 raisimGymTorch/env/bin/rsg*
+
+# Local environments, licensed simulator keys and experiment artifacts
+.venv*/
+.env
+.env.*
+activation.raisim
+*.raisim
+*.pt
+*.onnx
+*.mp4
+*.mov
+*.webm
+outputs/
+__pycache__/

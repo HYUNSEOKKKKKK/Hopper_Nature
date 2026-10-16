@@ -2,7 +2,6 @@ from shutil import copyfile
 import datetime
 import os
 import ntpath
-import torch
 
 
 class ConfigurationSaver:
@@ -32,6 +31,8 @@ def tensorboard_launcher(directory_path):
 
 
 def load_param(weight_path, env, actor, critic, barrier_critic, estimator, optimizer, data_dir):
+    import torch
+
     if weight_path == "":
         raise Exception("\nCan't find the pre-trained weight, please provide a pre-trained weight with --weight switch\n")
     print("\nRetraining from the checkpoint:", weight_path+"\n")

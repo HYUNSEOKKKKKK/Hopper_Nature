@@ -1,0 +1,7 @@
+# Python 3.10; install the matching PyTorch wheel separately (see docs/installation.md).
+numpy==2.2.6
+ruamel.yaml==0.17.21
+tensorboard==2.20.0
+adamp==0.3.0
+setuptools==80.9.0
+wheel==0.45.1

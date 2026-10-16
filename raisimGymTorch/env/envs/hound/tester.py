@@ -1,148 +1,102 @@
-from ruamel.yaml import YAML, dump, RoundTripDumper
-from raisimGymTorch.env.bin import hound
-from raisimGymTorch.env.RaisimGymVecEnv import RaisimGymVecEnv as VecEnv
-import raisimGymTorch.algo.ppo.module as ppo_module
-import os
-import math
-import time
-import torch
+"""Replay a Hopper checkpoint on a fixed flat-ground command schedule."""
+
 import argparse
-import numpy as np
-import pygame
+import math
+from pathlib import Path
+import time
 
-joystick = 0
-if (joystick == 1) :
-    pygame.display.init()
-    pygame.joystick.init()
-    pygame.joystick.Joystick(0).init()
+from raisimGymTorch.helper.hopper_config import REPO_ROOT, checkpoint_path, load_config
 
-# configuration
-parser = argparse.ArgumentParser()
-parser.add_argument('-w', '--weight', help='trained weight path', type=str, default='')
-args = parser.parse_args()
-
-# directories
-task_path = os.path.dirname(os.path.realpath(__file__))
-home_path = task_path + "/../../../../.."
-
-# config
-cfg = YAML().load(open(task_path + "/cfg.yaml", 'r'))
-
-# create environment from the configuration file
-cfg['environment']['num_envs'] = 1
-
-env = VecEnv(hound.RaisimGymEnv(task_path + "/../../../../rsc", dump(cfg['environment'], Dumper=RoundTripDumper)), cfg['environment'])
-
-# shortcuts
-ob_dim = env.num_obs
-act_dim = env.num_acts
-est_dim = env.num_est
-
-### runner.py 가 체크포인트를 쓰는 위치 (raisimLib/hound/...). run 폴더 이름만 바꿔 쓰면 됨.
-weight_path = (home_path + "/hound/raisimGymTorch/data/dhal_one_leg/2026-10-07-02-53-23/full_5000.pt")
-#weight_path = (task_path + "/../../../data/dhal_one_leg/2026-09-04-02-04-02/full_10000.pt")
-iteration_number = weight_path.rsplit('/', 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
-weight_dir = weight_path.rsplit('/', 1)[0] + '/'
-
-command_schedule = [
-    (2.0, 0.00, 0.00, 0.00),
-    (2.0, -0.25, 0.00, 0.00),
-    (2.0, 0.00, 0.00, 0.00),
-    (2.0, -0.30, 0.00, 0.00),
-    (2.0, 0.00, 0.00, 0.00),
-    (2.0, -0.40, 0.00, -0.00),
-    (2.0, 0.0, 0.00, 0.0),
-    (2.0, -0.50, 0.00, -0.0),
-    (2.0, 0.0, 0.00, 0.0),
-    (2.0, -0.60, 0.00, -0.0),
-    (2.0, 0.0, 0.00, 0.0),
+COMMAND_SCHEDULE = [
+    (2.0, 0.00, 0.0, 0.0),
+    (2.0, -0.25, 0.0, 0.0),
+    (2.0, 0.00, 0.0, 0.0),
+    (2.0, -0.30, 0.0, 0.0),
+    (2.0, 0.00, 0.0, 0.0),
+    (2.0, -0.40, 0.0, 0.0),
+    (2.0, 0.00, 0.0, 0.0),
+    (2.0, -0.50, 0.0, 0.0),
+    (2.0, 0.00, 0.0, 0.0),
+    (2.0, -0.60, 0.0, 0.0),
+    (2.0, 0.00, 0.0, 0.0),
 ]
-cycle_duration = sum(phase[0] for phase in command_schedule)
 
 
 def command_at(t):
-    elapsed = 0.0
-    phase_time = t % cycle_duration
-    for duration, command_x, command_y, command_yaw in command_schedule:
-        if phase_time < elapsed + duration:
-            return command_x, command_y, command_yaw
-        elapsed += duration
+    phase = t % sum(item[0] for item in COMMAND_SCHEDULE)
+    for duration, vx, vy, yaw in COMMAND_SCHEDULE:
+        if phase < duration:
+            return vx, vy, yaw
+        phase -= duration
     return 0.0, 0.0, 0.0
 
 
-if weight_path == "":
-    print("Can't find trained weight, please provide a trained weight with --weight switch\n")
-else:
-    print("Loaded weight from {}\n".format(weight_path))
-    start = time.time()
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-w', '--weight', type=checkpoint_path, required=True)
+    parser.add_argument('--config', type=Path, help='override the checkpoint cfg.yaml')
+    parser.add_argument('--duration', type=float, default=22.0, help='simulation seconds')
+    parser.add_argument('--headless', action='store_true')
+    parser.add_argument('--no-realtime', action='store_true', help='run without playback pacing')
+    args = parser.parse_args()
+    if not math.isfinite(args.duration) or args.duration <= 0:
+        parser.error('--duration must be a finite positive number')
 
-    env.set_terrain(0,0.0,0.7)
-    env.set_initial(0)
+    import numpy as np
+    import torch
+    from ruamel.yaml import dump, RoundTripDumper
+    from raisimGymTorch.env.bin import hound
+    from raisimGymTorch.env.RaisimGymVecEnv import RaisimGymVecEnv
+    from raisimGymTorch.algo.ppo.module import MLP
 
-    env.reset()
-    # env.set_terrain(4,4.7,1.0)
-    env.set_command(0.0,0.0,0.0)
+    cfg = load_config(args.config or args.weight.parent / 'cfg.yaml',
+                      num_envs=1, num_threads=1, headless=args.headless)
+    if not args.headless:
+        cfg['environment']['render'] = True
+    env = RaisimGymVecEnv(hound.RaisimGymEnv(
+        str(REPO_ROOT / 'rsc'), dump(cfg['environment'], Dumper=RoundTripDumper)))
+    try:
+        env.seed(cfg['seed'])
+        checkpoint = torch.load(args.weight, map_location='cpu', weights_only=True)
+        actor = MLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU,
+                    env.num_obs + env.num_est, env.num_acts)
+        estimator = MLP(cfg['architecture']['estimator_net'], torch.nn.LeakyReLU,
+                        env.num_obs, env.num_est)
+        actor.load_state_dict(checkpoint['actor_architecture_state_dict'])
+        estimator.load_state_dict(checkpoint['estimator_architecture_state_dict'])
+        actor.eval()
+        estimator.eval()
+        iteration = args.weight.stem.split('_')[1]
+        env.load_scaling(str(args.weight.parent), iteration)
+        env.set_terrain(0, 0.0, 0.7)
+        env.set_initial(0)
+        env.reset()
+        env.turn_on_visualization()
+        dt = cfg['environment']['control_dt']
+        reward_sum, terminations = 0.0, 0
+        steps = math.ceil(args.duration / dt)
+        print('Loaded checkpoint:', args.weight)
+        for step in range(steps):
+            started = time.perf_counter()
+            command = command_at(step * dt)
+            env.set_command(*command)
+            with torch.no_grad():
+                obs = env.observe(False)
+                estimate = estimator.architecture(torch.from_numpy(obs)).numpy()
+                action = actor.architecture(torch.from_numpy(np.hstack((obs, estimate)))).numpy()
+            reward, done, _ = env.step(action)
+            reward_sum += float(reward[0])
+            terminations += int(done[0])
+            if step % 100 == 0:
+                print(f't={step * dt:6.2f}s command={command} terminated={bool(done[0])}')
+            if not args.no_realtime:
+                time.sleep(max(0, dt - (time.perf_counter() - started)))
+        print(f'Completed {steps} steps; mean reward={reward_sum / steps:.6f}; '
+              f'episode terminations={terminations}')
+    finally:
+        env.turn_off_visualization()
+        env.close()
 
-    reward_ll_sum = 0
-    done_sum = 0
-    average_dones = 0.
-    n_steps = math.floor(cfg['environment']['max_time'] / cfg['environment']['control_dt'])
-    total_steps = n_steps * 1
-    start_step_id = 0
 
-    print("Visualizing and evaluating the policy: ", weight_path)
-    loaded_graph = ppo_module.MLP(cfg['architecture']['policy_net'], torch.nn.LeakyReLU, ob_dim+est_dim, act_dim)
-    loaded_graph.load_state_dict(torch.load(weight_path)['actor_architecture_state_dict'])
-    loaded_graph_est = ppo_module.MLP(cfg['architecture']['estimator_net'], torch.nn.LeakyReLU, ob_dim, est_dim)
-    loaded_graph_est.load_state_dict(torch.load(weight_path)['estimator_architecture_state_dict'])
-
-    # for name, param in loaded_graph.named_parameters():
-    #     print(f"{name}: weights => {param.data}")
-    env.load_scaling(weight_dir, int(iteration_number))  # WITH Obs Normalization
-    env.turn_on_visualization()
-
-    # max_steps = 1000000
-    max_steps = 10000 ## 10 secs
-
-    for step in range(max_steps):
-        # if joystick == 1 :
-        #     if (step % 10 == 0):
-        #         command_x = max(-0.8, min(-pygame.joystick.Joystick(0).get_axis(3)*1.5, 0.8))
-        #         command_y = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(2), 0.6))
-        #         command_yaw = max(-0.6, min(-pygame.joystick.Joystick(0).get_axis(0), 0.6))
-        #         env.set_command(command_x,command_y,command_yaw)
-
-        # if step % 400 == 0:
-        #     env.reset()
-        sim_time = step * cfg['environment']['control_dt']
-        command_x, command_y, command_yaw = command_at(sim_time)
-        env.set_command(command_x, command_y, command_yaw)
-        time.sleep(0.050)
-        with torch.no_grad():
-            obs = env.observe(False)
-            est_out = loaded_graph_est.architecture(torch.from_numpy(obs).cpu())
-            action_ll = loaded_graph.architecture(torch.from_numpy(np.hstack((obs,est_out))).cpu())
-        reward_ll, dones, _= env.step(action_ll.cpu().detach().numpy())
-        obs_post = env.observe(False)
-        state = env.get_state(False)
-        reward_ll_sum = reward_ll_sum + reward_ll[0]
-        if step % 50 == 0:
-            actual_vx = state[0, 0]
-            actual_vy = state[0, 1]
-            actual_yaw = obs_post[0, 5] * math.sqrt(env.var[5]) + env.mean[5]
-            lin_err = math.hypot(command_x - actual_vx, command_y - actual_vy)
-            yaw_err = abs(command_yaw - actual_yaw)
-            print("[t={:5.1f}s] cmd=({:+.2f}, {:+.2f}, {:+.2f}) actual=({:+.2f}, {:+.2f}, {:+.2f}) err=({:.3f}, {:.3f})"
-                  .format(sim_time, command_x, command_y, command_yaw,
-                          actual_vx, actual_vy, actual_yaw, lin_err, yaw_err))
-        if dones or step == max_steps - 1:
-            print('----------------------------------------------------')
-            print('{:<40} {:>6}'.format("average ll reward: ", '{:0.10f}'.format(reward_ll_sum / (step + 1 - start_step_id))))
-            print('{:<40} {:>6}'.format("time elapsed [sec]: ", '{:6.4f}'.format((step + 1 - start_step_id) * 0.01)))
-            print('----------------------------------------------------\n')
-            start_step_id = step + 1
-            reward_ll_sum = 0.0
-
-    env.turn_off_visualization()
-    env.reset()
-    print("Finished at the maximum visualization steps")
+if __name__ == '__main__':
+    main()
