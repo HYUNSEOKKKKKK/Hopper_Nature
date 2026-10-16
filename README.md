@@ -33,20 +33,32 @@
 
 ## Demos
 
-### Outdoor hopping trial
+<table>
+  <tr>
+    <th width="50%">Outdoor hopping trial</th>
+    <th width="50%">Indoor hallway trial</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="assets/demos/outdoor-trial.mp4"><img src="assets/demos/outdoor-trial.gif" alt="Recorded outdoor Hopper trial on a running track" width="100%"></a>
+    </td>
+    <td align="center">
+      <a href="assets/demos/indoor-trial.mp4"><img src="assets/demos/indoor-trial.gif" alt="Recorded indoor Hopper trial with a rolling test frame and nearby operators" width="100%"></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      8-second excerpt · 1× playback<br>
+      <a href="assets/demos/outdoor-trial.mp4">Full recording / download MP4 · 20.75 s</a>
+    </td>
+    <td align="center">
+      Rolling test frame · 10-second excerpt · 1× playback<br>
+      <a href="assets/demos/indoor-trial.mp4">Full recording / download MP4 · 42.40 s</a>
+    </td>
+  </tr>
+</table>
 
-<p align="center">
-  <a href="assets/demos/outdoor-trial.mp4">
-    <img src="assets/demos/outdoor-trial.gif" alt="Recorded outdoor Hopper trial on a running track" width="800">
-  </a>
-</p>
-
-<p align="center">
-  Recorded hardware trial · 8-second excerpt · 1× playback<br>
-  <a href="assets/demos/outdoor-trial.mp4">Full recording / download MP4 · 20.75 s</a>
-</p>
-
-The preview shows a recorded physical trial. The full MP4 is included in the repository; [clip intervals and recording context](docs/demos.md) describe the edits and trial conditions. The cover image is a render of the included **2026-10-08 URDF and CAD meshes**.
+The previews show recorded physical trials. Full MP4s are included in the repository; [clip intervals and recording context](docs/demos.md) describe the edits and trial conditions. The cover image is a render of the included **2026-10-08 URDF and CAD meshes**.
 
 A full presentation will be linked here after publication on the lab's YouTube channel.
 

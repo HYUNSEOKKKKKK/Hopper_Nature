@@ -7,8 +7,11 @@ The project maintainer supplied the source recordings for publication. The READM
 | Trial | Source | Full recording | README preview |
 | --- | --- | --- | --- |
 | Outdoor trial on a running track | `IMG_8769.MP4` | [MP4, 20.75 s](../assets/demos/outdoor-trial.mp4) | [GIF](../assets/demos/outdoor-trial.gif), source 2–10 s, 1×, 10 fps |
+| Indoor hallway trial | `IMG_8770.MP4` | [MP4, 42.40 s](../assets/demos/indoor-trial.mp4) | [GIF](../assets/demos/indoor-trial.gif), source 20–30 s, 1×, 10 fps |
 
-The outdoor preview is cropped to the robot and nearby operator. The full recording retains the complete camera view, including the fall at the end of the trial and operator recovery. An operator is present in the recording. The clip documents a physical trial; a specific policy checkpoint, command trace and independently measured tracking error have not been supplied.
+The outdoor preview is cropped to the robot and nearby operator. The full recording retains the complete camera view, including the fall at the end of the trial and operator recovery. An operator is present in the recording.
+
+The indoor preview keeps the complete camera view. A rolling test frame and nearby operators are visible as the robot approaches the camera in the hallway. These clips document physical trials; a specific policy checkpoint, command trace and independently measured tracking error have not been supplied.
 
 The machine-readable [media manifest](../assets/demos/manifest.json) records source/output hashes, intervals, crop, playback speed and encoding arguments.
 
@@ -35,9 +38,19 @@ ffmpeg -i "$SOURCE_DIR/IMG_8769.MP4" \
 ffmpeg -ss 2 -t 8 -i "$SOURCE_DIR/IMG_8769.MP4" \
   -filter_complex '[0:v]crop=1200:674:600:350,fps=10,scale=600:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=3' \
   -loop 0 assets/demos/outdoor-trial.gif
+
+ffmpeg -i "$SOURCE_DIR/IMG_8770.MP4" \
+  -map 0:v:0 -map '0:a:0?' -map_metadata -1 -map_chapters -1 \
+  -vf 'scale=1280:-2' -c:v libx264 -preset medium -crf 22 \
+  -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart \
+  assets/demos/indoor-trial.mp4
+
+ffmpeg -ss 20 -t 10 -i "$SOURCE_DIR/IMG_8770.MP4" \
+  -filter_complex '[0:v]fps=10,scale=600:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=3' \
+  -loop 0 assets/demos/indoor-trial.gif
 ```
 
-The crop is expressed as width 1200, height 674, left 600, top 350 in the 1920 × 1080 input. No speed change or interpolation is applied. GIF playback is muted by format; the full MP4 contains audio.
+The outdoor crop is expressed as width 1200, height 674, left 600, top 350 in the 1920 × 1080 input; the indoor clip is not cropped. No speed change or interpolation is applied. GIF playback is muted by format; both full MP4s contain audio.
 
 Only the curated MP4s under `assets/demos/` are exempted from the video ignore rules. Keep additional raw recordings outside the repository. Record source filename/hash, interval, crop, playback multiplier and trial context whenever adding a clip.
 

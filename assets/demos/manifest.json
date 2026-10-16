@@ -75,6 +75,69 @@
       },
       "checkpoint": null,
       "command_trace": null
+    },
+    {
+      "id": "indoor-trial",
+      "context": "Indoor hallway hardware trial; rolling test frame and nearby operators visible.",
+      "source": {
+        "filename": "IMG_8770.MP4",
+        "sha256": "06aa6f6e4e06efc3a65753a1dac33d809c6ec86e5fa9144a783784ac938ed139",
+        "duration_seconds": 42.4,
+        "width": 1920,
+        "height": 1080
+      },
+      "video": {
+        "path": "indoor-trial.mp4",
+        "sha256": "52e548b40ff94d7108e5ea3fb14c018c87676cc8420361ab9bab553d0e8dbb0f",
+        "size_bytes": 6668320,
+        "source_interval_seconds": [
+          0,
+          42.4
+        ],
+        "encoding_arguments": [
+          "-map",
+          "0:v:0",
+          "-map",
+          "0:a:0?",
+          "-map_metadata",
+          "-1",
+          "-map_chapters",
+          "-1",
+          "-vf",
+          "scale=1280:-2",
+          "-c:v",
+          "libx264",
+          "-preset",
+          "medium",
+          "-crf",
+          "22",
+          "-pix_fmt",
+          "yuv420p",
+          "-c:a",
+          "aac",
+          "-b:a",
+          "128k",
+          "-movflags",
+          "+faststart"
+        ]
+      },
+      "preview": {
+        "path": "indoor-trial.gif",
+        "sha256": "fffa302043eaf2f2140373669c48697250882d90b60b7cefc4a3fa0c21bef9f7",
+        "size_bytes": 7141988,
+        "source_interval_seconds": [
+          20,
+          30
+        ],
+        "fps": 10,
+        "width": 600,
+        "crop_xywh": null,
+        "filter": "[0:v]fps=10,scale=600:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=3",
+        "loop": true,
+        "audio": false
+      },
+      "checkpoint": null,
+      "command_trace": null
     }
   ]
 }
