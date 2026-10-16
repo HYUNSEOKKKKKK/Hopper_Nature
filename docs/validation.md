@@ -57,6 +57,12 @@ python scripts/export_policy.py \
 
 Replace `<timestamp>` before executing the commands. GitHub Actions runs only the checks that do not need a licensed simulator.
 
+## Workstation handoff check — 2026-10-16
+
+The current native extension was rebuilt during local cleanup, including the final environment settings committed in `029f4d5`. The existing local `2026-10-10-21-43-35/full_10000.pt` checkpoint was copied with its configuration, environment source and matching normalization files into the workstation's Git-excluded handoff folder. Its saved `Environment.hpp` matched the current source byte for byte.
+
+A headless replay completed **22 simulated seconds / 2200 steps with zero episode terminations** for that one rollout. The documentation checks and four CLI unittest cases also passed. This check establishes that the preserved bundle can be loaded and run on the original workstation; it does not establish tracking accuracy, robustness or a recording-to-checkpoint association. The earlier smoke-run results above used a different, untrained checkpoint and remain a separate record. Local build/replay logs and dependency snapshots are indexed in [RESUME.md](../RESUME.md).
+
 ## Remaining evidence
 
 - A clean OS / new Python environment installation using the documented pip wheel was not performed; simulation used the existing Conda PyTorch build listed above.

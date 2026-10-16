@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def check_markdown_links():
-    documents = [ROOT / name for name in ('README.md', 'CONTRIBUTING.md', 'NOTICE.md')]
+    documents = [ROOT / name for name in ('README.md', 'CONTRIBUTING.md', 'NOTICE.md', 'RESUME.md', 'AGENTS.md')]
     documents += sorted((ROOT / 'docs').glob('*.md'))
     count = 0
     for document in documents:

@@ -31,3 +31,6 @@ activation.raisim
 !/assets/demos/*.mp4
 outputs/
 __pycache__/
+
+# Workstation-only handoff: environment locks, checkpoint/media backups and logs.
+/.local/
