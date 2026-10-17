@@ -1,19 +1,21 @@
-# One-folder RaiSim 1 workspace
+# RaiSim 1 workspace and direct execution
 
-Hopper Nature is a **RaiSim 1.1.8** research project. The recommended local workspace keeps its source, Python environment, simulator dependency and experiment records together. It does not share an editable `raisimGymTorch` installation with a RaiSim 2 project.
+Hopper Nature is a **RaiSim 1.1.8** research project. Source, simulator dependency and experiment records live in one project folder. Python is provided by the dedicated Conda environment **`hopper_nature`**, stored in Conda's standard environment directory. The personal activation key stays outside the project at `~/.raisim/activation.raisim`.
 
 ```text
-Hopper_Nature/                         # This Git checkout
-├── README.md, RESUME.md, docs/         # Public installation and research handoff
-├── scripts/hopper.py                  # Workspace launcher
+Hopper_Nature/
+├── setup.py                           # Build the native extension
+├── README.md, RESUME.md, docs/
 ├── raisimGymTorch/
-│   ├── env/envs/hound/                # Research configuration and C++ environment
+│   ├── env/envs/hound/
+│   │   ├── runner.py                 # Run directly to train
+│   │   ├── tester.py                 # Run directly to replay
+│   │   ├── cfg.yaml
+│   │   └── Environment.hpp
 │   └── data/dhal_one_leg/<run>/       # Local training results, ignored by Git
 ├── rsc/                              # Robot model history and calibration
 └── .local/                           # Workstation files, ignored by Git
-    ├── env/                          # Python 3.10 Conda prefix
     ├── runtime/raisimLib/             # RaiSim 1.1.8, Eigen and optional Unity viewer
-    ├── workspace.json                # Optional path overrides
     ├── checkpoints/<run>/            # Optional preserved result bundles
     ├── media/originals/              # Original recordings
     ├── environment/                  # Environment inventories
@@ -22,57 +24,73 @@ Hopper_Nature/                         # This Git checkout
     └── archive/                      # Earlier local records and recovery material
 ```
 
-The environment and simulator directories are not included in a Git clone. Follow [installation](installation.md) to create them. The activation key stays at `~/.raisim/activation.raisim`, outside this workspace.
+The simulator and local research records are not included in a Git clone. Follow [installation](installation.md) to create the SDK layout and named Conda environment. The existing workstation also has `.local/env` as a compatibility shortcut to `hopper_nature`; it is not a second environment or a requirement for direct execution.
 
-## Run one explicit workspace
+## Build and train in the original style
 
 ```bash
+conda activate hopper_nature
 cd ~/Hopper_Nature
-python3 scripts/hopper.py build
-python3 scripts/hopper.py doctor
+python setup.py build_ext --inplace
 
-python3 scripts/hopper.py train --num-envs 4 --num-threads 2 \
-  --iterations 2 --headless --no-tensorboard
-
-python3 scripts/hopper.py replay --weight /path/to/run/full_10000.pt \
-  --headless --no-realtime
-python3 scripts/hopper.py export --weight /path/to/run/full_10000.pt
-
-# Optional legacy RaiSim 1 Unity client, in another terminal:
-python3 scripts/hopper.py viewer
+cd raisimGymTorch/env/envs/hound
+python runner.py
 ```
 
-The launcher changes only its child process: it selects the configured Python, sets this checkout as the working directory and `PYTHONPATH`, and selects its RaiSim library and CMake prefixes. It checks the SDK's version file before execution and requires Python 3.10 for Python commands. An inherited RaiSim 2 `PYTHONPATH` or library path is replaced for this process. Shell startup files and other Conda environments do not need changes.
+Rebuild from the repository root after changing C++ files such as `Environment.hpp`. `setup.py` selects the active Python, and CMake discovers RaiSim and Eigen under `.local/runtime/raisimLib/`. The engine must be version 1.1.8. The build writes `raisimGymTorch/env/bin/hound.cpython-310-*.so`.
 
-`doctor` reports the selected package, native extension, actual loaded RaiSim library and key-file presence. It does not activate a simulation, start a camera or establish policy performance. Use `--dry-run` before a command to inspect the selected paths:
+`runner.py` and `tester.py` locate this checkout from their own file paths. Direct execution does not require `scripts/hopper.py`, an editable package installation or a manual `PYTHONPATH`. It is also possible to run `python raisimGymTorch/env/envs/hound/runner.py` from the root, or use the existing `python -m raisimGymTorch.env.envs.hound.runner` interface.
+
+For a short check instead of full training, run from the task directory:
 
 ```bash
-python3 scripts/hopper.py --dry-run train --headless --no-tensorboard
+python runner.py --num-envs 4 --num-threads 2 --iterations 2 \
+  --headless --no-tensorboard
+
+python tester.py --weight /path/to/run/full_10000.pt \
+  --headless --no-realtime
 ```
 
-The original `python -m raisimGymTorch.env.envs.hound.runner` and `tester` entry points remain available from the checkout root with the correct Python and runtime paths.
+Training results go to `raisimGymTorch/data/dhal_one_leg/<timestamp>/`, regardless of the working directory. Relative user-supplied checkpoint and output paths are interpreted from the current working directory.
 
-## Use an existing Python or SDK installation
+In a second terminal, start the matching legacy Unity viewer directly:
 
-Create `.local/workspace.json` with only the paths you need to override. Relative paths are resolved from the checkout root; absolute paths are also supported. For example:
+```bash
+~/Hopper_Nature/.local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64
+```
+
+The project uses its own RaiSim dependency and viewer; the separate `raisim_ws` workspace is not needed by this build/run workflow. Adjust `~/Hopper_Nature` if the checkout root differs.
+
+## Use an external SDK
+
+With Python 3.10 activated, pass the actual dependency prefixes:
+
+```bash
+python setup.py build_ext --inplace --CMAKE_PREFIX_PATH \
+  '/path/to/raisim/linux;/path/to/Eigen3'
+```
+
+After switching interpreters or SDKs, use a fresh build directory, for example `--build-temp build/python310-clean`. Native binaries should be rebuilt after moving to another machine. Conda environments also contain absolute prefix paths and should be recreated at their destination.
+
+## Optional launcher compatibility
+
+`scripts/hopper.py` remains available for existing commands, but is not required for the direct workflow above. Its path overrides live in the Git-ignored `.local/workspace.json`, for example:
 
 ```json
 {
-  "python": ".local/env/bin/python",
+  "python": "/absolute/path/to/conda/envs/hopper_nature/bin/python",
   "raisim_prefix": ".local/runtime/raisimLib/raisim/linux",
   "eigen_prefix": ".local/runtime/raisimLib/thirdParty/Eigen3",
   "viewer": ".local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64"
 }
 ```
 
-Use `--config /path/to/workspace.json` before the command for another configuration. The launcher does not install packages, download dependencies or modify an existing environment. It builds the native extension in `build/workspace-py310/` with the explicit SDK and Eigen prefixes. There is no need to run `pip install -e .` when using the launcher.
-
-Choose the final workspace location before creating `.local/env`: Conda prefixes contain absolute paths. After moving a workspace to another machine or root, recreate its environment and rebuild the extension instead of treating the copied prefix or `.so` as portable.
+Those settings affect the optional launcher only. Direct `setup.py` and `runner.py` commands use the active Python and the build prefixes described above.
 
 ## Preserve a complete experiment
 
-Keep `full_N.pt`, `meanN.csv`, `varN.csv`, `cfg.yaml` and the associated `Environment.hpp` together under one run directory. Preserve run names when consolidating older records; resolve any collisions before moving files. Robot revisions, calibration and original recordings are research inputs rather than build output.
+Keep `full_N.pt`, `meanN.csv`, `varN.csv`, `cfg.yaml` and the associated `Environment.hpp` together under one run directory. Preserve run names when consolidating older records; resolve collisions before moving files. Robot revisions, calibration and original recordings are research inputs rather than build output.
 
-Git tracks the source, model assets and public documentation. It does not back up `.local/` or training output directories. Store those separately when transferring or archiving the research. Environment inventories describe how to recreate the setup, while native builds should be regenerated. A convenience copy on the same disk does not protect against losing that disk.
+Git tracks the source, model assets and public documentation. It does not back up `.local/` or training output directories. Store those separately when transferring or archiving the research. Environment inventories describe how to recreate the setup; a convenience copy on the same disk does not protect against losing that disk.
 
-On an existing workstation, `.local/README.md` records the actual local paths, preserved checkpoints and compatibility links from earlier locations. Compatibility links are local migration aids and are not required by a fresh installation.
+On the existing workstation, `.local/README.md` records actual paths, preserved checkpoints and compatibility links from earlier locations. Those links are migration aids and are not required by a fresh installation.

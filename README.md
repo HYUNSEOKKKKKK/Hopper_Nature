@@ -80,7 +80,7 @@ The project source retains the [MIT license](LICENSE). **RaiSim is a separately 
 
 ## Installation
 
-The following is the CPU path. Keep the project, its Python environment and its RaiSim **1.1.8** dependency inside one workspace. Obtain a RaiSim 1.x activation key and place it at `~/.raisim/activation.raisim` before running the simulator. See the [installation guide](docs/installation.md) for OS packages and CUDA, and the [workspace guide](docs/workspace.md) for local data and existing installations.
+The following is the CPU path. Keep the project, its RaiSim **1.1.8** dependency and experiment records together, and use the dedicated Conda environment `hopper_nature`. Obtain a RaiSim 1.x activation key and place it at `~/.raisim/activation.raisim` before running the simulator. See the [installation guide](docs/installation.md) for OS packages and CUDA, and the [workspace guide](docs/workspace.md) for local data and existing installations.
 
 ```bash
 git clone --branch withDHALOneLeg https://github.com/HYUNSEOKKKKKK/Hopper_Nature.git ~/Hopper_Nature
@@ -89,23 +89,23 @@ mkdir -p .local/runtime
 git clone https://github.com/raisimTech/raisimLib.git .local/runtime/raisimLib
 git -C .local/runtime/raisimLib checkout 74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca
 
-conda create --prefix "$PWD/.local/env" python=3.10 pip -y
-conda activate "$PWD/.local/env"
+conda create -n hopper_nature python=3.10 pip -y
+conda activate hopper_nature
 python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
 python -m pip install -r requirements.txt
 
-python3 scripts/hopper.py build
-python3 scripts/hopper.py doctor
+python setup.py build_ext --inplace
+python -c "from raisimGymTorch.env.bin import hound; print(hound.__file__)"
 ```
 
-The launcher selects this checkout, its Python 3.10 environment and RaiSim 1.1.8 for each command. It works from other directories when invoked by its full path, without editing shell startup files. No robot hardware is required.
+Activate `hopper_nature` before building or running. The build discovers the local RaiSim 1.1.8/Eigen dependency, and `runner.py` / `tester.py` select this checkout from their own file locations. You can also `cd raisimGymTorch/env/envs/hound` and run `python runner.py` / `python tester.py` directly. No launcher or editable package installation is required, and no robot hardware is required.
 
 ## Usage
 
 ### 1. Check the training pipeline
 
 ```bash
-python3 scripts/hopper.py train \
+python raisimGymTorch/env/envs/hound/runner.py \
   --num-envs 4 --num-threads 2 --iterations 2 \
   --headless --no-tensorboard
 ```
@@ -115,11 +115,11 @@ This runs two PPO updates and writes a timestamped directory under `raisimGymTor
 ### 2. Train from scratch
 
 ```bash
-python3 scripts/hopper.py train \
+python raisimGymTorch/env/envs/hound/runner.py \
   --num-envs 400 --num-threads 16 --headless --no-tensorboard
 
 # Optional, in a second terminal:
-python3 scripts/hopper.py python -m tensorboard.main \
+python -m tensorboard.main \
   --logdir raisimGymTorch/data/dhal_one_leg --port 6700
 ```
 
@@ -128,11 +128,11 @@ Choose a thread count appropriate to your CPU. The research configuration defaul
 ### 3. Replay your checkpoint
 
 ```bash
-python3 scripts/hopper.py replay \
+python raisimGymTorch/env/envs/hound/tester.py \
   --weight /path/to/run/full_10000.pt
 
 # Verify loading without a viewer:
-python3 scripts/hopper.py replay \
+python raisimGymTorch/env/envs/hound/tester.py \
   --weight /path/to/run/full_10000.pt --headless --no-realtime
 ```
 
@@ -141,7 +141,7 @@ Keep `cfg.yaml`, `mean10000.csv` and `var10000.csv` beside `full_10000.pt`. Repl
 ### 4. Export the policy
 
 ```bash
-python3 scripts/hopper.py export --weight /path/to/run/full_10000.pt
+python scripts/export_policy.py --weight /path/to/run/full_10000.pt
 ```
 
 The output directory contains `actor.txt`, `estimator.txt`, and the matching mean/variance CSV files. Export preserves the legacy text parameter layout. A downstream controller must implement the same observation, filtering, normalization, action scaling and ankle mapping. [Interface details](docs/method.md).
@@ -166,9 +166,9 @@ Hopper_Nature/
 ├── assets/                       # Model render, recorded demo previews and full MP4s
 ├── docs/                         # Installation, training, method and validation
 ├── scripts/                      # Portable export, media and release utilities
-│   └── hopper.py                 # Select this workspace's Python and RaiSim 1.1.8
+│   └── hopper.py                 # Optional launcher; direct setup.py/runner.py also work
 ├── .local/                       # Git-ignored workstation files; created locally
-│   ├── env/                      # Project-only Conda environment, Python 3.10
+│   ├── env/                      # Optional shortcut to the named Conda environment
 │   ├── runtime/raisimLib/         # Separately installed RaiSim 1.1.8 and viewer
 │   └── checkpoints/              # Optional local checkpoint bundles
 ├── raisimGymTorch/

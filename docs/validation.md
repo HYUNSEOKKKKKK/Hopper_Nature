@@ -75,6 +75,17 @@ The project, its historical training runs, a dedicated Python 3.10 Conda prefix 
 
 The launcher changes process paths and command selection; it does not change the controller or training formulation. Local migration checks, environment inventories and build/replay/export logs stay in the Git-ignored workstation records described by [RESUME.md](../RESUME.md).
 
+## Direct setup.py and task-file workflow — 2026-10-17
+
+The original workflow was checked with the named Conda environment `hopper_nature`, without invoking `scripts/hopper.py`:
+
+- From the repository root, `python setup.py build_ext --inplace` rebuilt successfully without extra prefix arguments. CMake selected the local RaiSim 1.1.8/Eigen SDK and the active environment's Python 3.10.19.
+- From `raisimGymTorch/env/envs/hound/`, direct `python runner.py` execution completed a headless smoke run with 4 environments, 2 threads and 2 PPO updates. Its output was isolated under the workstation's validation folder, not mixed into the historical runs.
+- Direct `python tester.py` execution replayed the preserved `full_10000.pt` bundle for 22 simulated seconds / 2200 steps with zero episode terminations in this rollout.
+- Eight unittest cases passed. The new regression case executes both task files with site packages disabled and `PYTHONPATH` removed, from the task directory and a separate temporary directory. Documentation/source/robot checks also passed.
+
+Only task-entry import paths and SDK discovery were changed. The research configuration, controller logic and robot assets were unchanged. The smoke run verifies command execution rather than policy performance; the Unity GUI was not started by these checks.
+
 ## Remaining evidence
 
 - A clean OS / new Python environment installation using the documented pip wheel was not performed; simulation used the existing Conda PyTorch build listed above.

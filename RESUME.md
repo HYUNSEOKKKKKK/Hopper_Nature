@@ -8,7 +8,7 @@
 - 공개 준비 기준 소스: `d6c9e47`. `029f4d5`에 마지막 속도 명령 범위·질량 랜덤화·기존 exporter 경로 변경이 포함되어 있습니다.
 - 활성 로봇: `rsc/Hop2_Parallel_Nature_20261008/Hop2_Parallel_Nature_20261008.urdf`, 명목 질량 17.100 kg.
 - 시뮬레이터: **RaiSim 1.1.8**. 현재 웹 문서의 RaiSim 2와 구분해서 사용합니다.
-- Python 3.10, PyTorch 2.5.1 계열, `ruamel.yaml==0.17.21`. 이 컴퓨터에서는 `.local/env/`에 Hopper 전용 Conda 환경을 만들었고, `.local/runtime/raisimLib/`에 RaiSim 1.1.8·Eigen·Unity를 보관했습니다. 실행에는 `scripts/hopper.py`를 사용합니다.
+- Python 3.10, PyTorch 2.5.1 계열, `ruamel.yaml==0.17.21`. 이 컴퓨터에서는 이름이 `hopper_nature`인 전용 Conda 환경을 사용하며, `.local/runtime/raisimLib/`에 RaiSim 1.1.8·Eigen·Unity를 보관했습니다. 기존 방식인 `setup.py` 빌드와 `runner.py`/`tester.py` 직접 실행을 기본으로 사용합니다. `.local/env`는 전용 Conda 환경의 호환 링크입니다.
 - 작업 모듈 이름 `hound`와 결과 폴더 이름 `dhal_one_leg`는 호환성을 위해 유지했습니다.
 - README에 야외 `IMG_8769.MP4`와 실내 `IMG_8770.MP4`의 GIF 미리보기·전체 MP4를 게시했습니다.
 
@@ -32,25 +32,26 @@
 
 기존 `export.py`가 가리키던 최근 실행은 `2026-10-10-21-43-35/full_10000.pt`입니다. 해당 실행의 `Environment.hpp`는 정리 시점 소스와 바이트 단위로 일치했습니다. 이 파일을 편의상 보관했으며, 공개 대표 정책이나 두 영상에 사용된 정책으로 확정한 것은 아닙니다.
 
-새 전용 환경과 내부 SDK 경로로 현재 소스를 다시 빌드하고 이 보관본을 22초·2200스텝 재생했습니다. 해당 한 번의 실행에서는 에피소드 종료가 없었고, 가중치 추출, 문서 점검과 테스트 7개도 통과했습니다. 연구 설정과 로봇 모델은 변경하지 않았습니다. 상세 범위는 [검증 기록](docs/validation.md)에 남겼습니다.
+`hopper_nature` 환경에서 `python setup.py build_ext --inplace`로 직접 재빌드하고, `hound/` 폴더에서 `python runner.py`의 짧은 학습과 `python tester.py`의 22초·2200스텝 재생을 확인했습니다. 이 재생에서는 에피소드 종료가 없었고, 가중치 추출, 문서 점검과 테스트 8개도 통과했습니다. 연구 설정과 로봇 모델은 변경하지 않았습니다. 상세 범위는 [검증 기록](docs/validation.md)에 남겼습니다.
 
 ## 다음에 시작할 때
 
 1. `git status`와 현재 브랜치를 확인하고, 이 컴퓨터에서는 `.local/README.md`를 읽습니다.
-2. `python3 scripts/hopper.py doctor`로 전용 Python·현재 소스·RaiSim 1.1.8 라이브러리가 선택되는지 확인합니다. 새 컴퓨터라면 [설치 안내](docs/installation.md)를 따릅니다.
+2. `conda activate hopper_nature`로 전용 환경을 활성화합니다. 새 컴퓨터라면 [설치 안내](docs/installation.md)를 따릅니다.
 3. RaiSim 1.1.8과 개인 활성화 키의 존재를 확인합니다. 키는 보관 폴더나 Git에 복사하지 않았습니다.
 4. C++ 환경을 다시 빌드한 후 정적 점검과 짧은 재생부터 시작합니다. 컴파일된 `.so`만 보고 소스 버전이 일치한다고 가정하지 마세요.
 
 저장소 루트에서:
 
 ```bash
-python3 scripts/hopper.py build
-python3 scripts/hopper.py doctor
+conda activate hopper_nature
+python setup.py build_ext --inplace
+python -c "from raisimGymTorch.env.bin import hound; print(hound.__file__)"
 
 python scripts/check_release.py
-python3 scripts/hopper.py python -m unittest discover -s tests -v
+python -m unittest discover -s tests -v
 
-python3 scripts/hopper.py replay \
+python raisimGymTorch/env/envs/hound/tester.py \
   --weight .local/checkpoints/2026-10-10-21-43-35/full_10000.pt \
   --duration 22 --headless --no-realtime
 ```

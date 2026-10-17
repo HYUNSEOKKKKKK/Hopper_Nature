@@ -25,6 +25,7 @@ ENDMACRO()
 set(Dependencies)
 
 add_subdirectory(thirdParty/pybind11 pybind11)
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/.local/runtime/raisimLib/thirdParty/Eigen3)
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../thirdParty/Eigen3)
 find_package(Eigen3 CONFIG REQUIRED)
 
@@ -40,6 +41,7 @@ endif()
 
 if (UNIX AND NOT APPLE AND NOT ANDROID AND NOT WEBGL AND NOT WIN32)
     set(RAISIM_OS linux)
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/.local/runtime/raisimLib/raisim/${RAISIM_OS})
     list(APPEND CMAKE_PREFIX_PATH ../raisim/${RAISIM_OS})
 elseif(APPLE)
     # on macOS "uname -m" returns the architecture (x86_64 or arm64)
@@ -68,7 +70,7 @@ elseif(WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/raisimGymTorch/env/bin)
 endif()
 
-find_package(raisim CONFIG REQUIRED)
+find_package(raisim 1.1.8 EXACT CONFIG REQUIRED)
 
 #######################
 ### src and linking ###

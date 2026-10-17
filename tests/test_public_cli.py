@@ -1,6 +1,7 @@
 """Exercise public entry points before installing simulator/learning dependencies."""
 
 from pathlib import Path
+import os
 import subprocess
 import sys
 import tempfile
@@ -25,6 +26,20 @@ class PublicCLI(unittest.TestCase):
                 result = self.run_cli(*command, '--help')
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertIn('usage:', result.stdout)
+
+    def test_task_files_run_directly_without_package_install_or_pythonpath(self):
+        task = ROOT / 'raisimGymTorch/env/envs/hound'
+        environment = os.environ.copy()
+        environment.pop('PYTHONPATH', None)
+        with tempfile.TemporaryDirectory() as directory:
+            for name in ('runner.py', 'tester.py'):
+                for cwd in (task, Path(directory)):
+                    with self.subTest(name=name, cwd=cwd):
+                        result = subprocess.run(
+                            [sys.executable, '-B', '-S', str(task / name), '--help'],
+                            cwd=cwd, env=environment, text=True, capture_output=True, timeout=15)
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                        self.assertIn('usage:', result.stdout)
 
     def test_invalid_training_size_fails_before_importing_dependencies(self):
         result = self.run_cli('-m', 'raisimGymTorch.env.envs.hound.runner', '--num-envs', '0')

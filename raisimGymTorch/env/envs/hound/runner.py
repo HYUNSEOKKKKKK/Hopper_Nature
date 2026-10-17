@@ -1,5 +1,10 @@
 import argparse
 from pathlib import Path
+import sys
+
+if __package__ in (None, ''):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
 from raisimGymTorch.helper.hopper_config import REPO_ROOT, TASK_DIR, load_config, positive_int
 
 parser = argparse.ArgumentParser(description="Train the Hopper policy with PPO.")

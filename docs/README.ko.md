@@ -22,20 +22,20 @@ mkdir -p .local/runtime
 git clone https://github.com/raisimTech/raisimLib.git .local/runtime/raisimLib
 git -C .local/runtime/raisimLib checkout 74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca
 
-conda create --prefix "$PWD/.local/env" python=3.10 pip -y
-conda activate "$PWD/.local/env"
+conda create -n hopper_nature python=3.10 pip -y
+conda activate hopper_nature
 python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
 python -m pip install -r requirements.txt
-python3 scripts/hopper.py build
-python3 scripts/hopper.py doctor
+python setup.py build_ext --inplace
+python -c "from raisimGymTorch.env.bin import hound; print(hound.__file__)"
 ```
 
-코드, Python 환경, RaiSim 1 의존성과 학습 결과를 `~/Hopper_Nature/` 안에서 관리합니다. 런처는 명령마다 전용 Python과 라이브러리 경로를 선택하므로 다른 RaiSim 프로젝트의 셸 설정에 의존하지 않습니다. `.local/`과 학습 결과는 Git에 포함되지 않으며 별도로 보관해야 합니다.
+코드, RaiSim 1 의존성과 학습 결과는 `~/Hopper_Nature/`에서 관리하고, Python은 이름이 `hopper_nature`인 Conda 환경을 사용합니다. `setup.py`가 내부 SDK를 찾고, `runner.py`/`tester.py`는 자신의 파일 위치를 기준으로 이 저장소를 읽습니다. `scripts/hopper.py`를 사용할 필요 없이 기존 방식으로 직접 빌드·실행할 수 있습니다. `.local/`과 학습 결과는 Git에 포함되지 않으며 별도로 보관해야 합니다.
 
 ## 먼저 작은 환경으로 확인
 
 ```bash
-python3 scripts/hopper.py train \
+python raisimGymTorch/env/envs/hound/runner.py \
   --num-envs 4 --num-threads 2 --iterations 2 \
   --headless --no-tensorboard
 ```
@@ -45,24 +45,24 @@ python3 scripts/hopper.py train \
 ## 본 학습
 
 ```bash
-python3 scripts/hopper.py train \
+python raisimGymTorch/env/envs/hound/runner.py \
   --num-envs 400 --num-threads 16 --headless --no-tensorboard
 ```
 
 CPU 사양에 맞춰 환경 수와 스레드 수를 조절하세요. 원래 설정은 400개 환경과 60개 스레드입니다. 기본 학습은 0–10000 업데이트이며 1000마다 저장합니다. 화면을 보려면 `--headless`를 빼고 지정된 RaiSim 1.x Unity 뷰어를 별도로 연결합니다.
 
 ```bash
-python3 scripts/hopper.py python -m tensorboard.main \
+python -m tensorboard.main \
   --logdir raisimGymTorch/data/dhal_one_leg --port 6700
 ```
 
 ## 체크포인트 재생과 추출
 
 ```bash
-python3 scripts/hopper.py replay \
+python raisimGymTorch/env/envs/hound/tester.py \
   --weight /path/to/run/full_10000.pt
 
-python3 scripts/hopper.py export --weight /path/to/run/full_10000.pt
+python scripts/export_policy.py --weight /path/to/run/full_10000.pt
 ```
 
 체크포인트와 같은 폴더에 `cfg.yaml`, `mean10000.csv`, `var10000.csv`가 있어야 합니다. 화면 없이 확인하려면 재생 명령에 `--headless --no-realtime`을 붙이세요. 재생은 22초 동안 서기와 x축 속도 명령을 번갈아 적용합니다. 종료된 에피소드는 자동 초기화되므로 끝까지 실행되었다는 사실만으로 연속 호핑 성공을 의미하지는 않습니다.
