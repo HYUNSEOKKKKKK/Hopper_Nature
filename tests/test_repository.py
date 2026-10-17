@@ -1,6 +1,7 @@
 """Check public documentation, Python syntax and active robot asset references."""
 
 import ast
+import unittest
 from pathlib import Path
 import re
 from urllib.parse import unquote, urlsplit
@@ -32,16 +33,16 @@ def check_markdown_links():
 
 
 def check_python():
-    files = sorted((ROOT / 'scripts').glob('*.py'))
+    files = [ROOT / 'assets/images/render_robot.py']
     files += [ROOT / 'raisimGymTorch/helper/hopper_config.py']
-    files += [ROOT / f'raisimGymTorch/env/envs/hound/{name}.py' for name in ('runner', 'tester')]
+    files += [ROOT / f'raisimGymTorch/env/envs/hopper/{name}.py' for name in ('runner', 'tester', 'export')]
     for path in files:
         ast.parse(path.read_text(), filename=str(path))
     print(f'Public Python entry points: {len(files)} parsed')
 
 
 def check_robot():
-    header = (ROOT / 'raisimGymTorch/env/envs/hound/Environment.hpp').read_text()
+    header = (ROOT / 'raisimGymTorch/env/envs/hopper/Environment.hpp').read_text()
     model = re.search(r'addArticulatedSystem\(resourceDir_\+"([^"]+)"\)', header)
     if model is None:
         raise ValueError('Cannot locate active robot model in Environment.hpp')
@@ -56,7 +57,16 @@ def check_robot():
     print(f'Active URDF: parsed, all mesh references exist, mass={mass:.6f} kg')
 
 
+class RepositoryChecks(unittest.TestCase):
+    def test_documentation_links(self):
+        check_markdown_links()
+
+    def test_entry_point_syntax(self):
+        check_python()
+
+    def test_active_robot_assets_and_mass(self):
+        check_robot()
+
+
 if __name__ == '__main__':
-    check_markdown_links()
-    check_python()
-    check_robot()
+    unittest.main()

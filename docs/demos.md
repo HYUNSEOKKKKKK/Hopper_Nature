@@ -59,7 +59,7 @@ Only the curated MP4s under `assets/demos/` are exempted from the video ignore r
 [hopper-overview.png](../assets/images/hopper-overview.png) is a static render of the active URDF and its DAE meshes in the environment's nominal joint configuration. Reproduce it with NumPy, Pillow and DejaVu Sans fonts:
 
 ```bash
-python scripts/render_robot.py
+python assets/images/render_robot.py
 ```
 
 Pillow is needed only for this optional utility, not for training. Ubuntu provides the fonts through `fonts-dejavu-core`.

@@ -2,12 +2,11 @@
 
 Please open an issue with your Ubuntu, Python, PyTorch and RaiSim versions, exact command, configuration changes and error output. For behavior reports, include the source revision, robot revision, checkpoint iteration and matching normalization files. Do not attach activation keys.
 
-For changes, keep the current `hound` extension name compatible, document any observation/action or checkpoint format changes, and rebuild after modifying C++ headers.
+Use `hopper` for the task directory, native extension and training output. Preserve existing checkpoint formats, document observation/action changes, and rebuild after modifying C++ headers.
 
 Run the checks that do not need a simulator:
 
 ```bash
-python scripts/check_release.py
 python -m unittest discover -s tests -v
 ```
 

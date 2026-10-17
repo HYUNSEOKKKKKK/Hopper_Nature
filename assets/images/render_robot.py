@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 MODEL = ROOT / 'rsc/Hop2_Parallel_Nature_20261008/Hop2_Parallel_Nature_20261008.urdf'
 
 

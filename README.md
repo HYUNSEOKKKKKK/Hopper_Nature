@@ -80,47 +80,70 @@ The project source retains the [MIT license](LICENSE). **RaiSim is a separately 
 
 ## Installation
 
-The following is the CPU path. Keep the project, its RaiSim **1.1.8** dependency and experiment records together, and use the dedicated Conda environment `hopper_nature`. Obtain a RaiSim 1.x activation key and place it at `~/.raisim/activation.raisim` before running the simulator. See the [installation guide](docs/installation.md) for OS packages and CUDA, and the [workspace guide](docs/workspace.md) for local data and existing installations.
+Start with Ubuntu 22.04 and an installed Conda/Miniforge. The commands below create the **`hopper_nature`** environment, clone this project and its pinned **RaiSim 1.1.8** dependency, and build the native extension. Run them in order. CPU PyTorch is sufficient; CUDA is optional.
+
+Python dependencies are Python **3.10**, PyTorch **2.5.1**, NumPy **2.2.6**, `ruamel.yaml` **0.17.21**, TensorBoard **2.20.0** and AdamP **0.3.0**. [requirements.txt](requirements.txt) pins the Python packages and build tools; install PyTorch separately as shown below.
 
 ```bash
+sudo apt update
+sudo apt install -y build-essential cmake git libeigen3-dev
+
+conda create -n hopper_nature python=3.10 pip -y
+conda activate hopper_nature
+
 git clone --branch withDHALOneLeg https://github.com/HYUNSEOKKKKKK/Hopper_Nature.git ~/Hopper_Nature
 cd ~/Hopper_Nature
+python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -r requirements.txt
+
 mkdir -p .local/runtime
 git clone https://github.com/raisimTech/raisimLib.git .local/runtime/raisimLib
 git -C .local/runtime/raisimLib checkout 74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca
 
-conda create -n hopper_nature python=3.10 pip -y
-conda activate hopper_nature
-python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
-python -m pip install -r requirements.txt
-
 python setup.py build_ext --inplace
-python -c "from raisimGymTorch.env.bin import hound; print(hound.__file__)"
+python -c "from raisimGymTorch.env.bin import hopper; print(hopper.__file__)"
 ```
 
-Activate `hopper_nature` before building or running. The build discovers the local RaiSim 1.1.8/Eigen dependency, and `runner.py` / `tester.py` select this checkout from their own file locations. You can also `cd raisimGymTorch/env/envs/hound` and run `python runner.py` / `python tester.py` directly. No launcher or editable package installation is required, and no robot hardware is required.
+Before training or replay, obtain your own **RaiSim 1.x-compatible activation key** through [RaiSim](https://raisim.com/) and place the supplied file at **`~/.raisim/activation.raisim`**. The simulator needs this key even for headless execution. It is not included in this repository.
+
+The build finds RaiSim/Eigen inside `.local/runtime/raisimLib/` and produces `raisimGymTorch/env/bin/hopper.cpython-310-*.so`. The separate `raisim_ws` workspace is not required. Rebuild with `python setup.py build_ext --inplace` from the repository root after changing C++ headers. See [installation details and troubleshooting](docs/installation.md) for external SDKs and CUDA.
 
 ## Usage
 
 ### 1. Check the training pipeline
 
 ```bash
-python raisimGymTorch/env/envs/hound/runner.py \
+conda activate hopper_nature
+cd ~/Hopper_Nature/raisimGymTorch/env/envs/hopper
+python runner.py \
   --num-envs 4 --num-threads 2 --iterations 2 \
   --headless --no-tensorboard
 ```
 
-This runs two PPO updates and writes a timestamped directory under `raisimGymTorch/data/dhal_one_leg/`. The `full_0.pt` checkpoint is saved **before optimization**; it is useful for checking loading and export, and is not a trained result.
+This runs two PPO updates and prints the output directory. All commands below use this same `hopper/` working directory. Results accumulate under **`~/Hopper_Nature/raisimGymTorch/data/hopper/<timestamp>/`**, with these files kept together:
+
+```text
+full_1000.pt       # Policy, estimator, critics and optimizer at a saved iteration
+mean1000.csv      # Matching observation normalization
+var1000.csv
+cfg.yaml          # Effective configuration for this run
+Environment.hpp   # Environment source snapshot
+```
+
+The two-update check only creates `full_0.pt`, `mean0.csv` and `var0.csv`: this checkpoint is saved **before optimization**, so it is not a trained result. Longer runs save every 1000 updates.
 
 ### 2. Train from scratch
 
 ```bash
-python raisimGymTorch/env/envs/hound/runner.py \
+python runner.py
+
+# Or choose environment/thread counts for your CPU and disable the viewer:
+python runner.py \
   --num-envs 400 --num-threads 16 --headless --no-tensorboard
 
 # Optional, in a second terminal:
 python -m tensorboard.main \
-  --logdir raisimGymTorch/data/dhal_one_leg --port 6700
+  --logdir ~/Hopper_Nature/raisimGymTorch/data/hopper --port 6700
 ```
 
 Choose a thread count appropriate to your CPU. The research configuration defaults to 60 threads and 400 environments; CLI overrides are saved in each run's `cfg.yaml`. Training runs updates 0–10000, saving every 1000 updates. For visual training, omit `--headless` and connect the matching RaiSim Unity client. [Training options and checkpoint contents](docs/training.md).
@@ -128,20 +151,29 @@ Choose a thread count appropriate to your CPU. The research configuration defaul
 ### 3. Replay your checkpoint
 
 ```bash
-python raisimGymTorch/env/envs/hound/tester.py \
-  --weight /path/to/run/full_10000.pt
+# Replace RUN_TIMESTAMP with the directory printed by runner.py.
+# Choose an iteration that exists in that directory.
+python tester.py \
+  --weight ../../../data/hopper/RUN_TIMESTAMP/full_10000.pt
 
 # Verify loading without a viewer:
-python raisimGymTorch/env/envs/hound/tester.py \
-  --weight /path/to/run/full_10000.pt --headless --no-realtime
+python tester.py \
+  --weight ../../../data/hopper/RUN_TIMESTAMP/full_10000.pt --headless --no-realtime
 ```
 
-Keep `cfg.yaml`, `mean10000.csv` and `var10000.csv` beside `full_10000.pt`. Replay uses the checkpoint's network configuration and a 22-second flat-ground command sequence alternating standing with negative body-frame x commands from −0.25 to −0.60 m/s. This sequence is an input specification; measured tracking performance requires a trained checkpoint. No pretrained result is bundled yet.
+Keep `cfg.yaml`, `mean10000.csv` and `var10000.csv` beside `full_10000.pt`. To see the robot, start the matching Unity client in another terminal and connect to `localhost:8080`:
+
+```bash
+sudo apt install -y libvulkan1 libminizip1 ffmpeg
+~/Hopper_Nature/.local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64
+```
+
+Replay uses the checkpoint's network configuration and a 22-second flat-ground command sequence alternating standing with negative body-frame x commands from −0.25 to −0.60 m/s. This sequence is an input specification; measured tracking performance requires a trained checkpoint. No pretrained result is bundled yet. The short check above can be replayed with `full_0.pt` in place of `full_10000.pt`.
 
 ### 4. Export the policy
 
 ```bash
-python scripts/export_policy.py --weight /path/to/run/full_10000.pt
+python export.py --weight ../../../data/hopper/RUN_TIMESTAMP/full_10000.pt
 ```
 
 The output directory contains `actor.txt`, `estimator.txt`, and the matching mean/variance CSV files. Export preserves the legacy text parameter layout. A downstream controller must implement the same observation, filtering, normalization, action scaling and ankle mapping. [Interface details](docs/method.md).
@@ -165,15 +197,15 @@ The demos show recorded hardware trials. A selected checkpoint and quantitative 
 Hopper_Nature/
 ├── assets/                       # Model render, recorded demo previews and full MP4s
 ├── docs/                         # Installation, training, method and validation
-├── scripts/                      # Portable export, media and release utilities
-│   └── hopper.py                 # Optional launcher; direct setup.py/runner.py also work
+├── setup.py                      # Build with the active Conda Python
+├── requirements.txt              # Pinned Python dependencies; install torch separately
 ├── .local/                       # Git-ignored workstation files; created locally
 │   ├── env/                      # Optional shortcut to the named Conda environment
 │   ├── runtime/raisimLib/         # Separately installed RaiSim 1.1.8 and viewer
 │   └── checkpoints/              # Optional local checkpoint bundles
 ├── raisimGymTorch/
-│   ├── env/envs/hound/            # Hopper environment, configuration, training/replay
-│   ├── data/dhal_one_leg/         # Git-ignored training runs and matching snapshots
+│   ├── env/envs/hopper/           # runner.py, tester.py, export.py, cfg.yaml, Environment.hpp
+│   ├── data/hopper/              # Git-ignored training runs and matching snapshots
 │   ├── algo/ppo/                 # PPO, estimator and barrier critic
 │   └── helper/                   # Configuration, logging and path helpers
 ├── rsc/                          # Robot model revisions and calibration records
@@ -181,7 +213,7 @@ Hopper_Nature/
 └── thirdParty/pybind11/           # Vendored Python/C++ bindings
 ```
 
-The historical `hound` module and `dhal_one_leg` run names are retained for compatibility. The active robot is selected in `Environment.hpp`; older robot folders are historical resources. Local environments, simulator dependencies, research checkpoints and original recordings are installed or restored separately; see [workspace organization and backup](docs/workspace.md).
+The task directory, native module and training output all use the name **`hopper`**. The active robot is selected in `Environment.hpp`; older robot folders are historical resources. Local environments, simulator dependencies, research checkpoints and original recordings are installed or restored separately; see [workspace organization and backup](docs/workspace.md).
 
 </details>
 

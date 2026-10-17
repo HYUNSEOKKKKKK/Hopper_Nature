@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TASK_DIR = REPO_ROOT / "raisimGymTorch/env/envs/hound"
+TASK_DIR = REPO_ROOT / "raisimGymTorch/env/envs/hopper"
 
 
 def positive_int(value):

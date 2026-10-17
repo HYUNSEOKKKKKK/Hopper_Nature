@@ -1,11 +1,18 @@
 # Training and replay
 
-Run these commands from the repository root after [installation](installation.md).
+After [installation](installation.md), activate the environment and enter the Hopper task directory:
+
+```bash
+conda activate hopper_nature
+cd ~/Hopper_Nature/raisimGymTorch/env/envs/hopper
+```
+
+Run the commands below from this directory.
 
 ## First run
 
 ```bash
-python -m raisimGymTorch.env.envs.hound.runner \
+python runner.py \
   --num-envs 4 --num-threads 2 --iterations 2 \
   --headless --no-tensorboard
 ```
@@ -15,7 +22,7 @@ Two updates exercise native simulation, estimator inference, rollout collection,
 ## Train a policy
 
 ```bash
-python -m raisimGymTorch.env.envs.hound.runner \
+python runner.py \
   --num-envs 400 --num-threads 16 --headless --no-tensorboard
 ```
 
@@ -26,7 +33,7 @@ python -m raisimGymTorch.env.envs.hound.runner \
 | `--num-threads N` | YAML default: 60; select a value suitable for your CPU |
 | `--iterations N` | 10001 updates, numbered 0–10000 |
 | `--seed N` | YAML default: 1 |
-| `--log-dir PATH` | `raisimGymTorch/data/dhal_one_leg` in this checkout |
+| `--log-dir PATH` | `raisimGymTorch/data/hopper` in this checkout |
 | `--headless` | Disable the viewer server, recording and evaluation pacing |
 | `--no-tensorboard` | Skip automatic TensorBoard server/browser; event logging still runs |
 
@@ -35,7 +42,7 @@ The configuration uses 0.002 s physics steps, 0.01 s control steps and a 4 s rol
 For visual training omit `--headless`, and connect the legacy viewer. Automatic TensorBoard uses port 6700; `--no-tensorboard` avoids conflicts when running several experiments.
 
 ```bash
-tensorboard --logdir raisimGymTorch/data/dhal_one_leg --port 6700
+tensorboard --logdir ~/Hopper_Nature/raisimGymTorch/data/hopper --port 6700
 ```
 
 ## Saved artifacts
@@ -43,7 +50,7 @@ tensorboard --logdir raisimGymTorch/data/dhal_one_leg --port 6700
 Each run writes its **effective** configuration, including CLI overrides:
 
 ```text
-raisimGymTorch/data/dhal_one_leg/<timestamp>/
+raisimGymTorch/data/hopper/<timestamp>/
 ├── cfg.yaml
 ├── Environment.hpp
 ├── full_0.pt
@@ -64,7 +71,7 @@ The public runner trains **from scratch**. The old `--mode retrain` branch was c
 ## Replay
 
 ```bash
-python -m raisimGymTorch.env.envs.hound.tester \
+python tester.py \
   --weight /path/to/run/full_10000.pt --duration 22
 ```
 
@@ -93,9 +100,9 @@ Longer replays repeat the schedule. Linear units are m/s; angular units are rad/
 ## Export
 
 ```bash
-python scripts/export_policy.py --weight /path/to/run/full_10000.pt
+python export.py --weight /path/to/run/full_10000.pt
 ```
 
-The default destination is `network_10000/` beside the checkpoint. Override it with `--output /path/to/export`. The text format transposes each linear weight matrix before flattening it, then appends its bias in state dictionary order. CSVs are copied unchanged. This matches the historical `export.py` layout, which remains as a local research script; use the portable command above for new runs.
+The default destination is `network_10000/` beside the checkpoint. Override it with `--output /path/to/export`. The text format transposes each linear weight matrix before flattening it, then appends its bias in state dictionary order. CSVs are copied unchanged. This preserves the historical text layout; the task’s `export.py` now accepts an explicit checkpoint path.
 
 Export is not a complete hardware controller. See the [method and interface](method.md) before downstream integration.

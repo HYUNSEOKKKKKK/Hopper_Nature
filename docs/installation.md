@@ -23,7 +23,8 @@ Expected layout:
 
 ```text
 ~/Hopper_Nature/
-├── scripts/hopper.py
+├── setup.py
+├── requirements.txt
 ├── raisimGymTorch/
 └── .local/
     ├── env/                         # Optional shortcut to the Conda environment
@@ -65,10 +66,10 @@ From the Hopper repository root, with the environment activated:
 ```bash
 conda activate hopper_nature
 python setup.py build_ext --inplace
-python -c "from raisimGymTorch.env.bin import hound; print(hound.__file__)"
+python -c "from raisimGymTorch.env.bin import hopper; print(hopper.__file__)"
 ```
 
-The build writes `raisimGymTorch/env/bin/hound.cpython-310-*.so`. It discovers the SDK and Eigen under `.local/runtime/raisimLib/` and requires RaiSim 1.1.8 exactly. It does not need to build the upstream examples or install a global Python package. `runner.py` and `tester.py` support direct execution from the task directory without an editable installation or manual `PYTHONPATH` setting.
+The build writes `raisimGymTorch/env/bin/hopper.cpython-310-*.so`. It discovers the SDK and Eigen under `.local/runtime/raisimLib/` and requires RaiSim 1.1.8 exactly. It does not need to build the upstream examples or install a global Python package. `runner.py` and `tester.py` support direct execution from the task directory without an editable installation or manual `PYTHONPATH` setting.
 
 After changing `Environment.hpp`, rebuild with the same command. When switching Python interpreters or SDK locations, use a fresh build directory, for example `python setup.py build_ext --inplace --build-temp build/python310-clean`. An external SDK can be selected with `python setup.py build_ext --inplace --CMAKE_PREFIX_PATH 'RAISIM_PREFIX;EIGEN_PREFIX'`, using the actual prefixes.
 
@@ -92,8 +93,9 @@ The pinned checkout also includes `raisimUnityOpengl/linux` for the older OpenGL
 | --- | --- |
 | CMake cannot find RaiSim | Pass the directory containing its `include/` and `lib/`, not this repository, in `--CMAKE_PREFIX_PATH`. |
 | CMake cannot find Eigen | Include `raisimLib/thirdParty/Eigen3` in that prefix list, or install `libeigen3-dev`. |
-| `No module named ...hound` | Build with the active Python 3.10 interpreter and run from the repository root. |
+| `No module named ...hopper` | Build with the active Python 3.10 interpreter and run from the repository root. |
 | `libraisim.so.1.1.8` cannot be opened | Keep the dependency at its build-time location or rebuild with its new prefix. For a custom install, add its `lib/` to `LD_LIBRARY_PATH`. |
+| Libraries load from an older workspace | Check inherited `LD_LIBRARY_PATH`. For the documented local SDK layout, use `unset LD_LIBRARY_PATH` in the current terminal before running; no global library path is needed. |
 | Activation error before training | Check the engine version and your key at `~/.raisim/activation.raisim`. |
 | `ruamel.yaml` dump/API error | Install the pinned 0.17.21 version; this source uses its older API. |
 | High memory use or CPU contention | Start with `--num-envs 4 --num-threads 2`; increase only after the short check succeeds. |

@@ -7,12 +7,12 @@ Hopper_Nature/
 ├── setup.py                           # Build the native extension
 ├── README.md, RESUME.md, docs/
 ├── raisimGymTorch/
-│   ├── env/envs/hound/
+│   ├── env/envs/hopper/
 │   │   ├── runner.py                 # Run directly to train
 │   │   ├── tester.py                 # Run directly to replay
 │   │   ├── cfg.yaml
 │   │   └── Environment.hpp
-│   └── data/dhal_one_leg/<run>/       # Local training results, ignored by Git
+│   └── data/hopper/<run>/       # Local training results, ignored by Git
 ├── rsc/                              # Robot model history and calibration
 └── .local/                           # Workstation files, ignored by Git
     ├── runtime/raisimLib/             # RaiSim 1.1.8, Eigen and optional Unity viewer
@@ -33,13 +33,13 @@ conda activate hopper_nature
 cd ~/Hopper_Nature
 python setup.py build_ext --inplace
 
-cd raisimGymTorch/env/envs/hound
+cd raisimGymTorch/env/envs/hopper
 python runner.py
 ```
 
-Rebuild from the repository root after changing C++ files such as `Environment.hpp`. `setup.py` selects the active Python, and CMake discovers RaiSim and Eigen under `.local/runtime/raisimLib/`. The engine must be version 1.1.8. The build writes `raisimGymTorch/env/bin/hound.cpython-310-*.so`.
+Rebuild from the repository root after changing C++ files such as `Environment.hpp`. `setup.py` selects the active Python, and CMake discovers RaiSim and Eigen under `.local/runtime/raisimLib/`. The engine must be version 1.1.8. The build writes `raisimGymTorch/env/bin/hopper.cpython-310-*.so`.
 
-`runner.py` and `tester.py` locate this checkout from their own file paths. Direct execution does not require `scripts/hopper.py`, an editable package installation or a manual `PYTHONPATH`. It is also possible to run `python raisimGymTorch/env/envs/hound/runner.py` from the root, or use the existing `python -m raisimGymTorch.env.envs.hound.runner` interface.
+`runner.py`, `tester.py` and `export.py` locate this checkout from their own file paths. Run them directly with the active Conda Python. It is also possible to run `python raisimGymTorch/env/envs/hopper/runner.py` from the root, or use the existing `python -m raisimGymTorch.env.envs.hopper.runner` interface.
 
 For a short check instead of full training, run from the task directory:
 
@@ -51,7 +51,7 @@ python tester.py --weight /path/to/run/full_10000.pt \
   --headless --no-realtime
 ```
 
-Training results go to `raisimGymTorch/data/dhal_one_leg/<timestamp>/`, regardless of the working directory. Relative user-supplied checkpoint and output paths are interpreted from the current working directory.
+Training results go to `raisimGymTorch/data/hopper/<timestamp>/`, regardless of the working directory. Relative user-supplied checkpoint and output paths are interpreted from the current working directory.
 
 In a second terminal, start the matching legacy Unity viewer directly:
 
@@ -71,21 +71,6 @@ python setup.py build_ext --inplace --CMAKE_PREFIX_PATH \
 ```
 
 After switching interpreters or SDKs, use a fresh build directory, for example `--build-temp build/python310-clean`. Native binaries should be rebuilt after moving to another machine. Conda environments also contain absolute prefix paths and should be recreated at their destination.
-
-## Optional launcher compatibility
-
-`scripts/hopper.py` remains available for existing commands, but is not required for the direct workflow above. Its path overrides live in the Git-ignored `.local/workspace.json`, for example:
-
-```json
-{
-  "python": "/absolute/path/to/conda/envs/hopper_nature/bin/python",
-  "raisim_prefix": ".local/runtime/raisimLib/raisim/linux",
-  "eigen_prefix": ".local/runtime/raisimLib/thirdParty/Eigen3",
-  "viewer": ".local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64"
-}
-```
-
-Those settings affect the optional launcher only. Direct `setup.py` and `runner.py` commands use the active Python and the build prefixes described above.
 
 ## Preserve a complete experiment
 

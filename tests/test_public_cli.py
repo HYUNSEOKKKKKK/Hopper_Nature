@@ -17,10 +17,9 @@ class PublicCLI(unittest.TestCase):
 
     def test_help_without_site_packages_or_native_build(self):
         for command in (
-            ['-m', 'raisimGymTorch.env.envs.hound.runner'],
-            ['-m', 'raisimGymTorch.env.envs.hound.tester'],
-            ['scripts/export_policy.py'],
-            ['scripts/hopper.py'],
+            ['-m', 'raisimGymTorch.env.envs.hopper.runner'],
+            ['-m', 'raisimGymTorch.env.envs.hopper.tester'],
+            ['-m', 'raisimGymTorch.env.envs.hopper.export'],
         ):
             with self.subTest(command=command):
                 result = self.run_cli(*command, '--help')
@@ -28,11 +27,11 @@ class PublicCLI(unittest.TestCase):
                 self.assertIn('usage:', result.stdout)
 
     def test_task_files_run_directly_without_package_install_or_pythonpath(self):
-        task = ROOT / 'raisimGymTorch/env/envs/hound'
+        task = ROOT / 'raisimGymTorch/env/envs/hopper'
         environment = os.environ.copy()
         environment.pop('PYTHONPATH', None)
         with tempfile.TemporaryDirectory() as directory:
-            for name in ('runner.py', 'tester.py'):
+            for name in ('runner.py', 'tester.py', 'export.py'):
                 for cwd in (task, Path(directory)):
                     with self.subTest(name=name, cwd=cwd):
                         result = subprocess.run(
@@ -42,7 +41,7 @@ class PublicCLI(unittest.TestCase):
                         self.assertIn('usage:', result.stdout)
 
     def test_invalid_training_size_fails_before_importing_dependencies(self):
-        result = self.run_cli('-m', 'raisimGymTorch.env.envs.hound.runner', '--num-envs', '0')
+        result = self.run_cli('-m', 'raisimGymTorch.env.envs.hopper.runner', '--num-envs', '0')
         self.assertEqual(result.returncode, 2)
         self.assertIn('must be at least 1', result.stderr)
         self.assertNotIn('ModuleNotFoundError', result.stderr)
@@ -52,8 +51,8 @@ class PublicCLI(unittest.TestCase):
             checkpoint = Path(directory) / 'full_1000.pt'
             checkpoint.touch()
             for command in (
-                ['-m', 'raisimGymTorch.env.envs.hound.tester'],
-                ['scripts/export_policy.py'],
+                ['-m', 'raisimGymTorch.env.envs.hopper.tester'],
+                ['-m', 'raisimGymTorch.env.envs.hopper.export'],
             ):
                 with self.subTest(command=command):
                     result = self.run_cli(*command, '--weight', str(checkpoint))
@@ -62,7 +61,7 @@ class PublicCLI(unittest.TestCase):
                     self.assertNotIn('ModuleNotFoundError', result.stderr)
 
     def test_replay_requires_explicit_checkpoint(self):
-        result = self.run_cli('-m', 'raisimGymTorch.env.envs.hound.tester')
+        result = self.run_cli('-m', 'raisimGymTorch.env.envs.hopper.tester')
         self.assertEqual(result.returncode, 2)
         self.assertIn('--weight', result.stderr)
 

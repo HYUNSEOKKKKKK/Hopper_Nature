@@ -30,7 +30,7 @@ The installed RaiSim headers/libraries, Eigen and Unity assets were compared aga
 | Policy export | Actor, estimator and observation CSVs produced |
 | Legacy export comparison | Actor/estimator text identical after trimming the final newline; CSVs identical |
 | CLI preflight tests | 4 unittest cases passed, with site packages disabled in CLI subprocesses |
-| Documentation/source checks | Relative file links, public Python syntax, active URDF mesh references and 17.100 kg model mass checked by `scripts/check_release.py` |
+| Documentation/source checks | Relative file links, public Python syntax, active URDF mesh references and 17.100 kg model mass checked by `tests/test_repository.py` |
 
 Replay used the smoke run's **untrained** `full_0.pt`. It had 14 episode terminations with automatic resets. Completion verifies execution, configuration loading and the command schedule, not successful continuous locomotion. Reward and timing from this short run are not presented as benchmark results.
 
@@ -39,20 +39,19 @@ Replay used the smoke run's **untrained** `full_0.pt`. It had 14 episode termina
 After installation, run:
 
 ```bash
-python scripts/check_release.py
 python -m unittest discover -s tests -v
 
-python -m raisimGymTorch.env.envs.hound.runner \
+python -m raisimGymTorch.env.envs.hopper.runner \
   --num-envs 4 --num-threads 2 --iterations 2 \
   --headless --no-tensorboard
 
 # Substitute the actual timestamp printed by the runner:
-python -m raisimGymTorch.env.envs.hound.tester \
-  --weight raisimGymTorch/data/dhal_one_leg/<timestamp>/full_0.pt \
+python -m raisimGymTorch.env.envs.hopper.tester \
+  --weight raisimGymTorch/data/hopper/<timestamp>/full_0.pt \
   --duration 22 --headless --no-realtime
 
-python scripts/export_policy.py \
-  --weight raisimGymTorch/data/dhal_one_leg/<timestamp>/full_0.pt
+python raisimGymTorch/env/envs/hopper/export.py \
+  --weight raisimGymTorch/data/hopper/<timestamp>/full_0.pt
 ```
 
 Replace `<timestamp>` before executing the commands. GitHub Actions runs only the checks that do not need a licensed simulator.
@@ -68,7 +67,7 @@ A headless replay completed **22 simulated seconds / 2200 steps with zero episod
 The project, its historical training runs, a dedicated Python 3.10 Conda prefix and the local RaiSim 1.1.8/Eigen/Unity dependencies were consolidated into one workstation directory. The Python prefix was cloned from the existing RaiSim 1 environment; this was not a fresh pip-wheel installation. The research `Environment.hpp`, `cfg.yaml` and robot models were unchanged.
 
 - All 1,289 files in the 31 historical training runs matched their pre-move SHA-256 hashes; the runs contain 338 checkpoints. Old local paths remain compatibility links.
-- `scripts/hopper.py build` rebuilt the native extension using the workspace's own Python, SDK and Eigen prefixes.
+- The earlier workspace build rebuilt the native extension using the workspace's own Python, SDK and Eigen prefixes.
 - `doctor` confirmed that the package, native extension and actual loaded `libraisim.so.1.1.8` came from that workspace.
 - Replay of the preserved `2026-10-10-21-43-35/full_10000.pt` completed 22 simulated seconds / 2200 control steps with zero episode terminations in this rollout. Export also completed.
 - Seven unittest cases passed, including launcher checks from a foreign working directory with inherited RaiSim 2 paths, rejection of a RaiSim 2 SDK and missing-configuration diagnostics. Documentation links, public Python syntax and active robot assets passed the release check.
@@ -77,18 +76,32 @@ The launcher changes process paths and command selection; it does not change the
 
 ## Direct setup.py and task-file workflow — 2026-10-17
 
-The original workflow was checked with the named Conda environment `hopper_nature`, without invoking `scripts/hopper.py`:
+The original workflow was checked with the named Conda environment `hopper_nature`, using direct file execution:
 
 - From the repository root, `python setup.py build_ext --inplace` rebuilt successfully without extra prefix arguments. CMake selected the local RaiSim 1.1.8/Eigen SDK and the active environment's Python 3.10.19.
-- From `raisimGymTorch/env/envs/hound/`, direct `python runner.py` execution completed a headless smoke run with 4 environments, 2 threads and 2 PPO updates. Its output was isolated under the workstation's validation folder, not mixed into the historical runs.
+- From `raisimGymTorch/env/envs/hopper/`, direct `python runner.py` execution completed a headless smoke run with 4 environments, 2 threads and 2 PPO updates. Its output was isolated under the workstation's validation folder, not mixed into the historical runs.
 - Direct `python tester.py` execution replayed the preserved `full_10000.pt` bundle for 22 simulated seconds / 2200 steps with zero episode terminations in this rollout.
 - Eight unittest cases passed. The new regression case executes both task files with site packages disabled and `PYTHONPATH` removed, from the task directory and a separate temporary directory. Documentation/source/robot checks also passed.
 
 Only task-entry import paths and SDK discovery were changed. The research configuration, controller logic and robot assets were unchanged. The smoke run verifies command execution rather than policy performance; the Unity GUI was not started by these checks.
 
+## Hopper naming and README installation check — 2026-10-17
+
+The task directory and native extension are now `hopper`; training results are under `raisimGymTorch/data/hopper/`. All 1,289 files in the 31 historical runs retained their SHA-256 hashes, including 338 checkpoints. `Environment.hpp`, `HeightMap.hpp` and `cfg.yaml` are byte-identical to their pre-rename versions. The launcher folder was removed; export now runs directly through the task's `export.py`, and source/documentation checks run through unittest.
+
+Two installations were checked:
+
+- The existing `hopper_nature` environment rebuilt the renamed extension, completed two PPO updates with 4 environments and 2 threads, replayed the existing `2026-10-10-21-43-35/full_10000.pt` for 22 simulated seconds / 2200 steps with zero episode terminations, and exported its policy.
+- A separate minimal Conda environment was created from cached Python packages, then installed the README's CPU PyTorch wheel and `requirements.txt`. It used Python **3.10.21**, PyTorch **2.5.1+cpu**, system GCC **11.4.0** and CMake **3.22.1**. `pip check` passed. A clean source copy containing no prior build, environment registrations or training output rebuilt successfully using `python setup.py build_ext --inplace`. The SDK/Eigen files were copied from the verified local RaiSim 1.1.8 dependency; the existing workstation activation key was used.
+- In the clean copy, direct `python runner.py` completed two PPO updates with 4 environments and 2 threads, saving to the default `raisimGymTorch/data/hopper/<timestamp>/` path. Its untrained `full_0.pt` replayed for 2200 steps with 17 episode terminations and exported successfully. The same fresh environment also replayed the preserved trained checkpoint for 2200 steps with zero episode terminations in that rollout.
+- Eight current unittest cases passed: CLI help/direct execution and checkpoint diagnostics, documentation links, entry point syntax and active robot assets/mass. Direct entry point checks disable site packages and remove `PYTHONPATH`.
+- With inherited `LD_LIBRARY_PATH` and `PYTHONPATH` removed, the existing environment replayed the preserved checkpoint for another 2200 steps. The process's loaded-library map confirmed that every RaiSim library came from this project's `.local/runtime/raisimLib/`. The clean source build also resolved its RaiSim libraries from its own SDK copy without an external workspace path.
+
+Local logs, the fresh environment's package versions and smoke-run artifacts are preserved under `.local/validation/` with `hopper-` and `readme-` prefixes. The temporary environment and source copy were removed after validation. These checks verify installation and execution, rather than policy performance.
+
 ## Remaining evidence
 
-- A clean OS / new Python environment installation using the documented pip wheel was not performed; simulation used the existing Conda PyTorch build listed above.
+- A fresh OS installation has not been checked. The fresh Conda/pip-wheel check above reused the existing machine's system packages, verified SDK files and activation key.
 - License acquisition and activation on another machine have not been checked.
 - CUDA training, the Unity client, viewer video recording, Windows/macOS and hardware execution have not been checked here.
 - A representative final checkpoint, full training run, measured tracking metrics and a recorded simulation demo are still to be supplied. Maintainer-supplied hardware recordings are now included in [the demo record](demos.md); their association with a specific policy checkpoint is not yet documented.

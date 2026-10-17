@@ -5,7 +5,8 @@ from pathlib import Path
 import shutil
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+if __package__ in (None, ''):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 from raisimGymTorch.helper.hopper_config import checkpoint_path
 
 

@@ -65,10 +65,10 @@ The variable `gait_hz_` is historically named: it is used as the **period** in `
 
 Task rewards combine linear/angular velocity tracking with penalties for body orientation, joint position/velocity/acceleration, torque, foot slip/orientation, action differences, body contact, base motion and standing COM position. Relaxed log-barrier terms shape joint, height, motion, velocity, contact, clearance, impulse and smoothness constraints.
 
-Inspect `getReward()`, `getLogBarReward()` and `isTerminalState()` in [Environment.hpp](../raisimGymTorch/env/envs/hound/Environment.hpp), and the [reward coefficients](../raisimGymTorch/env/envs/hound/cfg.yaml), for the actual implementation. Reward shaping does not establish constraint guarantees on hardware.
+Inspect `getReward()`, `getLogBarReward()` and `isTerminalState()` in [Environment.hpp](../raisimGymTorch/env/envs/hopper/Environment.hpp), and the [reward coefficients](../raisimGymTorch/env/envs/hopper/cfg.yaml), for the actual implementation. Reward shaping does not establish constraint guarantees on hardware.
 
 ## Export contract
 
-`scripts/export_policy.py` exports actor and estimator only. It transposes each 2D weight tensor before flattening and retains state dictionary order, matching the legacy text exporter. LeakyReLU behavior, layer dimensions and final linear layers must match the consuming implementation.
+`raisimGymTorch/env/envs/hopper/export.py` exports actor and estimator only. It transposes each 2D weight tensor before flattening and retains state dictionary order, matching the legacy text exporter. LeakyReLU behavior, layer dimensions and final linear layers must match the consuming implementation.
 
 For replay or downstream integration, retain the exact robot model, configuration, mean/variance files, observation ordering/history, filter cadence, phase convention and action scaling from the training run. This repository does not supply the complete hardware I/O/control system used outside the simulation workflow.

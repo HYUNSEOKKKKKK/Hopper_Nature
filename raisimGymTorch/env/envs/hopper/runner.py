@@ -9,7 +9,7 @@ from raisimGymTorch.helper.hopper_config import REPO_ROOT, TASK_DIR, load_config
 
 parser = argparse.ArgumentParser(description="Train the Hopper policy with PPO.")
 parser.add_argument('--config', type=Path, help='YAML configuration (default: task cfg.yaml)')
-parser.add_argument('--log-dir', type=Path, default=REPO_ROOT / 'raisimGymTorch/data/dhal_one_leg')
+parser.add_argument('--log-dir', type=Path, default=REPO_ROOT / 'raisimGymTorch/data/hopper')
 parser.add_argument('--iterations', type=positive_int, default=10001, help='number of PPO updates')
 parser.add_argument('--num-envs', type=positive_int, help='override parallel environment count')
 parser.add_argument('--num-threads', type=positive_int, help='override OpenMP thread count')
@@ -21,8 +21,8 @@ args = parser.parse_args()
 from ruamel.yaml import YAML, dump, RoundTripDumper
 from raisimGymTorch.env.RaisimGymVecEnv import RaisimGymVecEnv as VecEnv
 from raisimGymTorch.helper.raisim_gym_helper import ConfigurationSaver, tensorboard_launcher
-from raisimGymTorch.env.bin.hound import NormalSampler
-from raisimGymTorch.env.bin.hound import RaisimGymEnv
+from raisimGymTorch.env.bin.hopper import NormalSampler
+from raisimGymTorch.env.bin.hopper import RaisimGymEnv
 from raisimGymTorch.env.RewardAnalyzer import RewardAnalyzer
 import math
 import time

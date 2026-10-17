@@ -49,7 +49,7 @@ def main():
     import numpy as np
     import torch
     from ruamel.yaml import dump, RoundTripDumper
-    from raisimGymTorch.env.bin import hound
+    from raisimGymTorch.env.bin import hopper
     from raisimGymTorch.env.RaisimGymVecEnv import RaisimGymVecEnv
     from raisimGymTorch.algo.ppo.module import MLP
 
@@ -57,7 +57,7 @@ def main():
                       num_envs=1, num_threads=1, headless=args.headless)
     if not args.headless:
         cfg['environment']['render'] = True
-    env = RaisimGymVecEnv(hound.RaisimGymEnv(
+    env = RaisimGymVecEnv(hopper.RaisimGymEnv(
         str(REPO_ROOT / 'rsc'), dump(cfg['environment'], Dumper=RoundTripDumper)))
     try:
         env.seed(cfg['seed'])
