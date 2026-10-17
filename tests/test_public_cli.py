@@ -19,6 +19,7 @@ class PublicCLI(unittest.TestCase):
             ['-m', 'raisimGymTorch.env.envs.hound.runner'],
             ['-m', 'raisimGymTorch.env.envs.hound.tester'],
             ['scripts/export_policy.py'],
+            ['scripts/hopper.py'],
         ):
             with self.subTest(command=command):
                 result = self.run_cli(*command, '--help')

@@ -6,6 +6,7 @@ Read [RESUME.md](RESUME.md) before changing this project. It records the last ha
 - Active task: `raisimGymTorch/env/envs/hound/`; Python module name `hound`, log task name `dhal_one_leg`.
 - Active robot: `rsc/Hop2_Parallel_Nature_20261008/`. Older model/calibration directories are historical evidence, not disposable build output.
 - Use Python 3.10 and **RaiSim 1.1.8** with the existing requirements. RaiSim 2 instructions are not interchangeable.
+- Prefer `python3 scripts/hopper.py build` / `doctor` / `train` / `replay` / `export` for the one-folder workspace. The launcher selects `.local/env` and `.local/runtime/raisimLib`, or overrides in `.local/workspace.json`. Keep these machine-local dependencies outside Git and preserve the parked research configuration.
 - Use `python -m raisimGymTorch.env.envs.hound.runner` / `tester` and `scripts/export_policy.py`. The historical task `export.py` retains a workstation-specific experiment reference.
 - Preserve checkpoint bundles: `full_N.pt`, `meanN.csv`, `varN.csv`, `cfg.yaml`, and the associated `Environment.hpp`. `.local/` and data folders may contain irreplaceable research artifacts despite being ignored by Git. Avoid blanket cleanup such as `git clean -fdx`.
 - Original camera clips and environment inventories stay local. Curated public MP4/GIF assets and their provenance live under `assets/demos/`.

@@ -80,34 +80,32 @@ The project source retains the [MIT license](LICENSE). **RaiSim is a separately 
 
 ## Installation
 
-The following is the CPU path. Obtain a RaiSim 1.x activation key and place it at `~/.raisim/activation.raisim` before running the simulator. See the [installation guide](docs/installation.md) for OS packages, CUDA, visualization and troubleshooting.
+The following is the CPU path. Keep the project, its Python environment and its RaiSim **1.1.8** dependency inside one workspace. Obtain a RaiSim 1.x activation key and place it at `~/.raisim/activation.raisim` before running the simulator. See the [installation guide](docs/installation.md) for OS packages and CUDA, and the [workspace guide](docs/workspace.md) for local data and existing installations.
 
 ```bash
-mkdir -p ~/hopper_ws
-cd ~/hopper_ws
+git clone --branch withDHALOneLeg https://github.com/HYUNSEOKKKKKK/Hopper_Nature.git ~/Hopper_Nature
+cd ~/Hopper_Nature
+mkdir -p .local/runtime
+git clone https://github.com/raisimTech/raisimLib.git .local/runtime/raisimLib
+git -C .local/runtime/raisimLib checkout 74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca
 
-git clone https://github.com/raisimTech/raisimLib.git
-git -C raisimLib checkout 74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca
-git clone --branch withDHALOneLeg https://github.com/HYUNSEOKKKKKK/Hopper_Nature.git
-cd Hopper_Nature
-
-conda create -n hopper python=3.10 pip -y
-conda activate hopper
+conda create --prefix "$PWD/.local/env" python=3.10 pip -y
+conda activate "$PWD/.local/env"
 python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
 python -m pip install -r requirements.txt
 
-python setup.py build_ext --inplace --CMAKE_PREFIX_PATH \
-  "$PWD/../raisimLib/raisim/linux;$PWD/../raisimLib/thirdParty/Eigen3"
+python3 scripts/hopper.py build
+python3 scripts/hopper.py doctor
 ```
 
-Run commands below **from this repository's root**, with the same Python environment used to build the extension. No robot hardware is required.
+The launcher selects this checkout, its Python 3.10 environment and RaiSim 1.1.8 for each command. It works from other directories when invoked by its full path, without editing shell startup files. No robot hardware is required.
 
 ## Usage
 
 ### 1. Check the training pipeline
 
 ```bash
-python -m raisimGymTorch.env.envs.hound.runner \
+python3 scripts/hopper.py train \
   --num-envs 4 --num-threads 2 --iterations 2 \
   --headless --no-tensorboard
 ```
@@ -117,11 +115,12 @@ This runs two PPO updates and writes a timestamped directory under `raisimGymTor
 ### 2. Train from scratch
 
 ```bash
-python -m raisimGymTorch.env.envs.hound.runner \
+python3 scripts/hopper.py train \
   --num-envs 400 --num-threads 16 --headless --no-tensorboard
 
 # Optional, in a second terminal:
-tensorboard --logdir raisimGymTorch/data/dhal_one_leg --port 6700
+python3 scripts/hopper.py python -m tensorboard.main \
+  --logdir raisimGymTorch/data/dhal_one_leg --port 6700
 ```
 
 Choose a thread count appropriate to your CPU. The research configuration defaults to 60 threads and 400 environments; CLI overrides are saved in each run's `cfg.yaml`. Training runs updates 0–10000, saving every 1000 updates. For visual training, omit `--headless` and connect the matching RaiSim Unity client. [Training options and checkpoint contents](docs/training.md).
@@ -129,11 +128,11 @@ Choose a thread count appropriate to your CPU. The research configuration defaul
 ### 3. Replay your checkpoint
 
 ```bash
-python -m raisimGymTorch.env.envs.hound.tester \
+python3 scripts/hopper.py replay \
   --weight /path/to/run/full_10000.pt
 
 # Verify loading without a viewer:
-python -m raisimGymTorch.env.envs.hound.tester \
+python3 scripts/hopper.py replay \
   --weight /path/to/run/full_10000.pt --headless --no-realtime
 ```
 
@@ -142,7 +141,7 @@ Keep `cfg.yaml`, `mean10000.csv` and `var10000.csv` beside `full_10000.pt`. Repl
 ### 4. Export the policy
 
 ```bash
-python scripts/export_policy.py --weight /path/to/run/full_10000.pt
+python3 scripts/hopper.py export --weight /path/to/run/full_10000.pt
 ```
 
 The output directory contains `actor.txt`, `estimator.txt`, and the matching mean/variance CSV files. Export preserves the legacy text parameter layout. A downstream controller must implement the same observation, filtering, normalization, action scaling and ankle mapping. [Interface details](docs/method.md).
@@ -167,8 +166,14 @@ Hopper_Nature/
 ├── assets/                       # Model render, recorded demo previews and full MP4s
 ├── docs/                         # Installation, training, method and validation
 ├── scripts/                      # Portable export, media and release utilities
+│   └── hopper.py                 # Select this workspace's Python and RaiSim 1.1.8
+├── .local/                       # Git-ignored workstation files; created locally
+│   ├── env/                      # Project-only Conda environment, Python 3.10
+│   ├── runtime/raisimLib/         # Separately installed RaiSim 1.1.8 and viewer
+│   └── checkpoints/              # Optional local checkpoint bundles
 ├── raisimGymTorch/
 │   ├── env/envs/hound/            # Hopper environment, configuration, training/replay
+│   ├── data/dhal_one_leg/         # Git-ignored training runs and matching snapshots
 │   ├── algo/ppo/                 # PPO, estimator and barrier critic
 │   └── helper/                   # Configuration, logging and path helpers
 ├── rsc/                          # Robot model revisions and calibration records
@@ -176,7 +181,7 @@ Hopper_Nature/
 └── thirdParty/pybind11/           # Vendored Python/C++ bindings
 ```
 
-The historical `hound` module and `dhal_one_leg` run names are retained for compatibility. The active robot is selected in `Environment.hpp`; older robot folders are historical resources.
+The historical `hound` module and `dhal_one_leg` run names are retained for compatibility. The active robot is selected in `Environment.hpp`; older robot folders are historical resources. Local environments, simulator dependencies, research checkpoints and original recordings are installed or restored separately; see [workspace organization and backup](docs/workspace.md).
 
 </details>
 

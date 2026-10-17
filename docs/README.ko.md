@@ -2,7 +2,7 @@
 
 Hopper Nature는 병렬 발목 기구를 가진 외발 로봇의 서기·호핑 제어를 학습하는 RaiSim/PyTorch 프로젝트입니다. 공개 범위는 로봇 모델, C++ 시뮬레이션 환경, PPO와 상태 추정기, 학습·정책 재생·텍스트 가중치 추출 도구입니다.
 
-[프로젝트 소개](../README.md) · [설치 상세](installation.md) · [학습 상세](training.md) · [구조와 제어 인터페이스](method.md)
+[프로젝트 소개](../README.md) · [설치 상세](installation.md) · [한 폴더 작업공간](workspace.md) · [학습 상세](training.md) · [구조와 제어 인터페이스](method.md)
 
 ## 실행 환경
 
@@ -16,27 +16,26 @@ Hopper Nature는 병렬 발목 기구를 가진 외발 로봇의 서기·호핑 
 먼저 `build-essential cmake git libeigen3-dev`를 설치하고, RaiSim 1.x 키를 `~/.raisim/activation.raisim`에 준비하세요.
 
 ```bash
-mkdir -p ~/hopper_ws
-cd ~/hopper_ws
-git clone https://github.com/raisimTech/raisimLib.git
-git -C raisimLib checkout 74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca
-git clone --branch withDHALOneLeg https://github.com/HYUNSEOKKKKKK/Hopper_Nature.git
-cd Hopper_Nature
+git clone --branch withDHALOneLeg https://github.com/HYUNSEOKKKKKK/Hopper_Nature.git ~/Hopper_Nature
+cd ~/Hopper_Nature
+mkdir -p .local/runtime
+git clone https://github.com/raisimTech/raisimLib.git .local/runtime/raisimLib
+git -C .local/runtime/raisimLib checkout 74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca
 
-conda create -n hopper python=3.10 pip -y
-conda activate hopper
+conda create --prefix "$PWD/.local/env" python=3.10 pip -y
+conda activate "$PWD/.local/env"
 python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
 python -m pip install -r requirements.txt
-python setup.py build_ext --inplace --CMAKE_PREFIX_PATH \
-  "$PWD/../raisimLib/raisim/linux;$PWD/../raisimLib/thirdParty/Eigen3"
+python3 scripts/hopper.py build
+python3 scripts/hopper.py doctor
 ```
 
-이후 명령은 모두 Hopper 저장소 루트에서 실행합니다.
+코드, Python 환경, RaiSim 1 의존성과 학습 결과를 `~/Hopper_Nature/` 안에서 관리합니다. 런처는 명령마다 전용 Python과 라이브러리 경로를 선택하므로 다른 RaiSim 프로젝트의 셸 설정에 의존하지 않습니다. `.local/`과 학습 결과는 Git에 포함되지 않으며 별도로 보관해야 합니다.
 
 ## 먼저 작은 환경으로 확인
 
 ```bash
-python -m raisimGymTorch.env.envs.hound.runner \
+python3 scripts/hopper.py train \
   --num-envs 4 --num-threads 2 --iterations 2 \
   --headless --no-tensorboard
 ```
@@ -46,23 +45,24 @@ python -m raisimGymTorch.env.envs.hound.runner \
 ## 본 학습
 
 ```bash
-python -m raisimGymTorch.env.envs.hound.runner \
+python3 scripts/hopper.py train \
   --num-envs 400 --num-threads 16 --headless --no-tensorboard
 ```
 
 CPU 사양에 맞춰 환경 수와 스레드 수를 조절하세요. 원래 설정은 400개 환경과 60개 스레드입니다. 기본 학습은 0–10000 업데이트이며 1000마다 저장합니다. 화면을 보려면 `--headless`를 빼고 지정된 RaiSim 1.x Unity 뷰어를 별도로 연결합니다.
 
 ```bash
-tensorboard --logdir raisimGymTorch/data/dhal_one_leg --port 6700
+python3 scripts/hopper.py python -m tensorboard.main \
+  --logdir raisimGymTorch/data/dhal_one_leg --port 6700
 ```
 
 ## 체크포인트 재생과 추출
 
 ```bash
-python -m raisimGymTorch.env.envs.hound.tester \
+python3 scripts/hopper.py replay \
   --weight /path/to/run/full_10000.pt
 
-python scripts/export_policy.py --weight /path/to/run/full_10000.pt
+python3 scripts/hopper.py export --weight /path/to/run/full_10000.pt
 ```
 
 체크포인트와 같은 폴더에 `cfg.yaml`, `mean10000.csv`, `var10000.csv`가 있어야 합니다. 화면 없이 확인하려면 재생 명령에 `--headless --no-realtime`을 붙이세요. 재생은 22초 동안 서기와 x축 속도 명령을 번갈아 적용합니다. 종료된 에피소드는 자동 초기화되므로 끝까지 실행되었다는 사실만으로 연속 호핑 성공을 의미하지는 않습니다.

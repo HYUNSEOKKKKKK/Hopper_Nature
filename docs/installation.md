@@ -12,26 +12,28 @@ The local development dependency is **RaiSim 1.1.8**, from `raisimTech/raisimLib
 sudo apt update
 sudo apt install -y build-essential cmake git libeigen3-dev
 
-mkdir -p ~/hopper_ws
-cd ~/hopper_ws
-git clone https://github.com/raisimTech/raisimLib.git
-git -C raisimLib checkout 74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca
-git clone --branch withDHALOneLeg https://github.com/HYUNSEOKKKKKK/Hopper_Nature.git
-cd Hopper_Nature
+git clone --branch withDHALOneLeg https://github.com/HYUNSEOKKKKKK/Hopper_Nature.git ~/Hopper_Nature
+cd ~/Hopper_Nature
+mkdir -p .local/runtime
+git clone https://github.com/raisimTech/raisimLib.git .local/runtime/raisimLib
+git -C .local/runtime/raisimLib checkout 74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca
 ```
 
 Expected layout:
 
 ```text
-~/hopper_ws/
-├── raisimLib/
-│   ├── raisim/linux/       # RaiSim headers, libraries and CMake package
-│   ├── thirdParty/Eigen3/
-│   └── raisimUnity/        # Legacy viewer distributed with that revision
-└── Hopper_Nature/
+~/Hopper_Nature/
+├── scripts/hopper.py
+├── raisimGymTorch/
+└── .local/
+    ├── env/                         # Created in step 3
+    └── runtime/raisimLib/
+        ├── raisim/linux/            # RaiSim 1.1.8 headers/libraries/CMake package
+        ├── thirdParty/Eigen3/
+        └── raisimUnity/             # Matching legacy viewer
 ```
 
-An existing layout with Hopper inside `raisimLib/` also works; pass the actual RaiSim and Eigen prefix paths at build time. The project directory name does not affect model or output paths.
+The `.local/` directory is ignored by Git. Existing external Python and SDK installations can be selected in `.local/workspace.json`; see [workspace paths](workspace.md#use-an-existing-python-or-sdk-installation). The project directory name does not affect model or output paths.
 
 ## 2. RaiSim activation
 
@@ -44,13 +46,13 @@ The engine requires activation even when training without a viewer. License avai
 With an existing Miniforge/Conda installation:
 
 ```bash
-conda create -n hopper python=3.10 pip -y
-conda activate hopper
+conda create --prefix "$PWD/.local/env" python=3.10 pip -y
+conda activate "$PWD/.local/env"
 python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
 python -m pip install -r requirements.txt
 ```
 
-Alternatively, use `python3.10 -m venv .venv` and `source .venv/bin/activate` before the same pip commands. On a system without Python 3.10, install it first or use Conda.
+Alternatively, use `python3.10 -m venv .venv` and `source .venv/bin/activate` before the same pip commands, then set `"python": ".venv/bin/python"` in `.local/workspace.json`. On a system without Python 3.10, install it first or use Conda. Create the environment at its final path; recreate it after relocating the workspace.
 
 For GPU training, replace the CPU PyTorch install command with an appropriate **2.5.1** wheel from the [official previous-version instructions](https://pytorch.org/get-started/previous-versions/). GPU execution is optional; the runner chooses CUDA when `torch.cuda.is_available()` is true. CUDA training has not been checked as part of this release preparation.
 
@@ -58,24 +60,22 @@ The Python requirements pin the directly used packages. PyTorch is separate beca
 
 ## 4. Build the C++ extension
 
-From the Hopper repository root, with the Python environment activated:
+From the Hopper repository root:
 
 ```bash
-python setup.py build_ext --inplace --CMAKE_PREFIX_PATH \
-  "$PWD/../raisimLib/raisim/linux;$PWD/../raisimLib/thirdParty/Eigen3"
-
-python -c "from raisimGymTorch.env.bin import hound; print(hound.__file__)"
+python3 scripts/hopper.py build
+python3 scripts/hopper.py doctor
 ```
 
-The build writes `raisimGymTorch/env/bin/hound.cpython-310-*.so`. It does not need to build the upstream RaiSim examples or install a global Python package. Use `python -m ...` from the repository root so this checkout is imported.
+The build writes `raisimGymTorch/env/bin/hound.cpython-310-*.so`. It does not need to build the upstream RaiSim examples or install a global Python package. The launcher selects this checkout and its own dependency paths even when another RaiSim project is configured in the parent shell.
 
-After changing `Environment.hpp`, rebuild with the same command. When switching Python interpreters, use a clean build directory, for example `python setup.py build_ext --inplace --build-temp build/python310-clean --CMAKE_PREFIX_PATH '...'` with the real prefixes substituted.
+After changing `Environment.hpp`, rebuild with the same command. The launcher uses `build/workspace-py310/`. When switching Python interpreters or SDK locations, start with a new build directory or archive that directory before rebuilding. The direct `python setup.py build_ext --inplace --CMAKE_PREFIX_PATH 'RAISIM_PREFIX;EIGEN_PREFIX'` command is also supported with the real prefixes substituted.
 
 Then run the [two-update check](training.md#first-run).
 
 ## 5. Optional visualization
 
-This environment creates a legacy `RaisimServer` when `render` is true. Use the **RaiSim Unity** client from the pinned RaiSim 1.x checkout and connect to the local server (default TCP port 8080). Run the `linux/raisimUnity.x86_64` executable inside that checkout's `raisimUnity` directory. Start the simulation and client in separate terminals.
+This environment creates a legacy `RaisimServer` when `render` is true. Use the **RaiSim Unity** client from the pinned RaiSim 1.x checkout and connect to the local server (default TCP port 8080). Run `python3 scripts/hopper.py viewer` in another terminal; it starts the configured `raisimUnity/linux/raisimUnity.x86_64` executable.
 
 Install the viewer's Linux dependencies if needed:
 

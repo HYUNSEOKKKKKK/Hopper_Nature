@@ -1,6 +1,6 @@
 # Validation record
 
-Date: **2026-10-16**. These checks cover release tooling and local simulation execution. They do not report trained policy or hardware performance.
+Initial release check: **2026-10-16**. Workspace consolidation check: **2026-10-17**. These checks cover release tooling and local simulation execution. They do not report trained policy or hardware performance.
 
 ## Environment
 
@@ -62,6 +62,18 @@ Replace `<timestamp>` before executing the commands. GitHub Actions runs only th
 The current native extension was rebuilt during local cleanup, including the final environment settings committed in `029f4d5`. The existing local `2026-10-10-21-43-35/full_10000.pt` checkpoint was copied with its configuration, environment source and matching normalization files into the workstation's Git-excluded handoff folder. Its saved `Environment.hpp` matched the current source byte for byte.
 
 A headless replay completed **22 simulated seconds / 2200 steps with zero episode terminations** for that one rollout. The documentation checks and four CLI unittest cases also passed. This check establishes that the preserved bundle can be loaded and run on the original workstation; it does not establish tracking accuracy, robustness or a recording-to-checkpoint association. The earlier smoke-run results above used a different, untrained checkpoint and remain a separate record. Local build/replay logs and dependency snapshots are indexed in [RESUME.md](../RESUME.md).
+
+## One-folder workspace check — 2026-10-17
+
+The project, its historical training runs, a dedicated Python 3.10 Conda prefix and the local RaiSim 1.1.8/Eigen/Unity dependencies were consolidated into one workstation directory. The Python prefix was cloned from the existing RaiSim 1 environment; this was not a fresh pip-wheel installation. The research `Environment.hpp`, `cfg.yaml` and robot models were unchanged.
+
+- All 1,289 files in the 31 historical training runs matched their pre-move SHA-256 hashes; the runs contain 338 checkpoints. Old local paths remain compatibility links.
+- `scripts/hopper.py build` rebuilt the native extension using the workspace's own Python, SDK and Eigen prefixes.
+- `doctor` confirmed that the package, native extension and actual loaded `libraisim.so.1.1.8` came from that workspace.
+- Replay of the preserved `2026-10-10-21-43-35/full_10000.pt` completed 22 simulated seconds / 2200 control steps with zero episode terminations in this rollout. Export also completed.
+- Seven unittest cases passed, including launcher checks from a foreign working directory with inherited RaiSim 2 paths, rejection of a RaiSim 2 SDK and missing-configuration diagnostics. Documentation links, public Python syntax and active robot assets passed the release check.
+
+The launcher changes process paths and command selection; it does not change the controller or training formulation. Local migration checks, environment inventories and build/replay/export logs stay in the Git-ignored workstation records described by [RESUME.md](../RESUME.md).
 
 ## Remaining evidence
 
