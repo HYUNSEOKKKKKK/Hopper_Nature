@@ -1,6 +1,6 @@
 # Validation record
 
-Initial release check: **2026-10-16**. Workspace consolidation check: **2026-10-17**. These checks cover release tooling and local simulation execution. They do not report trained policy or hardware performance.
+Initial release check: **2026-10-16**. Workspace consolidation check: **2026-10-17**. Local Unity/recording check: **2026-10-18**. These checks cover release tooling and local simulation execution. They do not report trained policy or hardware performance.
 
 ## Environment
 
@@ -9,7 +9,7 @@ Initial release check: **2026-10-16**. Workspace consolidation check: **2026-10-
 | OS | Ubuntu 22.04, Linux x86_64, kernel 6.8 |
 | Compiler / CMake | GCC 11.4.0 / CMake 3.22.1 |
 | Python | 3.10.19 |
-| PyTorch | Existing Conda CPU build `2.5.1.post303`; CUDA unavailable |
+| PyTorch | Existing Conda `2.5.1.post303`; earlier checks selected CPU |
 | NumPy / ruamel.yaml | 2.2.6 / 0.17.21 |
 | TensorBoard / AdamP | 2.20.0 / 0.3.0 |
 | RaiSim | 1.1.8 from upstream revision `74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca`, with an existing local key |
@@ -99,11 +99,26 @@ Two installations were checked:
 
 Local logs, the fresh environment's package versions and smoke-run artifacts are preserved under `.local/validation/` with `hopper-` and `readme-` prefixes. The temporary environment and source copy were removed after validation. These checks verify installation and execution, rather than policy performance.
 
+## Project-local Unity and recording — 2026-10-18
+
+Direct task entry points now accept `--viewer`. They launch only `.local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64` inside the checkout, wait for the native server's connection status, and close the owned client on exit. Manual two-terminal startup and `--headless` remain available. A small native connection-status accessor was added; the research environment, configuration and robot assets were unchanged.
+
+- Rebuilt the native extension with `python setup.py build_ext --inplace` in `hopper_nature`.
+- Ran `python runner.py --viewer --num-envs 4 --num-threads 2 --iterations 2 --no-tensorboard` with output isolated under the local validation directory and inherited `LD_LIBRARY_PATH` / `PYTHONPATH` removed. The project-local Unity connected and two PPO updates completed. With desktop/GPU access, the existing Conda build selected CUDA for this short run; this is not a full GPU-training benchmark.
+- The client generated `2026-10-18-00-12-41policy_0.mp4` inside its project-local `Screenshot/` directory. FFprobe parsed it as H.264, 1024 × 800, 188 frames, 3.134 seconds. An extracted frame was visually inspected and showed the robot and connected Unity interface. This recording used the untrained iteration-0 policy.
+- Ran `python tester.py --viewer --weight .../full_10000.pt --duration 22` with the preserved policy. The internal Unity connected, all 2200 control steps completed, and this rollout had zero episode terminations. The client closed after replay. The tester does not automatically record video.
+- Repeated the two-update training and 22-second replay without a viewer using `--headless`.
+- The Linux extension now links the complete selected RaiSim SDK with runtime search paths that take priority over inherited workspace library paths. Another 2200-step replay with the workstation's legacy `LD_LIBRARY_PATH` still set verified that all five loaded RaiSim libraries came from this checkout. A clean source export in a different directory was also built with system GCC 11.4 / CMake 3.22 and replayed for 2200 steps; all five RaiSim libraries came from that export’s own SDK despite the inherited legacy paths.
+- Twelve unittest cases passed, including refusal to reuse an already connected client or a legacy viewer on `PATH`, local client launch without inherited library/Python paths, child cleanup, mutually exclusive viewer/headless options, and the existing CLI/source/documentation/robot checks.
+- The local client executable and managed application assembly match the pinned public upstream revision. Its tracked `gui_settings.xml` already enables automatic connection to `127.0.0.1:8080`, so this workflow does not depend on workstation-specific Unity settings.
+
+The workstation's `raisimUnity` alias was updated to this same internal executable. This alias is a convenience for the existing machine; new users can use `--viewer` directly after the README installation. Local logs, video metadata and an extracted frame are preserved under `.local/validation/unity-*`; automatically launched Unity logs are under `.local/logs/`.
+
 ## Remaining evidence
 
 - A fresh OS installation has not been checked. The fresh Conda/pip-wheel check above reused the existing machine's system packages, verified SDK files and activation key.
 - License acquisition and activation on another machine have not been checked.
-- CUDA training, the Unity client, viewer video recording, Windows/macOS and hardware execution have not been checked here.
+- Full CUDA training, Windows/macOS and hardware execution have not been checked here. The local Unity/recording check above used the existing desktop, GPU driver and activation key.
 - A representative final checkpoint, full training run, measured tracking metrics and a recorded simulation demo are still to be supplied. Maintainer-supplied hardware recordings are now included in [the demo record](demos.md); their association with a specific policy checkpoint is not yet documented.
 
 When a result bundle is selected, add its source revision, model revision, configuration, checkpoint/CSV checksums, evaluation commands and measurements to this record. Record its demo intervals in [demos.md](demos.md).

@@ -6,6 +6,7 @@ if __package__ in (None, ''):
     sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from raisimGymTorch.helper.hopper_config import REPO_ROOT, TASK_DIR, load_config, positive_int
+from raisimGymTorch.helper.hopper_viewer import check_viewer, start_viewer, stop_viewer, viewer_argument
 
 parser = argparse.ArgumentParser(description="Train the Hopper policy with PPO.")
 parser.add_argument('--config', type=Path, help='YAML configuration (default: task cfg.yaml)')
@@ -14,9 +15,10 @@ parser.add_argument('--iterations', type=positive_int, default=10001, help='numb
 parser.add_argument('--num-envs', type=positive_int, help='override parallel environment count')
 parser.add_argument('--num-threads', type=positive_int, help='override OpenMP thread count')
 parser.add_argument('--seed', type=int, help='override the configuration seed')
-parser.add_argument('--headless', action='store_true', help='disable visualization and video')
+viewer_argument(parser)
 parser.add_argument('--no-tensorboard', action='store_true', help='do not launch a browser/server')
 args = parser.parse_args()
+viewer_executable = check_viewer(parser, args.viewer)
 
 from ruamel.yaml import YAML, dump, RoundTripDumper
 from raisimGymTorch.env.RaisimGymVecEnv import RaisimGymVecEnv as VecEnv
@@ -43,6 +45,8 @@ task_path = str(TASK_DIR)
 # config
 cfg = load_config(args.config, num_envs=args.num_envs, num_threads=args.num_threads,
                   headless=args.headless, seed=args.seed)
+if args.viewer:
+    cfg['environment']['render'] = True
 
 # create environment from the configuration file
 env = VecEnv(RaisimGymEnv(str(REPO_ROOT / 'rsc'), dump(cfg['environment'], Dumper=RoundTripDumper)))
@@ -105,6 +109,7 @@ ppo = PPO.PPO(actor=actor,
               )
 
 reward_analyzer = RewardAnalyzer(env, ppo.writer)
+viewer = start_viewer(env, viewer_executable)
 # scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[2000], gamma=0.5)
 scheduler = torch.optim.lr_scheduler.MultiStepLR(ppo.optimizer, milestones=[1000], gamma=0.75)
 
@@ -208,3 +213,4 @@ for update in range(args.iterations):
     print('----------------------------------------------------\n')
 
 env.close()
+stop_viewer(viewer)

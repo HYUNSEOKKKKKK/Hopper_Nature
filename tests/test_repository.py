@@ -34,7 +34,7 @@ def check_markdown_links():
 
 def check_python():
     files = [ROOT / 'assets/images/render_robot.py']
-    files += [ROOT / 'raisimGymTorch/helper/hopper_config.py']
+    files += [ROOT / 'raisimGymTorch/helper/hopper_config.py', ROOT / 'raisimGymTorch/helper/hopper_viewer.py']
     files += [ROOT / f'raisimGymTorch/env/envs/hopper/{name}.py' for name in ('runner', 'tester', 'export')]
     for path in files:
         ast.parse(path.read_text(), filename=str(path))

@@ -35,11 +35,12 @@ python runner.py \
 | `--seed N` | YAML default: 1 |
 | `--log-dir PATH` | `raisimGymTorch/data/hopper` in this checkout |
 | `--headless` | Disable the viewer server, recording and evaluation pacing |
+| `--viewer` | Start the Unity inside this checkout, wait for connection, and close it on exit |
 | `--no-tensorboard` | Skip automatic TensorBoard server/browser; event logging still runs |
 
 The configuration uses 0.002 s physics steps, 0.01 s control steps and a 4 s rollout: 400 transitions per environment per PPO update. With 400 environments, that is 160,000 transitions per update. PPO uses four epochs, four minibatches, discount 0.99 and GAE lambda 0.95. The AdamP learning rate starts at 0.0003 and is multiplied by 0.75 at update 1000. These are configuration values, not measured performance.
 
-For visual training omit `--headless`, and connect the legacy viewer. Automatic TensorBoard uses port 6700; `--no-tensorboard` avoids conflicts when running several experiments.
+For visual training use `python runner.py --viewer`; it opens the project's own client. The original `python runner.py` command also works with a manually started local viewer. Automatic TensorBoard uses port 6700; `--no-tensorboard` avoids conflicts when running several experiments.
 
 ```bash
 tensorboard --logdir ~/Hopper_Nature/raisimGymTorch/data/hopper --port 6700
@@ -66,18 +67,22 @@ Checkpoints contain actor, action distribution, task critic, barrier critic, est
 
 Keep the checkpoint, its matching observation mean and variance, and `cfg.yaml` together. Archive `Environment.hpp`, source commit, dependency versions, seed and hardware with final experiments. Experiment directories and weight files are excluded from Git. A selected pretrained result can later be distributed as a release asset with a checksum.
 
+With `record_video: yes` and rendering enabled, evaluation rollouts are also recorded by the connected Unity client. Start the project-local client with `--viewer`; its MP4s go to `.local/runtime/raisimLib/raisimUnity/linux/Screenshot/` inside this checkout, separate from checkpoint bundles. The default evaluation rollout is 4 simulated seconds, recorded at updates 0, 1000, 2000, and so on. `--headless` disables recording. Unity logs from automatic launches are under `.local/logs/`.
+
 The public runner trains **from scratch**. The old `--mode retrain` branch was commented out; exact training resume is not implemented. Restoring network/optimizer weights alone would not restore curriculum, scheduler, observation/state running statistics, or random generators. Do not describe that as an exact continuation.
 
 ## Replay
 
 ```bash
-python tester.py \
+python tester.py --viewer \
   --weight /path/to/run/full_10000.pt --duration 22
 ```
 
 Replay reads `cfg.yaml` beside the checkpoint, creates one environment and one thread, loads matching observation statistics, then runs deterministic network inference. Simulation reset and physics still include environment randomization. Seed selection does not guarantee identical trajectories across parallel runs, hardware or dependency versions.
 
 Use `--headless --no-realtime` for a check without a viewer. Use `--config PATH` only when deliberately overriding the checkpoint configuration. A headless training configuration is automatically rendered during visual replay unless `--headless` is supplied.
+
+`--viewer` opens this checkout's Unity and waits for connection before replay begins. It is mutually exclusive with `--headless`. For manual startup use `python tester.py` without `--viewer` and open the project-local Unity in another terminal. The tester does not start automatic video recording.
 
 The fixed 22 s flat-ground schedule is:
 

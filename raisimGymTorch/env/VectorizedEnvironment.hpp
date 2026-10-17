@@ -118,6 +118,7 @@ class VectorizedEnvironment {
   void turnOffVisualization() { if(render_) environments_[0]->turnOffVisualization(); }
   void startRecordingVideo(const std::string& videoName) { if(render_) environments_[0]->startRecordingVideo(videoName); }
   void stopRecordingVideo() { if(render_) environments_[0]->stopRecordingVideo(); }
+  bool isViewerConnected() const { return render_ && environments_[0]->isViewerConnected(); }
   void getObStatistics(Eigen::Ref<EigenVec> &mean, Eigen::Ref<EigenVec> &var, float &count) {
     mean = obMean_; var = obVar_; count = obCount_; }
   void setObStatistics(Eigen::Ref<EigenVec> &mean, Eigen::Ref<EigenVec> &var, float count) {

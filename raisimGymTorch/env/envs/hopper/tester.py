@@ -10,6 +10,7 @@ if __package__ in (None, ''):
     sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from raisimGymTorch.helper.hopper_config import REPO_ROOT, checkpoint_path, load_config
+from raisimGymTorch.helper.hopper_viewer import check_viewer, start_viewer, stop_viewer, viewer_argument
 
 COMMAND_SCHEDULE = [
     (2.0, 0.00, 0.0, 0.0),
@@ -40,11 +41,12 @@ def main():
     parser.add_argument('-w', '--weight', type=checkpoint_path, required=True)
     parser.add_argument('--config', type=Path, help='override the checkpoint cfg.yaml')
     parser.add_argument('--duration', type=float, default=22.0, help='simulation seconds')
-    parser.add_argument('--headless', action='store_true')
+    viewer_argument(parser)
     parser.add_argument('--no-realtime', action='store_true', help='run without playback pacing')
     args = parser.parse_args()
     if not math.isfinite(args.duration) or args.duration <= 0:
         parser.error('--duration must be a finite positive number')
+    viewer_executable = check_viewer(parser, args.viewer)
 
     import numpy as np
     import torch
@@ -59,6 +61,7 @@ def main():
         cfg['environment']['render'] = True
     env = RaisimGymVecEnv(hopper.RaisimGymEnv(
         str(REPO_ROOT / 'rsc'), dump(cfg['environment'], Dumper=RoundTripDumper)))
+    viewer = None
     try:
         env.seed(cfg['seed'])
         checkpoint = torch.load(args.weight, map_location='cpu', weights_only=True)
@@ -76,6 +79,7 @@ def main():
         env.set_initial(0)
         env.reset()
         env.turn_on_visualization()
+        viewer = start_viewer(env, viewer_executable)
         dt = cfg['environment']['control_dt']
         reward_sum, terminations = 0.0, 0
         steps = math.ceil(args.duration / dt)
@@ -98,6 +102,7 @@ def main():
         print(f'Completed {steps} steps; mean reward={reward_sum / steps:.6f}; '
               f'episode terminations={terminations}')
     finally:
+        stop_viewer(viewer)
         env.turn_off_visualization()
         env.close()
 

@@ -65,6 +65,15 @@ class PublicCLI(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn('--weight', result.stderr)
 
+    def test_viewer_and_headless_are_mutually_exclusive(self):
+        for module in ('runner', 'tester'):
+            with self.subTest(module=module):
+                result = self.run_cli('-m', f'raisimGymTorch.env.envs.hopper.{module}',
+                                      '--viewer', '--headless')
+                self.assertEqual(result.returncode, 2)
+                self.assertIn('not allowed with argument', result.stderr)
+                self.assertNotIn('ModuleNotFoundError', result.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()

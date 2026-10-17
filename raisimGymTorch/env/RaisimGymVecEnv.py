@@ -47,6 +47,9 @@ class RaisimGymVecEnv:
     def stop_video_recording(self):
         self.wrapper.stopRecordingVideo()
 
+    def is_viewer_connected(self):
+        return self.wrapper.isViewerConnected()
+
     def step(self, action):
         self.wrapper.step(action, self._reward,self._barrierReward, self._done)
         return self._reward.copy(), self._done.copy(),  self._barrierReward.copy()

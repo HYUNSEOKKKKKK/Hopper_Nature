@@ -82,6 +82,15 @@ set(RAISIMGYM_ENV_DIR ${CMAKE_CURRENT_SOURCE_DIR}/raisimGymTorch/env/envs)
 FOREACH(subdir ${SUBDIRS})
     pybind11_add_module(${subdir} raisimGymTorch/env/raisim_gym.cpp raisimGymTorch/env/Yaml.cpp)
     target_link_libraries(${subdir} PRIVATE raisim::raisim ${Dependencies})
+    if(RAISIM_OS STREQUAL "linux")
+        # Resolve the complete selected SDK before inherited workspace library paths.
+        # Direct dependencies are needed because the upstream engine's own RUNPATH
+        # otherwise allows LD_LIBRARY_PATH to select another workspace's helpers.
+        target_link_libraries(${subdir} PRIVATE "-Wl,--no-as-needed"
+            raisim::raisimPng raisim::raisimODE raisim::raisimMine raisim::raisimZ
+            "-Wl,--as-needed")
+        set_property(TARGET ${subdir} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--disable-new-dtags")
+    endif()
     target_include_directories(${subdir} PUBLIC ${EIGEN3_INCLUDE_DIRS} ${RAISIMGYM_ENV_DIR}/${subdir} ${CMAKE_CURRENT_SOURCE_DIR}/raisimGymTorch/env)
     target_compile_options(${subdir} PRIVATE -fPIC -O3 -flto -mno-avx2)
     target_compile_definitions(${subdir} PRIVATE "-DRAISIMGYM_TORCH_ENV_NAME=${subdir}")

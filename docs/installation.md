@@ -10,7 +10,7 @@ The local development dependency is **RaiSim 1.1.8**, from `raisimTech/raisimLib
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential cmake git libeigen3-dev
+sudo apt install -y build-essential cmake git libeigen3-dev libvulkan1 libminizip1 ffmpeg
 
 git clone --branch withDHALOneLeg https://github.com/HYUNSEOKKKKKK/Hopper_Nature.git ~/Hopper_Nature
 cd ~/Hopper_Nature
@@ -77,7 +77,18 @@ Then run the [two-update check](training.md#first-run).
 
 ## 5. Optional visualization
 
-This environment creates a legacy `RaisimServer` when `render` is true. Use the **RaiSim Unity** client from the pinned RaiSim 1.x checkout and connect to the local server (default TCP port 8080). In another terminal, run `~/Hopper_Nature/.local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64` directly (adjust the checkout root if needed).
+The pinned RaiSim checkout contains both the engine and **RaiSim Unity** inside `.local/runtime/raisimLib/`. After building, the direct task commands can launch that client and wait for its connection to the simulation:
+
+```bash
+cd ~/Hopper_Nature/raisimGymTorch/env/envs/hopper
+python runner.py --viewer --num-envs 4 --num-threads 2 --iterations 2 --no-tensorboard
+# Or replay a complete checkpoint bundle:
+python tester.py --viewer --weight /path/to/run/full_10000.pt
+```
+
+No global alias or external workspace is used. The client must exist at `.local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64`; missing files or a failed connection produce a diagnostic. The launched window closes with the command. `--viewer` and `--headless` are mutually exclusive. A desktop display is required; on remote servers use `--headless`.
+
+For the original two-terminal workflow, omit `--viewer` and run `~/Hopper_Nature/.local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64` directly in another terminal. The default server port is 8080; this client uses `127.0.0.1` with automatic connection enabled in its `gui_settings.xml`.
 
 Install the viewer's Linux dependencies if needed:
 
@@ -85,7 +96,9 @@ Install the viewer's Linux dependencies if needed:
 sudo apt install -y libvulkan1 libminizip1 ffmpeg
 ```
 
-The pinned checkout also includes `raisimUnityOpengl/linux` for the older OpenGL client. Consult its [visualization documentation](https://github.com/raisimTech/raisimLib/blob/74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca/docs/sections/Visualizers.rst) for client controls. Current RaiSim 2 viewers are not the documented workflow here. Video recording depends on a connected compatible client and has not been validated by the headless checks.
+The pinned checkout also includes `raisimUnityOpengl/linux` for the older OpenGL client. Consult its [visualization documentation](https://github.com/raisimTech/raisimLib/blob/74b836fba1dbd3227ce61f8abf7bffbd8f6e41ca/docs/sections/Visualizers.rst) for client controls. The commands above use the Vulkan Unity client.
+
+With rendering and `record_video: yes`, the runner records evaluation rollouts to `.local/runtime/raisimLib/raisimUnity/linux/Screenshot/` inside this checkout. Checkpoints remain in `raisimGymTorch/data/hopper/`. The tester does not start automatic recording. Unity startup/connection logs from `--viewer` are saved under `.local/logs/`. See the [local GUI/recording validation](validation.md) for checks actually performed.
 
 ## Troubleshooting
 
@@ -100,6 +113,8 @@ The pinned checkout also includes `raisimUnityOpengl/linux` for the older OpenGL
 | `ruamel.yaml` dump/API error | Install the pinned 0.17.21 version; this source uses its older API. |
 | High memory use or CPU contention | Start with `--num-envs 4 --num-threads 2`; increase only after the short check succeeds. |
 | No viewer, remote host or no display | Use `--headless --no-tensorboard`; launch TensorBoard separately when useful. |
+| `--viewer` reports missing Unity | Complete the pinned RaiSim clone/checkout step inside this repository; rebuild the extension after updating source. |
+| Unity exits or does not connect | Read the printed `.local/logs/unity-*.log`; check display access, viewer libraries, and `gui_settings.xml` at `127.0.0.1:8080`. Only one simulation can use port 8080 at a time. |
 | Checkpoint shape or missing CSV error | Use the checkpoint's own `cfg.yaml` and the mean/variance files from the same iteration. |
 
 Fresh OS installation and successful activation on another machine remain outside the [local validation record](validation.md).

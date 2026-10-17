@@ -1,6 +1,6 @@
 # Hopper 작업 재개 안내
 
-마지막 정리: **2026-10-17**. 당분간 개발을 쉬는 상태이며, RaiSim 1 전용의 한 폴더 작업공간으로 코드·실행 의존성·학습 자료를 모았습니다. 다음 작업은 이 문서부터 확인하세요.
+마지막 정리: **2026-10-18**. 당분간 개발을 쉬는 상태이며, RaiSim 1 전용의 한 폴더 작업공간으로 코드·실행 의존성·학습 자료를 모았습니다. 다음 작업은 이 문서부터 확인하세요.
 
 ## 현재 상태
 
@@ -9,6 +9,7 @@
 - 활성 로봇: `rsc/Hop2_Parallel_Nature_20261008/Hop2_Parallel_Nature_20261008.urdf`, 명목 질량 17.100 kg.
 - 시뮬레이터: **RaiSim 1.1.8**. 현재 웹 문서의 RaiSim 2와 구분해서 사용합니다.
 - Python 3.10, PyTorch 2.5.1 계열, `ruamel.yaml==0.17.21`. 이 컴퓨터에서는 이름이 `hopper_nature`인 전용 Conda 환경을 사용하며, `.local/runtime/raisimLib/`에 RaiSim 1.1.8·Eigen·Unity를 보관했습니다. 기존 방식인 `setup.py` 빌드와 `runner.py`/`tester.py` 직접 실행을 기본으로 사용합니다. `.local/env`는 전용 Conda 환경의 호환 링크입니다.
+- `runner.py --viewer`와 `tester.py --viewer`는 프로젝트 내부 Unity를 실행하고 연결을 기다립니다. 영상은 `.local/runtime/raisimLib/raisimUnity/linux/Screenshot/`, 로그는 `.local/logs/`에 저장합니다. 로컬 `raisimUnity` alias도 내부 Unity를 가리킵니다.
 - 작업 폴더·native 모듈·결과 폴더 이름을 모두 `hopper`로 통일했습니다. `setup.py`, `runner.py`, `tester.py`, `export.py`를 직접 실행합니다.
 - README에 야외 `IMG_8769.MP4`와 실내 `IMG_8770.MP4`의 GIF 미리보기·전체 MP4를 게시했습니다.
 
@@ -28,11 +29,11 @@
 | 보관 자료의 SHA-256 | `.local/inventory/archive-manifest.json` |
 | 정리·실행 확인 기록 | `.local/validation/`, `.local/inventory/cleanup-report.json` |
 
-기존 저장소와 형제 디렉터리에 나뉘어 있던 학습 기록은 `raisimGymTorch/data/hopper/` 한 곳으로 모았습니다. 31개 실행·338개 체크포인트가 있으며, 이동한 학습 파일 1,289개의 SHA-256이 모두 일치했습니다. 옛 로컬 경로는 호환 링크로 유지했습니다. **코드만 Git에 있다고 체크포인트·원본 영상까지 백업된 것은 아닙니다.** `.local/`의 복사본도 같은 디스크에 있으므로 장기 보관 시 별도 저장장치에 함께 복사하세요.
+기존 저장소와 형제 디렉터리에 나뉘어 있던 학습 기록은 `raisimGymTorch/data/hopper/` 한 곳으로 모았습니다. 정리 당시 31개 실행·338개 체크포인트를 보존했고, 이동한 학습 파일 1,289개의 SHA-256이 모두 일치했습니다. 옛 로컬 경로는 호환 링크로 유지했습니다. **코드만 Git에 있다고 체크포인트·원본 영상까지 백업된 것은 아닙니다.** `.local/`의 복사본도 같은 디스크에 있으므로 장기 보관 시 별도 저장장치에 함께 복사하세요.
 
 기존 `export.py`가 가리키던 최근 실행은 `2026-10-10-21-43-35/full_10000.pt`입니다. 해당 실행의 `Environment.hpp`는 정리 시점 소스와 바이트 단위로 일치했습니다. 이 파일을 편의상 보관했으며, 공개 대표 정책이나 두 영상에 사용된 정책으로 확정한 것은 아닙니다.
 
-`hopper_nature` 환경에서 이름 변경 후 직접 재빌드·2회 PPO 학습·기존 정책의 22초/2200스텝 재생·가중치 추출을 확인했습니다. 별도의 새 Conda 환경에서도 README의 CPU PyTorch wheel과 requirements만 설치한 뒤 깨끗한 소스 사본에서 같은 빌드·학습·재생·추출 절차를 통과했습니다. 테스트 8개도 통과했고, 연구 설정·로봇 모델·기존 학습 파일 1,289개의 내용은 그대로 보존했습니다. 상세 범위는 [검증 기록](docs/validation.md)에 남겼습니다.
+`hopper_nature` 환경에서 이름 변경 후 직접 재빌드·2회 PPO 학습·기존 정책의 22초/2200스텝 재생·가중치 추출을 확인했습니다. 별도의 새 Conda 환경에서도 README의 CPU PyTorch wheel과 requirements만 설치한 뒤 깨끗한 소스 사본에서 같은 빌드·학습·재생·추출 절차를 통과했습니다. Unity 실제 실행·녹화와 테스트 12개도 통과했고, 연구 설정·로봇 모델·기존 학습 파일 1,289개의 내용은 그대로 보존했습니다. 상세 범위는 [검증 기록](docs/validation.md)에 남겼습니다.
 
 ## 다음에 시작할 때
 
@@ -62,7 +63,7 @@ python raisimGymTorch/env/envs/hopper/tester.py \
 - 연구실 YouTube 영상이 공개되면 실제 URL을 README 데모 바로 아래와 [영상 기록](docs/demos.md)에 연결합니다. 현재 URL은 아직 전달받지 않았습니다.
 - 공개 대표 체크포인트를 선정하고 모델·설정·정규화 CSV·출처 커밋·SHA-256을 묶어 배포합니다.
 - 두 하드웨어 촬영 영상과 정책 체크포인트의 대응 관계를 확인합니다.
-- 정량 성능, CUDA, 다른 컴퓨터의 OS·라이선스를 포함한 새 설치, Unity 영상 녹화, 실제 하드웨어 제어는 각각 별도 검증이 필요합니다. 기존 [검증 기록](docs/validation.md)과 혼동하지 마세요.
+- 정량 성능, CUDA, 다른 컴퓨터의 OS·라이선스를 포함한 새 설치, 실제 하드웨어 제어는 각각 별도 검증이 필요합니다. 기존 [검증 기록](docs/validation.md)과 혼동하지 마세요.
 
 ## 정리 원칙
 

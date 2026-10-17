@@ -17,7 +17,7 @@ Hopper Nature는 병렬 발목 기구를 가진 외발 로봇의 서기·호핑 
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential cmake git libeigen3-dev
+sudo apt install -y build-essential cmake git libeigen3-dev libvulkan1 libminizip1 ffmpeg
 
 conda create -n hopper_nature python=3.10 pip -y
 conda activate hopper_nature
@@ -36,6 +36,8 @@ python -c "from raisimGymTorch.env.bin import hopper; print(hopper.__file__)"
 
 코드, RaiSim 1 의존성과 학습 결과는 `~/Hopper_Nature/`에서 관리하고, Python은 이름이 `hopper_nature`인 Conda 환경을 사용합니다. `setup.py`가 내부 SDK를 찾고, `runner.py`/`tester.py`는 자신의 파일 위치를 기준으로 이 저장소를 읽습니다. 작업 폴더와 결과 폴더는 모두 `hopper`이며 기존 방식으로 직접 빌드·실행합니다. `.local/`과 학습 결과는 Git에 포함되지 않으며 별도로 보관해야 합니다.
 
+위 RaiSim 설치 단계는 Unity도 프로젝트 내부에 설치합니다. `--viewer`를 주면 이 Unity를 직접 실행하고 연결을 기다립니다. 다른 작업공간이나 개인 alias가 필요하지 않습니다. 화면을 볼 수 있는 데스크톱 환경에서 사용하고, 디스플레이가 없는 서버에서는 `--headless`를 사용하세요.
+
 ## 먼저 작은 환경으로 확인
 
 아래 명령은 작업 폴더에서 직접 실행합니다.
@@ -50,6 +52,12 @@ python runner.py \
 
 2회의 PPO 업데이트를 실행하고 `raisimGymTorch/data/hopper/<시간>/`에 설정과 체크포인트를 저장합니다. `full_0.pt`는 첫 업데이트 **전**에 저장되므로 학습된 결과물이 아닙니다.
 
+창과 녹화까지 확인하려면 같은 폴더에서 다음 명령을 실행합니다. 창은 작업이 끝나면 자동으로 닫힙니다.
+
+```bash
+python runner.py --viewer --num-envs 4 --num-threads 2 --iterations 2 --no-tensorboard
+```
+
 ## 본 학습
 
 ```bash
@@ -57,7 +65,7 @@ python runner.py \
   --num-envs 400 --num-threads 16 --headless --no-tensorboard
 ```
 
-CPU 사양에 맞춰 환경 수와 스레드 수를 조절하세요. 원래 설정은 400개 환경과 60개 스레드입니다. 기본 학습은 0–10000 업데이트이며 1000마다 저장합니다. 화면을 보려면 `--headless`를 빼고 지정된 RaiSim 1.x Unity 뷰어를 별도로 연결합니다.
+CPU 사양에 맞춰 환경 수와 스레드 수를 조절하세요. 원래 설정은 400개 환경과 60개 스레드입니다. 기본 학습은 0–10000 업데이트이며 1000마다 저장합니다. 화면과 함께 본 학습을 하려면 `python runner.py --viewer`를 실행합니다.
 
 ```bash
 python -m tensorboard.main \
@@ -67,13 +75,21 @@ python -m tensorboard.main \
 ## 체크포인트 재생과 추출
 
 ```bash
-python tester.py \
+python tester.py --viewer \
   --weight ../../../data/hopper/RUN_TIMESTAMP/full_10000.pt
 
 python export.py --weight ../../../data/hopper/RUN_TIMESTAMP/full_10000.pt
 ```
 
-`RUN_TIMESTAMP`는 학습 실행 폴더 이름으로 바꾸고 실제 저장된 회차를 선택하세요. 체크포인트와 같은 폴더에 `cfg.yaml`, `mean10000.csv`, `var10000.csv`가 있어야 합니다. 화면 없이 확인하려면 재생 명령에 `--headless --no-realtime`을 붙이세요. 재생은 22초 동안 서기와 x축 속도 명령을 번갈아 적용합니다. 종료된 에피소드는 자동 초기화되므로 끝까지 실행되었다는 사실만으로 연속 호핑 성공을 의미하지는 않습니다.
+`RUN_TIMESTAMP`는 학습 실행 폴더 이름으로 바꾸고 실제 저장된 회차를 선택하세요. 체크포인트와 같은 폴더에 `cfg.yaml`, `mean10000.csv`, `var10000.csv`가 있어야 합니다. 재생은 22초 동안 서기와 x축 속도 명령을 번갈아 적용합니다. 종료된 에피소드는 자동 초기화되므로 끝까지 실행되었다는 사실만으로 연속 호핑 성공을 의미하지는 않습니다.
+
+화면 없이 확인할 때는 `--viewer`를 빼고 `--headless --no-realtime`을 사용하세요. 두 옵션은 함께 쓸 수 없습니다. 기존 방식대로 Unity를 별도 터미널에서 직접 실행하려면 다음 경로를 사용하고, 학습·재생 명령에서는 `--viewer`를 뺍니다.
+
+```bash
+~/Hopper_Nature/.local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64
+```
+
+영상은 **`.local/runtime/raisimLib/raisimUnity/linux/Screenshot/`**에 저장됩니다. 학습 결과의 `data/hopper/`와 별도이지만 모두 프로젝트 안입니다. `record_video: yes`이고 렌더링을 켰을 때 runner가 0·1000·2000… 업데이트의 평가 구간(기본 4초)을 녹화합니다. tester는 화면 재생만 하고 자동 녹화는 하지 않습니다. 자동 실행된 Unity의 로그는 `.local/logs/`에 있습니다.
 
 `actor.txt`, `estimator.txt` 추출은 하드웨어 제어기 전체를 제공하는 것이 아닙니다. 실제 제어기에 연결하려면 관측값, 필터, 정규화, 동작 스케일링과 병렬 기구 계산을 동일하게 구현해야 합니다. 현재 공개 runner는 처음부터 학습하는 방식이며 정확한 학습 재개 기능은 구현되어 있지 않습니다.
 

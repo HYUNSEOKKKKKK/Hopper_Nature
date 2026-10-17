@@ -86,7 +86,7 @@ Python dependencies are Python **3.10**, PyTorch **2.5.1**, NumPy **2.2.6**, `ru
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential cmake git libeigen3-dev
+sudo apt install -y build-essential cmake git libeigen3-dev libvulkan1 libminizip1 ffmpeg
 
 conda create -n hopper_nature python=3.10 pip -y
 conda activate hopper_nature
@@ -107,6 +107,8 @@ python -c "from raisimGymTorch.env.bin import hopper; print(hopper.__file__)"
 Before training or replay, obtain your own **RaiSim 1.x-compatible activation key** through [RaiSim](https://raisim.com/) and place the supplied file at **`~/.raisim/activation.raisim`**. The simulator needs this key even for headless execution. It is not included in this repository.
 
 The build finds RaiSim/Eigen inside `.local/runtime/raisimLib/` and produces `raisimGymTorch/env/bin/hopper.cpython-310-*.so`. The separate `raisim_ws` workspace is not required. Rebuild with `python setup.py build_ext --inplace` from the repository root after changing C++ headers. See [installation details and troubleshooting](docs/installation.md) for external SDKs and CUDA.
+
+The pinned dependency also installs **Unity inside this checkout**. Training and replay can launch it directly with `--viewer`, without a shell alias or another project folder. A graphical desktop is required for the viewer; headless training works without it.
 
 ## Usage
 
@@ -132,10 +134,20 @@ Environment.hpp   # Environment source snapshot
 
 The two-update check only creates `full_0.pt`, `mean0.csv` and `var0.csv`: this checkpoint is saved **before optimization**, so it is not a trained result. Longer runs save every 1000 updates.
 
+To check the window and recording as well, run the same short check with `--viewer`:
+
+```bash
+python runner.py --viewer --num-envs 4 --num-threads 2 --iterations 2 --no-tensorboard
+```
+
+This starts the Unity installed inside the checkout, waits for its connection, then runs the check. The window closes when the command finishes. The console prints the Unity log and recording directory.
+
+Run one Unity client per simulation. Close a manually opened client before using `--viewer`.
+
 ### 2. Train from scratch
 
 ```bash
-python runner.py
+python runner.py --viewer
 
 # Or choose environment/thread counts for your CPU and disable the viewer:
 python runner.py \
@@ -146,14 +158,14 @@ python -m tensorboard.main \
   --logdir ~/Hopper_Nature/raisimGymTorch/data/hopper --port 6700
 ```
 
-Choose a thread count appropriate to your CPU. The research configuration defaults to 60 threads and 400 environments; CLI overrides are saved in each run's `cfg.yaml`. Training runs updates 0–10000, saving every 1000 updates. For visual training, omit `--headless` and connect the matching RaiSim Unity client. [Training options and checkpoint contents](docs/training.md).
+Choose a thread count appropriate to your CPU. The research configuration defaults to 60 threads and 400 environments; CLI overrides are saved in each run's `cfg.yaml`. Training runs updates 0–10000, saving every 1000 updates. `--viewer` opens this project's Unity; `--headless` disables visualization and recording. [Training options and checkpoint contents](docs/training.md).
 
 ### 3. Replay your checkpoint
 
 ```bash
 # Replace RUN_TIMESTAMP with the directory printed by runner.py.
 # Choose an iteration that exists in that directory.
-python tester.py \
+python tester.py --viewer \
   --weight ../../../data/hopper/RUN_TIMESTAMP/full_10000.pt
 
 # Verify loading without a viewer:
@@ -161,14 +173,15 @@ python tester.py \
   --weight ../../../data/hopper/RUN_TIMESTAMP/full_10000.pt --headless --no-realtime
 ```
 
-Keep `cfg.yaml`, `mean10000.csv` and `var10000.csv` beside `full_10000.pt`. To see the robot, start the matching Unity client in another terminal and connect to `localhost:8080`:
+Keep `cfg.yaml`, `mean10000.csv` and `var10000.csv` beside `full_10000.pt`. `--viewer` starts the local client and waits for its connection to `127.0.0.1:8080`. You can also keep the original two-terminal workflow: run the task without `--viewer`, then start the local Unity directly in another terminal:
 
 ```bash
-sudo apt install -y libvulkan1 libminizip1 ffmpeg
 ~/Hopper_Nature/.local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64
 ```
 
 Replay uses the checkpoint's network configuration and a 22-second flat-ground command sequence alternating standing with negative body-frame x commands from −0.25 to −0.60 m/s. This sequence is an input specification; measured tracking performance requires a trained checkpoint. No pretrained result is bundled yet. The short check above can be replayed with `full_0.pt` in place of `full_10000.pt`.
+
+**Where files go:** checkpoints and configuration go to `raisimGymTorch/data/hopper/<timestamp>/`. Unity writes videos to **`.local/runtime/raisimLib/raisimUnity/linux/Screenshot/`** inside this project, using names such as `2026-10-18-00-12-41policy_0.mp4`. With `record_video: yes` and rendering enabled, `runner.py` records the evaluation rollout at updates 0, 1000, 2000, and so on; each rollout is 4 simulated seconds with the default configuration. `tester.py` displays the replay but does not start automatic recording. Automatically launched Unity logs go to `.local/logs/`. These outputs are ignored by Git.
 
 ### 4. Export the policy
 

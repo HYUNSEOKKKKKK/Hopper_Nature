@@ -56,6 +56,7 @@ class RaisimGymEnv {
   void turnOnVisualization() { server_->wakeup(); visualizationOn_ = true;}
   void startRecordingVideo(const std::string& videoName ) { server_->startRecordingVideo(videoName); }
   void stopRecordingVideo() { server_->stopRecordingVideo(); }
+  bool isViewerConnected() const { return server_ && server_->isConnected(); }
   raisim::Reward& getRewards() { return rewards_; }
 
  protected:

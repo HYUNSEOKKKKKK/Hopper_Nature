@@ -34,7 +34,7 @@ cd ~/Hopper_Nature
 python setup.py build_ext --inplace
 
 cd raisimGymTorch/env/envs/hopper
-python runner.py
+python runner.py --viewer
 ```
 
 Rebuild from the repository root after changing C++ files such as `Environment.hpp`. `setup.py` selects the active Python, and CMake discovers RaiSim and Eigen under `.local/runtime/raisimLib/`. The engine must be version 1.1.8. The build writes `raisimGymTorch/env/bin/hopper.cpython-310-*.so`.
@@ -59,7 +59,11 @@ In a second terminal, start the matching legacy Unity viewer directly:
 ~/Hopper_Nature/.local/runtime/raisimLib/raisimUnity/linux/raisimUnity.x86_64
 ```
 
-The project uses its own RaiSim dependency and viewer; the separate `raisim_ws` workspace is not needed by this build/run workflow. Adjust `~/Hopper_Nature` if the checkout root differs.
+Use the two-terminal command with `python runner.py` / `python tester.py` without `--viewer`. Alternatively, `--viewer` starts this same internal executable, waits for its connection and closes it with the task. It does not look up a global alias. On this workstation, the `raisimUnity` alias also points to the internal executable; already-open terminals need `source ~/.bashrc` to load the updated alias.
+
+Video files go to `.local/runtime/raisimLib/raisimUnity/linux/Screenshot/` inside the project. With rendering and `record_video: yes`, the runner records evaluation rollouts at updates 0, 1000, 2000, and so on. The tester displays the policy without automatic recording. Logs for automatically launched clients go to `.local/logs/`.
+
+The project uses its own RaiSim dependency and viewer; the separate `raisim_ws` workspace is not needed by this build/run workflow. Adjust `~/Hopper_Nature` if the checkout root differs. On another machine, follow the README to install Conda packages and the pinned engine/viewer inside the checkout, provide your own activation key, and rebuild; the developer's ignored dependency files and global aliases are not part of a Git clone.
 
 ## Use an external SDK
 
